@@ -81,9 +81,15 @@ def index(request):
         calendar_list_entry = service.calendarList().get(calendarId=names).execute()
         print (calendar_list_entry['summary'])
 
+        #This is the redirect URL that is sent to the user once the OAUTH credentials have been validated successfully
     return HttpResponseRedirect("/admin")
 
 def auth_return(request):
+
+    '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+    I don't know what the hell this code is doing, but it breaks the response like 50% of the time
+    '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
   # if not xsrfutil.validate_token(settings.SECRET_KEY, request.GET['state'],
   #                                request.user):
   #   return  HttpResponseBadRequest()
