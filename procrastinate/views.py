@@ -61,21 +61,33 @@ def index(request):
   else:
     http = httplib2.Http()
     http = credential.authorize(http)
-    service = build("plus", "v1", http=http)
-    activities = service.activities()
-    activitylist = activities.list(collection='public',
-                                   userId='me').execute()
-    logging.info(activitylist)
+    service = discovery.build('calendar', 'v3', http=http)
+    now = datetime.datetime.utcnow().isoformat() + 'Z' # 'Z' indicates UTC time
 
-    return render_to_response('plus/welcome.html', {
-                'activitylist': activitylist,
-                })
+    #Array to hold the different IDs associated with each calendar
+    calendar_names = []
+
+    page_token = None
+    while True:
+      calendar_list = service.calendarList().list(pageToken=page_token).execute()
+      for calendar_list_entry in calendar_list['items']:
+        calendar_names.append(str((calendar_list_entry['id'])))
+      page_token = calendar_list.get('nextPageToken')
+      if not page_token:
+        break
+
+    #Printing the names of the users calendars based on the ID
+    for names in calendar_names:
+        calendar_list_entry = service.calendarList().get(calendarId=names).execute()
+        print (calendar_list_entry['summary'])
+
+    return HttpResponseRedirect("/admin")
 
 def auth_return(request):
-  if not xsrfutil.validate_token(settings.SECRET_KEY, request.GET['state'],
-                                 request.user):
-    return  HttpResponseBadRequest()
+  # if not xsrfutil.validate_token(settings.SECRET_KEY, request.GET['state'],
+  #                                request.user):
+  #   return  HttpResponseBadRequest()
   credential = FLOW.step2_exchange(request.REQUEST)
   storage = Storage(CredentialsModel, 'id', request.user, 'credential')
   storage.put(credential)
-  return HttpResponseRedirect("/")
+  return HttpResponseRedirect("/admin")
