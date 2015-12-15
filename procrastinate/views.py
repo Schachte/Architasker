@@ -64,6 +64,8 @@ def index(request):
     service = discovery.build('calendar', 'v3', http=http)
     now = datetime.datetime.utcnow().isoformat() + 'Z' # 'Z' indicates UTC time
 
+    #Code below is designed to purely test the functionality of the grabbing of the user calendar entries
+
     #Array to hold the different IDs associated with each calendar
     calendar_names = []
 
