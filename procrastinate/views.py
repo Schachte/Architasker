@@ -30,6 +30,7 @@ from apiclient import discovery
 from django.core.cache import cache
 from django.utils.cache import get_cache_key
 import time
+from store_new_events.models import UserEvent as SNE
 
 #Load the API key
 CLIENT_SECRETS = os.path.join(os.path.dirname(__file__), '..', 'client_secrets.json')
@@ -60,7 +61,8 @@ def convert(data):
 
 #Main function deailing with auth verification
 def index(request):
-  storage = Storage(CredentialsModel, 'id', request.user.id, 'credential')
+  current_user = User.objects.get(id=request.user.id)
+  storage = Storage(CredentialsModel, 'id', current_user, 'credential')
   credential = storage.get()
   if credential is None or credential.invalid == True:
     FLOW.params['state'] = xsrfutil.generate_token(settings.SECRET_KEY,
@@ -87,7 +89,8 @@ def get_calendar_data(request):
     user_is_authenticated = False
 
     #Send request to pull data from the calendar API
-    storage = Storage(CredentialsModel, 'id', request.user, 'credential')
+    current_user = User.objects.get(id=request.user.id)
+    storage = Storage(CredentialsModel, 'id', current_user, 'credential')
     credential = storage.get()
     if not credential is None:
 
@@ -102,12 +105,10 @@ def get_calendar_data(request):
         then = datetime.timedelta(days=6) #Indexed at 0
         then = now + then
 
-
         #Array to hold the different IDs associated with each calendar
         calendar_names = []
 
         page_token = None
-
         #Print the calendars
         calendar_list = service.calendarList().list(pageToken=page_token).execute()
         for calendar_list_entry in calendar_list['items']:
@@ -140,17 +141,25 @@ def get_calendar_data(request):
 
         if not events:
             print('No upcoming events found.')
-        time.sleep(1)
+
         for event in events:
             start = event['start'].get('dateTime', event['start'].get('date'))
             string_converted_date = convert(event['start'])
-            # string_converted_date = string_converted_date['date']
 
             if 'date' in string_converted_date.keys():
                 current = str(string_converted_date['date'])
                 dt = datetime.datetime.strptime(current, '%Y-%m-%d')
-                # print(int(dt))
-                # print(dt.weekday())
+                current_user = User.objects.get(username=request.user.username)
+                temp_model = SNE.objects.create(
+                    authenticated_user = current_user,
+                    task_name = event['summary'],
+                    is_google_task = True,
+                    google_json = str(event),
+                    start_time = str(now),
+                    end_time = str(then)
+                )
+                temp_model.save()
+
 
                 if (dt.weekday() == 0 and not convert(event) in mon):
                     mon.append(convert(event))
@@ -167,41 +176,41 @@ def get_calendar_data(request):
                 elif (dt.weekday() == 6 and not convert(event) in sun):
                     sun.append(convert(event))
 
-        if events:
-            print('\n*********************************MONDAY TASKS*********************************\n')
-            for monday_tasks in mon:
-                string_converted_date = convert(monday_tasks['start'])
-                print('Task: %s during the time of %s' %(monday_tasks['summary'], str(string_converted_date['date'])))
-
-            print('\n*********************************TUESDAY TASKS*********************************\n')
-            for tuesday_tasks in tues:
-                string_converted_date = convert(tuesday_tasks['start'])
-                print('Task: %s during the time of %s' %(tuesday_tasks['summary'], str(string_converted_date['date'])))
-
-            print('\n*********************************WEDNESDAY TASKS*********************************\n')
-            for wednesday_tasks in wed:
-                string_converted_date = convert(wednesday_tasks['start'])
-                print('Task: %s during the time of %s' %(wednesday_tasks['summary'], str(string_converted_date['date'])))
-
-            print('\n*********************************THURSDAY TASKS*********************************\n')
-            for thursday_tasks in thurs:
-                string_converted_date = convert(thursday_tasks['start'])
-                print('Task: %s during the time of %s' %(thursday_tasks['summary'], str(string_converted_date['date'])))
-
-            print('\n*********************************FRIDAY TASKS*********************************\n')
-            for friday_tasks in fri:
-                string_converted_date = convert(friday_tasks['start'])
-                print('Task: %s during the time of %s' %(friday_tasks['summary'], str(string_converted_date['date'])))
-
-            print('\n*********************************SATURDAY TASKS*********************************\n')
-            for saturday_tasks in sat:
-                string_converted_date = convert(saturday_tasks['start'])
-                print('Task: %s during the time of %s' %(saturday_tasks['summary'], str(string_converted_date['date'])))
-
-            print('\n*********************************SUNDAY TASKS*********************************\n')
-            for sunday_tasks in sun:
-                string_converted_date = convert(sunday_tasks['start'])
-                print('Task: %s during the time of %s' %(sunday_tasks['summary'], str(string_converted_date['date'])))
+        # if events:
+        #     print('\n*********************************MONDAY TASKS*********************************\n')
+        #     for monday_tasks in mon:
+        #         string_converted_date = convert(monday_tasks['start'])
+        #         print('Task: %s during the time of %s' %(monday_tasks['summary'], str(string_converted_date['date'])))
+        #
+        #     print('\n*********************************TUESDAY TASKS*********************************\n')
+        #     for tuesday_tasks in tues:
+        #         string_converted_date = convert(tuesday_tasks['start'])
+        #         print('Task: %s during the time of %s' %(tuesday_tasks['summary'], str(string_converted_date['date'])))
+        #
+        #     print('\n*********************************WEDNESDAY TASKS*********************************\n')
+        #     for wednesday_tasks in wed:
+        #         string_converted_date = convert(wednesday_tasks['start'])
+        #         print('Task: %s during the time of %s' %(wednesday_tasks['summary'], str(string_converted_date['date'])))
+        #
+        #     print('\n*********************************THURSDAY TASKS*********************************\n')
+        #     for thursday_tasks in thurs:
+        #         string_converted_date = convert(thursday_tasks['start'])
+        #         print('Task: %s during the time of %s' %(thursday_tasks['summary'], str(string_converted_date['date'])))
+        #
+        #     print('\n*********************************FRIDAY TASKS*********************************\n')
+        #     for friday_tasks in fri:
+        #         string_converted_date = convert(friday_tasks['start'])
+        #         print('Task: %s during the time of %s' %(friday_tasks['summary'], str(string_converted_date['date'])))
+        #
+        #     print('\n*********************************SATURDAY TASKS*********************************\n')
+        #     for saturday_tasks in sat:
+        #         string_converted_date = convert(saturday_tasks['start'])
+        #         print('Task: %s during the time of %s' %(saturday_tasks['summary'], str(string_converted_date['date'])))
+        #
+        #     print('\n*********************************SUNDAY TASKS*********************************\n')
+        #     for sunday_tasks in sun:
+        #         string_converted_date = convert(sunday_tasks['start'])
+        #         print('Task: %s during the time of %s' %(sunday_tasks['summary'], str(string_converted_date['date'])))
 
             print_examples.append(str(event['summary']))
 

@@ -37,7 +37,8 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'procrastinate'
+    'procrastinate',
+    'store_new_events'
 )
 
 MIDDLEWARE_CLASSES = (
