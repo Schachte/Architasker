@@ -6,6 +6,7 @@ import oauth2client
 import argparse
 import os
 import logging
+import collections
 from django.template import loader, Context
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
@@ -26,6 +27,9 @@ from oauth2client.client import flow_from_clientsecrets
 from oauth2client.django_orm import Storage
 from procrastinate import settings
 from apiclient import discovery
+from django.core.cache import cache
+from django.utils.cache import get_cache_key
+import time
 
 #Load the API key
 CLIENT_SECRETS = os.path.join(os.path.dirname(__file__), '..', 'client_secrets.json')
@@ -35,6 +39,24 @@ FLOW = flow_from_clientsecrets(
     CLIENT_SECRETS,
     scope='https://www.googleapis.com/auth/calendar.readonly',
     redirect_uri='http://127.0.0.1:8000/oauth2callback')
+
+mon     = []
+tues    = []
+wed     = []
+thurs   = []
+fri     = []
+sat     = []
+sun     = []
+
+def convert(data):
+    if isinstance(data, basestring):
+        return str(data)
+    elif isinstance(data, collections.Mapping):
+        return dict(map(convert, data.iteritems()))
+    elif isinstance(data, collections.Iterable):
+        return type(data)(map(convert, data))
+    else:
+        return data
 
 #Main function deailing with auth verification
 def index(request):
@@ -55,6 +77,11 @@ def auth_return(request):
 
 #Function to actually pull the data from the authenticated OAUTH user
 def get_calendar_data(request):
+    cache.delete('/get_cal')
+    request.path = '/get_cal'
+    key = get_cache_key(request)
+    if cache.has_key(key):
+        cache.delete(key)
 
     user_is_authenticated = False
 
@@ -67,7 +94,13 @@ def get_calendar_data(request):
         http = httplib2.Http()
         http = credential.authorize(http)
         service = discovery.build('calendar', 'v3', http=http)
-        now = datetime.datetime.utcnow().isoformat() + 'Z' # 'Z' indicates UTC time
+
+        '''These calculations below calculate the beginning of the week as well as the end of the week'''
+        now = datetime.datetime.utcnow()
+        now = now - datetime.timedelta(now.weekday())
+        then = datetime.timedelta(days=6) #Indexed at 0
+        then = now + then
+
 
         #Array to hold the different IDs associated with each calendar
         calendar_names = []
@@ -87,7 +120,6 @@ def get_calendar_data(request):
             print (str(cals))
 
         user_cals = []
-
         #Printing the names of the users calendars based on the ID
         for names in calendar_names:
             calendar_list_entry = service.calendarList().get(calendarId=names).execute()
@@ -96,26 +128,98 @@ def get_calendar_data(request):
 
         print_examples = []
 
-        now = datetime.datetime.utcnow().isoformat() + 'Z' # 'Z' indicates UTC time
-        print('Getting the upcoming 10 events')
+        #Setting the beginning of the week as well as the end of the week
+        now = now.isoformat() + 'Z' # 'Z' indicates UTC time
+        then = then.isoformat() + 'Z'
+
         eventsResult = service.events().list(
-            calendarId='primary', timeMin=now, maxResults=5, singleEvents=True,
-            orderBy='startTime').execute()
+            calendarId='primary', timeMin=now,
+            timeMax=then).execute()
         events = eventsResult.get('items', [])
 
         if not events:
             print('No upcoming events found.')
+        time.sleep(1)
         for event in events:
             start = event['start'].get('dateTime', event['start'].get('date'))
-            print(event['summary'])
+            string_converted_date = convert(event['start'])
+            # string_converted_date = string_converted_date['date']
+
+            if 'date' in string_converted_date.keys():
+                current = str(string_converted_date['date'])
+                dt = datetime.datetime.strptime(current, '%Y-%m-%d')
+                # print(int(dt))
+                # print(dt.weekday())
+
+                if (dt.weekday() == 0 and not convert(event) in mon):
+                    mon.append(convert(event))
+                elif (dt.weekday() == 1 and not convert(event) in tues):
+                    tues.append(convert(event))
+                elif (dt.weekday() == 2 and not convert(event) in wed):
+                    wed.append(convert(event))
+                elif (dt.weekday() == 3 and not convert(event) in thurs):
+                    thurs.append(convert(event))
+                elif (dt.weekday() == 4 and not convert(event) in fri):
+                    fri.append(convert(event))
+                elif (dt.weekday() == 5 and not convert(event) in sat):
+                    sat.append(convert(event))
+                elif (dt.weekday() == 6 and not convert(event) in sun):
+                    sun.append(convert(event))
+
+        if events:
+            print('\n*********************************MONDAY TASKS*********************************\n')
+            for monday_tasks in mon:
+                string_converted_date = convert(monday_tasks['start'])
+                print('Task: %s during the time of %s' %(monday_tasks['summary'], str(string_converted_date['date'])))
+
+            print('\n*********************************TUESDAY TASKS*********************************\n')
+            for tuesday_tasks in tues:
+                string_converted_date = convert(tuesday_tasks['start'])
+                print('Task: %s during the time of %s' %(tuesday_tasks['summary'], str(string_converted_date['date'])))
+
+            print('\n*********************************WEDNESDAY TASKS*********************************\n')
+            for wednesday_tasks in wed:
+                string_converted_date = convert(wednesday_tasks['start'])
+                print('Task: %s during the time of %s' %(wednesday_tasks['summary'], str(string_converted_date['date'])))
+
+            print('\n*********************************THURSDAY TASKS*********************************\n')
+            for thursday_tasks in thurs:
+                string_converted_date = convert(thursday_tasks['start'])
+                print('Task: %s during the time of %s' %(thursday_tasks['summary'], str(string_converted_date['date'])))
+
+            print('\n*********************************FRIDAY TASKS*********************************\n')
+            for friday_tasks in fri:
+                string_converted_date = convert(friday_tasks['start'])
+                print('Task: %s during the time of %s' %(friday_tasks['summary'], str(string_converted_date['date'])))
+
+            print('\n*********************************SATURDAY TASKS*********************************\n')
+            for saturday_tasks in sat:
+                string_converted_date = convert(saturday_tasks['start'])
+                print('Task: %s during the time of %s' %(saturday_tasks['summary'], str(string_converted_date['date'])))
+
+            print('\n*********************************SUNDAY TASKS*********************************\n')
+            for sunday_tasks in sun:
+                string_converted_date = convert(sunday_tasks['start'])
+                print('Task: %s during the time of %s' %(sunday_tasks['summary'], str(string_converted_date['date'])))
+
             print_examples.append(str(event['summary']))
 
+        context = {
+            'user_cals' : user_cals,
+            'print_examples' : print_examples,
+            'user_is_authenticated' : user_is_authenticated,
+            'mon' : mon,
+            'tues' : tues,
+            'wed' : wed,
+            'thurs' : thurs,
+            'fri' : fri,
+            'sat' : sat,
+            'sun' : sun,
+            'event_length' : len(events)
+        }
 
-            context = {
-                'user_cals' : user_cals,
-                'print_examples' : print_examples,
-                'user_is_authenticated' : user_is_authenticated
-            }
+        cache.delete('/get_cal')
+
             #This is the redirect URL that is sent to the user once the OAUTH credentials have been validated successfully
         return render(request, 'user_calendar.html', context)
     else:
