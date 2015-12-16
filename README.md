@@ -4,5 +4,5 @@
 
 <hr>
 Naming conventions for the branches:<br>
-<\t><\t>branch\_YOURBRANCHNAME<br>
+&nbsp;&nbsp;&nbsp;branch\_YOURBRANCHNAME<br>
 
