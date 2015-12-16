@@ -8,21 +8,37 @@
   <body>
 
     <!-- INSERT OAUTH VALIDATION DATA HERE -->
-    These are the user calendars:
 
-    <ul>
-    {% for cals in user_cals %}
-        <li><h3>{{ cals }}</h3></li>
-    {% endfor %}
-    </ul>
+    {% if user_is_authenticated == True %}
 
-    <h3>Example Events Pulled From The <h1><i>{{ user_cals.0 }}</i></h1> Calendar</h3><br>
+      <ul>
+      {% for cals in user_cals %}
+          <li><h3>{{ cals }}</h3></li>
+      {% endfor %}
+      </ul>
+
+      <form action="/unauthorize" method="POST">
+        {% csrf_token %}
+      <input type="submit" value="Remove Authorization From Procrastinator">
+      </form>
+
+    {% else %}
+
+      <img src="https://c2.staticflickr.com/2/1202/1399604858_8bd193e59c.jpg">
+      <h1> You're not authenticated....</h1>
+      <a href="/oauth">Click Here to authenticate via OAUTH</a>
+
+    {% endif %}
+
+
+
+    <!-- <h3>Example Events Pulled From The <h1><i>{{ user_cals.0 }}</i></h1> Calendar</h3><br>
 
     <ul>
     {% for examps in print_examples %}
       <li>{{ examps }}</li>
     {% endfor %}
-  </ul>
+  </ul> -->
 
 
   </body>
