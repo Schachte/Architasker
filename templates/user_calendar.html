@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <title>OAUTH Test</title>
+  </head>
+
+  <body>
+
+    <!-- INSERT OAUTH VALIDATION DATA HERE -->
+    These are the user calendars:
+
+    <ul>
+    {% for cals in user_cals %}
+        <li><h3>{{ cals }}</h3></li>
+    {% endfor %}
+    </ul>
+
+    <h3>Example Events Pulled From The <h1><i>{{ user_cals.0 }}</i></h1> Calendar</h3><br>
+
+    <ul>
+    {% for examps in print_examples %}
+      <li>{{ examps }}</li>
+    {% endfor %}
+  </ul>
+
+
+  </body>
+</html>

@@ -58,7 +58,55 @@ def index(request):
     print (FLOW.params['state'])
     authorize_url = FLOW.step1_get_authorize_url()
     return HttpResponseRedirect(authorize_url)
-  else:
+  # else:
+    # http = httplib2.Http()
+    # http = credential.authorize(http)
+    # service = discovery.build('calendar', 'v3', http=http)
+    # now = datetime.datetime.utcnow().isoformat() + 'Z' # 'Z' indicates UTC time
+    #
+    # #Code below is designed to purely test the functionality of the grabbing of the user calendar entries
+    #
+    # #Array to hold the different IDs associated with each calendar
+    # calendar_names = []
+    #
+    # page_token = None
+    # # while True:
+    # calendar_list = service.calendarList().list(pageToken=page_token).execute()
+    # for calendar_list_entry in calendar_list['items']:
+    #     if '@group' in str((calendar_list_entry['id'])) and not '#' in str((calendar_list_entry['id'])):
+    #         calendar_names.append(str((calendar_list_entry['id'])))
+    # page_token = calendar_list.get('nextPageToken')
+    # if not page_token:
+    #     pass
+    #
+    # for cals in calendar_names:
+    #     print (str(cals))
+    #
+    # print ("\n\n\n\n")
+    #
+    # #Printing the names of the users calendars based on the ID
+    # for names in calendar_names:
+    #     calendar_list_entry = service.calendarList().get(calendarId=names).execute()
+    #     print (calendar_list_entry['summary'])
+    #
+    #     #This is the redirect URL that is sent to the user once the OAUTH credentials have been validated successfully
+    # return HttpResponseRedirect("/admin")
+
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+I don't know what the hell this code is doing, but it breaks the response like 50% of the time
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+def auth_return(request):
+  # if not xsrfutil.validate_token(settings.SECRET_KEY, request.GET['state'],
+  #                                request.user):
+  #   return  HttpResponseBadRequest()
+  credential = FLOW.step2_exchange(request.REQUEST)
+  storage = Storage(CredentialsModel, 'id', request.user, 'credential')
+  storage.put(credential)
+  return HttpResponseRedirect("/admin")
+
+def get_calendar_data(request):
+    storage = Storage(CredentialsModel, 'id', request.user, 'credential')
+    credential = storage.get()
     http = httplib2.Http()
     http = credential.authorize(http)
     service = discovery.build('calendar', 'v3', http=http)
@@ -70,32 +118,48 @@ def index(request):
     calendar_names = []
 
     page_token = None
-    while True:
-      calendar_list = service.calendarList().list(pageToken=page_token).execute()
-      for calendar_list_entry in calendar_list['items']:
-        calendar_names.append(str((calendar_list_entry['id'])))
-      page_token = calendar_list.get('nextPageToken')
-      if not page_token:
-        break
+    # while True:
+    calendar_list = service.calendarList().list(pageToken=page_token).execute()
+    for calendar_list_entry in calendar_list['items']:
+        if '@group' in str((calendar_list_entry['id'])) and not '#' in str((calendar_list_entry['id'])):
+            calendar_names.append(str((calendar_list_entry['id'])))
+    page_token = calendar_list.get('nextPageToken')
+    if not page_token:
+        pass
+
+    for cals in calendar_names:
+        print (str(cals))
+
+    user_cals = []
 
     #Printing the names of the users calendars based on the ID
     for names in calendar_names:
         calendar_list_entry = service.calendarList().get(calendarId=names).execute()
         print (calendar_list_entry['summary'])
+        user_cals.append(str(calendar_list_entry['summary']))
 
+    print_examples = []
+
+    now = datetime.datetime.utcnow().isoformat() + 'Z' # 'Z' indicates UTC time
+    print('Getting the upcoming 10 events')
+    eventsResult = service.events().list(
+        calendarId='primary', timeMin=now, maxResults=5, singleEvents=True,
+        orderBy='startTime').execute()
+    events = eventsResult.get('items', [])
+
+    if not events:
+        print('No upcoming events found.')
+    for event in events:
+        start = event['start'].get('dateTime', event['start'].get('date'))
+        print(event['summary'])
+        print_examples.append(str(event['summary']))
+
+
+        context = {
+
+        'user_cals' : user_cals,
+        'print_examples' : print_examples
+
+        }
         #This is the redirect URL that is sent to the user once the OAUTH credentials have been validated successfully
-    return HttpResponseRedirect("/admin")
-
-def auth_return(request):
-
-    '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-    I don't know what the hell this code is doing, but it breaks the response like 50% of the time
-    '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-
-  # if not xsrfutil.validate_token(settings.SECRET_KEY, request.GET['state'],
-  #                                request.user):
-  #   return  HttpResponseBadRequest()
-  credential = FLOW.step2_exchange(request.REQUEST)
-  storage = Storage(CredentialsModel, 'id', request.user, 'credential')
-  storage.put(credential)
-  return HttpResponseRedirect("/admin")
+    return render(request, 'user_calendar.html', context)

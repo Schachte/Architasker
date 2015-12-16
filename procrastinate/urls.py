@@ -21,4 +21,5 @@ urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
     url(r'^oauth/', index, name="oauthview"),
     url(r'^oauth2callback', auth_return, name="auth_return"),
+    url(r'^get_cal', get_calendar_data, name="get_calendar_data")
 ]
