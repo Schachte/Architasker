@@ -60,18 +60,19 @@ def convert(data):
 
 #Main function deailing with auth verification
 def index(request):
-  storage = Storage(CredentialsModel, 'id', request.user, 'credential')
+  storage = Storage(CredentialsModel, 'id', request.user.id, 'credential')
   credential = storage.get()
   if credential is None or credential.invalid == True:
     FLOW.params['state'] = xsrfutil.generate_token(settings.SECRET_KEY,
-                                                   request.user)
+                                                   request.user.id)
     authorize_url = FLOW.step1_get_authorize_url()
     return HttpResponseRedirect(authorize_url)
 
 #User than calls the data function once authenticated
 def auth_return(request):
   credential = FLOW.step2_exchange(request.REQUEST)
-  storage = Storage(CredentialsModel, 'id', request.user, 'credential')
+  current_user = User.objects.get(id=request.user.id)
+  storage = Storage(CredentialsModel, 'id', current_user, 'credential')
   storage.put(credential)
   return HttpResponseRedirect("/get_cal")
 
@@ -229,7 +230,7 @@ def get_calendar_data(request):
 def unauthorize_account(request):
 
     if request.method == "POST":
-        entry = CredentialsModel.objects.get(id=request.user)
+        entry = CredentialsModel.objects.get(id=request.user.id)
         entry.delete()
         return render(request, 'user_calendar.html')
     else:
