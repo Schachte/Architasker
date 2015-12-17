@@ -235,3 +235,6 @@ def unauthorize_account(request):
         return render(request, 'user_calendar.html')
     else:
         return render(request, 'user_calendar.html')
+
+def cal(request):
+    return render(request, "calender.html", {})
