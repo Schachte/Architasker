@@ -262,7 +262,7 @@ def get_calendar_data(request):
     credential = storage.get()
     if not credential is None:
         user_is_authenticated = True
-        event_length = SNE.objects.filter(current_day = 'Monday').count
+        event_length = SNE.objects.all().count()
     else:
         event_length = 0
 
