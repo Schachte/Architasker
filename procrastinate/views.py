@@ -117,17 +117,12 @@ def pull_user_event_data(request):
         then = datetime.timedelta(days=6) #Indexed at 0
         then = now + then
 
-        #Array to hold the different IDs associated with each calendar
-        calendar_names = []
-
         #Oauth handling var
         page_token = None
 
         #This is a shitty error-handling snippet for weirdly named calendars. We need to fix this
         calendar_list = service.calendarList().list(pageToken=page_token).execute()
-        for calendar_list_entry in calendar_list['items']:
-            if '@group' in str((calendar_list_entry['id'])) and not '#' in str((calendar_list_entry['id'])):
-                calendar_names.append(str((calendar_list_entry['id'])))
+
         page_token = calendar_list.get('nextPageToken')
         if not page_token:
             pass
@@ -162,17 +157,18 @@ def pull_user_event_data(request):
             if 'date' in string_converted_date.keys():
                 current = str(string_converted_date['date'])
                 dt = datetime.datetime.strptime(current, '%Y-%m-%d')
-                print(dt.weekday())
+                # print(dt.weekday())
                 current_user = User.objects.get(username=request.user.username)
-                temp_model = SNE.objects.create(
-                    authenticated_user = current_user,
-                    task_name = event['summary'],
-                    is_google_task = True,
-                    google_json = str(event),
-                    start_time = str(now),
-                    end_time = str(then),
-                    special_event_id = str(event['id'])
-                )
+                if not SNE.objects.filter(special_event_id=str(event['id'])).exists():
+                    temp_model = SNE.objects.create(
+                        authenticated_user = current_user,
+                        task_name = event['summary'],
+                        is_google_task = True,
+                        google_json = str(event),
+                        start_time = str(now),
+                        end_time = str(then),
+                        special_event_id = str(event['id'])
+                    )
 
                 #Parsing out the different events to store into day arrays for the week
                 if (dt.weekday() == 0 and not convert(event) in mon):
@@ -198,30 +194,10 @@ def pull_user_event_data(request):
                     temp_model.current_day = "Sunday"
 
                 #Once the proper integer-to-day model conversion has been applied from the above switch, save the model code to DB]
-                try:
+                if not SNE.objects.filter(special_event_id=str(event['id'])).exists():
                     temp_model.save()
-                except:
-                    pass
 
 
-        # if events:
-        #     print('\n*********************************MONDAY TASKS*********************************\n')
-        #     for monday_tasks in mon:
-        #         string_converted_date = convert(monday_tasks['start'])
-        #         print('Task: %s during the time of %s' %(monday_tasks['summary'], str(string_converted_date['date'])))
-
-
-        context = {
-            'user_is_authenticated' : user_is_authenticated,
-            'mon' : mon,
-            'tues' : tues,
-            'wed' : wed,
-            'thurs' : thurs,
-            'fri' : fri,
-            'sat' : sat,
-            'sun' : sun,
-            'event_length' : len(events)
-        }
         return HttpResponseRedirect('/get_cal')
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
