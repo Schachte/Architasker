@@ -13,69 +13,6 @@
 
       {% if event_length > 0 %}
 
-      {% if mon|length > 0 %}
-      <h1>MONDAY</h1><br>
-      {% for key in mon %}
-        {{ key.summary }}<br>
-      {% endfor %}
-      <hr>
-      {% endif %}
-
-      {% if tues|length > 0 %}
-      <h1>TUESDAY</h1><br>
-      {% for key in tues %}
-        {{ key.summary }}<br>
-      {% endfor %}
-      <hr>
-      {% endif %}
-
-      {% if wed|length > 0 %}
-      <h1>WEDNESDAY</h1><br>
-      {% for key in wed %}
-        {{ key.summary }}<br>
-      {% endfor %}
-      <hr>
-      {% endif %}
-
-      {% if thurs|length > 0 %}
-      <h1>THURSDAY</h1><br>
-      {% for key in thurs %}
-        {{ key.summary }}<br>
-      {% endfor %}
-      <hr>
-      {% endif %}
-
-      {% if fri|length > 0 %}
-      <h1>FRIDAY</h1><br>
-      {% for key in fri %}
-        {{ key.summary }}<br>
-      {% endfor %}
-      <hr>
-      {% endif %}
-
-      {% if sat|length > 0 %}
-      <h1>SATURDAY</h1><br>
-      {% for key in sat %}
-        {{ key.summary }}<br>
-      {% endfor %}
-      <hr>
-      {% endif %}
-
-      {% if sun|length > 0 %}
-      <h1>SUNDAY</h1><br>
-      {% for key in sun %}
-        {{ key.summary }}<br>
-      {% endfor %}
-      <hr>
-      {% endif %}
-
-      <h3>The calendars that this user owns are(is)....</h3><br><br>
-      <ul>
-      {% for cals in user_cals %}
-          <li><h3>{{ cals }}</h3></li>
-      {% endfor %}
-      </ul>
-    
 
       <br>
 

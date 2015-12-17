@@ -18,12 +18,15 @@
 
 		$('#calendar').fullCalendar({
 			theme: true,
+			height: 500,
+			maxTime: 14,
 			header: {
-				left: 'prev,next today',
+				left: 'prev, today',
 				center: 'title',
-				right: 'month,agendaWeek,agendaDay'
+				right: 'agendaWeek,agendaDay'
 			},
-			defaultDate: '2015-12-12',
+
+			defaultView: 'basicWeek',
 			selectable: true,
 			selectHelper: true,
 			select: function(start, end) {
@@ -42,63 +45,57 @@
 			editable: true,
 			eventLimit: true, // allow "more" link when too many events
 			events: [
-				{
-					title: 'All Day Event',
-					start: '2015-12-01'
-				},
-				{
-					title: 'Long Event',
-					start: '2015-12-07',
-					end: '2015-12-10'
-				},
-				{
-					id: 999,
-					title: 'Repeating Event',
-					start: '2015-12-09T16:00:00'
-				},
-				{
-					id: 999,
-					title: 'Repeating Event',
-					start: '2015-12-16T16:00:00'
-				},
-				{
-					title: 'Conference',
-					start: '2015-12-11',
-					end: '2015-12-13'
-				},
-				{
-					title: 'Meeting',
-					start: '2015-12-12T10:30:00',
-					end: '2015-12-12T12:30:00'
-				},
-				{
-					title: 'Lunch',
-					start: '2015-12-12T12:00:00'
-				},
-				{
-					title: 'Meeting',
-					start: '2015-12-12T14:30:00'
-				},
-				{
-					title: 'Happy Hour',
-					start: '2015-12-12T17:30:00'
-				},
-				{
-					title: 'Dinner',
-					start: '2015-12-12T20:00:00'
-				},
-				{
-					title: 'Birthday Party',
-					start: '2015-12-13T07:00:00'
-				},
-				{
-					title: 'Click for Google',
-					url: 'http://google.com/',
-					start: '2015-12-28'
-				}
+				{% for monday_tasks in mon %}
+					{
+						title: '{{ monday_tasks.summary }}',
+						start: '2015-12-14'
+					},
+				{% endfor %}
+
+				{% for tuesday_tasks in tues %}
+					{
+						title: '{{ tuesday_tasks.summary }}',
+						start: '2015-12-15'
+					},
+				{% endfor %}
+
+				{% for wednesday_tasks in wed %}
+					{
+						title: '{{ wednesday_tasks.summary }}',
+						start: '2015-12-16'
+					},
+				{% endfor %}
+
+				{% for thursday_tasks in thurs %}
+					{
+						title: '{{ thursday_tasks.summary }}',
+						start: '2015-12-17'
+					},
+				{% endfor %}
+
+				{% for friday_tasks in fri %}
+					{
+						title: '{{ friday_tasks.summary }}',
+						start: '2015-12-18'
+					},
+				{% endfor %}
+
+				{% for saturday_tasks in sat %}
+					{
+						title: '{{ saturday_tasks.summary }}',
+						start: '2015-12-19'
+					},
+				{% endfor %}
+
+				{% for sunday_tasks in sun %}
+					{
+						title: '{{ sunday_tasks.summary }}',
+						start: '2015-12-20'
+					},
+				{% endfor %}
 			]
 		});
-		
+
 	});
 
 </script>
@@ -112,7 +109,9 @@
 	}
 
 	#calendar {
-		max-width: 900px;
+		max-width: 1200px;
+		max-height: 50px;
+		height: 200px;
 		margin: 0 auto;
 	}
 
@@ -120,7 +119,30 @@
 </head>
 <body>
 
-	<div id='calendar'></div>
+	{% if user_is_authenticated == True %}
+
+		{% if event_length > 0 %}
+		<div id='calendar'>
+
+			<form action="/unauthorize" method="POST">
+				{% csrf_token %}
+			<input type="submit" value="Remove Authorization From Procrastinator">
+			</form>
+
+
+		</div>
+		{% else %}
+		<h1>YOU HAVE NO EVENTS</h1>
+		{% endif %}
+
+		{% else %}
+
+			<img src="https://c2.staticflickr.com/2/1202/1399604858_8bd193e59c.jpg">
+			<h1> You're not authenticated....</h1>
+			<a href="/oauth">Click Here to authenticate via OAUTH</a>
+
+		{% endif %}
+
 
 </body>
 </html>

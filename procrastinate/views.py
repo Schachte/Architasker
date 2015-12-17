@@ -231,7 +231,7 @@ def get_calendar_data(request):
         cache.delete('/get_cal')
 
             #This is the redirect URL that is sent to the user once the OAUTH credentials have been validated successfully
-        return render(request, 'user_calendar.html', context)
+        return render(request, 'calender.html', context)
     else:
         return render(request, 'user_calendar.html')
 
