@@ -177,13 +177,13 @@ def pull_user_event_data(request):
             if 'date' in string_converted_date.keys():
                 current = str(string_converted_date['date'])
                 dt = datetime.datetime.strptime(current, '%Y-%m-%d')
-                # print(dt.weekday())
+
                 current_user = User.objects.get(username=request.user.username)
 
                 not_exists = False
                 if not SNE.objects.filter(special_event_id=str(event['id'])).exists():
                     not_exists = True
-                    print('here')
+
                     temp_model = SNE.objects.create(
                         authenticated_user = current_user,
                         task_name = event['summary'],
@@ -194,16 +194,12 @@ def pull_user_event_data(request):
                         special_event_id = str(event['id'])
                     )
 
-
-                # print(dt.weekday())
                 #Parsing out the different events to store into day arrays for the week
                 if (dt.weekday() == 0 ):
                     mon.append(convert(event))
 
                     if not_exists:
                         temp_model.current_day = "Monday"
-
-                    # if not SNE.objects.filter(special_event_id=str(event['id'])).exists():
                         temp_model.save()
 
                 elif (dt.weekday() == 1 ):
@@ -211,60 +207,43 @@ def pull_user_event_data(request):
 
                     if not_exists:
                         temp_model.current_day = "Tuesday"
-
-                    # if not SNE.objects.filter(special_event_id=str(event['id'])).exists():
-
                         temp_model.save()
+
                 elif (dt.weekday() == 2 ):
                     wed.append(convert(event))
 
                     if not_exists:
                         temp_model.current_day = "Wednesday"
-
-                    # if not SNE.objects.filter(special_event_id=str(event['id'])).exists():
-
                         temp_model.save()
+
                 elif (dt.weekday() == 3 ):
                     thurs.append(convert(event))
 
                     if not_exists:
                         temp_model.current_day = "Thursday"
-
-                    # if not SNE.objects.filter(special_event_id=str(event['id'])).exists():
-
                         temp_model.save()
+
                 elif (dt.weekday() == 4 ):
                     fri.append(convert(event))
 
                     if not_exists:
                         temp_model.current_day = "Friday"
-
-                    # if not SNE.objects.filter(special_event_id=str(event['id'])).exists():
-
                         temp_model.save()
+
                 elif (dt.weekday() == 5 ):
                     sat.append(convert(event))
 
                     if not_exists:
                         temp_model.current_day = "Saturday"
-
-                    # if not SNE.objects.filter(special_event_id=str(event['id'])).exists():
-
                         temp_model.save()
+
                 elif (dt.weekday() == 6 ):
                     sun.append(convert(event))
 
                     if not_exists:
                         temp_model.current_day = "Sunday"
-
-                    # if not SNE.objects.filter(special_event_id=str(event['id'])).exists():
-
                         temp_model.save()
 
-                # time.sleep(2)
-                #Once the proper integer-to-day model conversion has been applied from the above switch, save the model code to DB]
-                # if not SNE.objects.filter(special_event_id=str(event['id'])).exists():
-                #     temp_model.save()
 
         return HttpResponseRedirect('/get_cal')
 
