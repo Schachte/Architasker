@@ -162,6 +162,7 @@ def pull_user_event_data(request):
             if 'date' in string_converted_date.keys():
                 current = str(string_converted_date['date'])
                 dt = datetime.datetime.strptime(current, '%Y-%m-%d')
+                print(dt.weekday())
                 current_user = User.objects.get(username=request.user.username)
                 temp_model = SNE.objects.create(
                     authenticated_user = current_user,
@@ -169,7 +170,8 @@ def pull_user_event_data(request):
                     is_google_task = True,
                     google_json = str(event),
                     start_time = str(now),
-                    end_time = str(then)
+                    end_time = str(then),
+                    special_event_id = str(event['id'])
                 )
 
                 #Parsing out the different events to store into day arrays for the week
@@ -195,8 +197,11 @@ def pull_user_event_data(request):
                     sun.append(convert(event))
                     temp_model.current_day = "Sunday"
 
-                #Once the proper integer-to-day model conversion has been applied from the above switch, save the model code to DB
-                temp_model.save()
+                #Once the proper integer-to-day model conversion has been applied from the above switch, save the model code to DB]
+                try:
+                    temp_model.save()
+                except:
+                    pass
 
 
         # if events:
@@ -235,6 +240,8 @@ def get_calendar_data(request):
     if not credential is None:
         user_is_authenticated = True
         event_length = SNE.objects.filter(current_day = 'Monday').count
+    else:
+        event_length = 0
 
     context = {
 
