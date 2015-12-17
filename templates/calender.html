@@ -47,49 +47,49 @@
 			events: [
 				{% for monday_tasks in mon %}
 					{
-						title: '{{ monday_tasks.summary }}',
+						title: '{{ monday_tasks.task_name }}',
 						start: '2015-12-14'
 					},
 				{% endfor %}
 
 				{% for tuesday_tasks in tues %}
 					{
-						title: '{{ tuesday_tasks.summary }}',
+						title: '{{ tuesday_tasks.task_name }}',
 						start: '2015-12-15'
 					},
 				{% endfor %}
 
 				{% for wednesday_tasks in wed %}
 					{
-						title: '{{ wednesday_tasks.summary }}',
+						title: '{{ wednesday_tasks.task_name }}',
 						start: '2015-12-16'
 					},
 				{% endfor %}
 
 				{% for thursday_tasks in thurs %}
 					{
-						title: '{{ thursday_tasks.summary }}',
+						title: '{{ thursday_tasks.task_name }}',
 						start: '2015-12-17'
 					},
 				{% endfor %}
 
 				{% for friday_tasks in fri %}
 					{
-						title: '{{ friday_tasks.summary }}',
+						title: '{{ friday_tasks.task_name }}',
 						start: '2015-12-18'
 					},
 				{% endfor %}
 
 				{% for saturday_tasks in sat %}
 					{
-						title: '{{ saturday_tasks.summary }}',
+						title: '{{ saturday_tasks.task_name }}',
 						start: '2015-12-19'
 					},
 				{% endfor %}
 
 				{% for sunday_tasks in sun %}
 					{
-						title: '{{ sunday_tasks.summary }}',
+						title: '{{ sunday_tasks.task_name }}',
 						start: '2015-12-20'
 					},
 				{% endfor %}

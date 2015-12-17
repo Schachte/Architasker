@@ -12,3 +12,4 @@ class UserEvent(models.Model):
     end_time = models.CharField(max_length=255, default='None')
     url = models.CharField(max_length=255, default='None')
     color = models.CharField(max_length=255, default='None')
+    current_day = models.CharField(max_length=255, default='Monday') #Maybe need to change the default day on this field

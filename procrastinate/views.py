@@ -41,6 +41,7 @@ FLOW = flow_from_clientsecrets(
     scope='https://www.googleapis.com/auth/calendar.readonly',
     redirect_uri='http://127.0.0.1:8000/oauth2callback')
 
+#These arrays temp. hold the user event data (is there a more efficient way of doing this??)
 mon     = []
 tues    = []
 wed     = []
@@ -48,6 +49,10 @@ thurs   = []
 fri     = []
 sat     = []
 sun     = []
+
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+Function to convert unicode dictionaries into str dictionaries
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
 def convert(data):
     if isinstance(data, basestring):
@@ -59,7 +64,11 @@ def convert(data):
     else:
         return data
 
-#Main function deailing with auth verification
+
+'''''''''''''''''''''''''''''''''''''''''''''''''''
+Main function deailing with auth verification
+'''''''''''''''''''''''''''''''''''''''''''''''''''
+
 def index(request):
   current_user = User.objects.get(id=request.user.id)
   storage = Storage(CredentialsModel, 'id', current_user, 'credential')
@@ -70,7 +79,11 @@ def index(request):
     authorize_url = FLOW.step1_get_authorize_url()
     return HttpResponseRedirect(authorize_url)
 
-#User than calls the data function once authenticated
+
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+User than calls the data function once authenticated
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
 def auth_return(request):
   credential = FLOW.step2_exchange(request.REQUEST)
   current_user = User.objects.get(id=request.user.id)
@@ -78,14 +91,12 @@ def auth_return(request):
   storage.put(credential)
   return HttpResponseRedirect("/get_cal")
 
-#Function to actually pull the data from the authenticated OAUTH user
-def get_calendar_data(request):
-    cache.delete('/get_cal')
-    request.path = '/get_cal'
-    key = get_cache_key(request)
-    if cache.has_key(key):
-        cache.delete(key)
 
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+Custom function to parse out the user events and store them on-click
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+def pull_user_event_data(request):
     user_is_authenticated = False
 
     #Send request to pull data from the calendar API
@@ -94,6 +105,7 @@ def get_calendar_data(request):
     credential = storage.get()
     if not credential is None:
 
+        '''Dealing with OAUTH verification'''
         user_is_authenticated = True
         http = httplib2.Http()
         http = credential.authorize(http)
@@ -108,8 +120,10 @@ def get_calendar_data(request):
         #Array to hold the different IDs associated with each calendar
         calendar_names = []
 
+        #Oauth handling var
         page_token = None
-        #Print the calendars
+
+        #This is a shitty error-handling snippet for weirdly named calendars. We need to fix this
         calendar_list = service.calendarList().list(pageToken=page_token).execute()
         for calendar_list_entry in calendar_list['items']:
             if '@group' in str((calendar_list_entry['id'])) and not '#' in str((calendar_list_entry['id'])):
@@ -118,34 +132,33 @@ def get_calendar_data(request):
         if not page_token:
             pass
 
-        for cals in calendar_names:
-            print (str(cals))
-
-        user_cals = []
-        #Printing the names of the users calendars based on the ID
-        for names in calendar_names:
-            calendar_list_entry = service.calendarList().get(calendarId=names).execute()
-            print (calendar_list_entry['summary'])
-            user_cals.append(str(calendar_list_entry['summary']))
-
-        print_examples = []
-
         #Setting the beginning of the week as well as the end of the week
-        now = now.isoformat() + 'Z' # 'Z' indicates UTC time
+        # 'Z' indicates UTC time
+        now = now.isoformat() + 'Z'
         then = then.isoformat() + 'Z'
 
+        #Get the events off the primary calendar, this should be changed eventually so the user can select the calendar they please to use
         eventsResult = service.events().list(
+
             calendarId='primary', timeMin=now,
             timeMax=then).execute()
+
         events = eventsResult.get('items', [])
 
-        if not events:
-            print('No upcoming events found.')
+        #Get all the google events from the database when attempting the current sync
+        google_tasks = SNE.objects.filter(is_google_task = True)
 
+        #If they exist, then loop through and delete each one from the database
+        if google_tasks is not None:
+            for each_google_task in google_tasks:
+                each_google_task.delete()
+
+        #We need to start parsing and storing the data into the database with the most recent copy of google events
         for event in events:
             start = event['start'].get('dateTime', event['start'].get('date'))
             string_converted_date = convert(event['start'])
 
+            #Storing the physical event into the DB store
             if 'date' in string_converted_date.keys():
                 current = str(string_converted_date['date'])
                 dt = datetime.datetime.strptime(current, '%Y-%m-%d')
@@ -158,65 +171,42 @@ def get_calendar_data(request):
                     start_time = str(now),
                     end_time = str(then)
                 )
-                temp_model.save()
 
-
+                #Parsing out the different events to store into day arrays for the week
                 if (dt.weekday() == 0 and not convert(event) in mon):
                     mon.append(convert(event))
+                    temp_model.current_day = "Monday"
                 elif (dt.weekday() == 1 and not convert(event) in tues):
                     tues.append(convert(event))
+                    temp_model.current_day = "Tuesday"
                 elif (dt.weekday() == 2 and not convert(event) in wed):
                     wed.append(convert(event))
+                    temp_model.current_day = "Wednesday"
                 elif (dt.weekday() == 3 and not convert(event) in thurs):
                     thurs.append(convert(event))
+                    temp_model.current_day = "Thursday"
                 elif (dt.weekday() == 4 and not convert(event) in fri):
                     fri.append(convert(event))
+                    temp_model.current_day = "Friday"
                 elif (dt.weekday() == 5 and not convert(event) in sat):
                     sat.append(convert(event))
+                    temp_model.current_day = "Saturday"
                 elif (dt.weekday() == 6 and not convert(event) in sun):
                     sun.append(convert(event))
+                    temp_model.current_day = "Sunday"
+
+                #Once the proper integer-to-day model conversion has been applied from the above switch, save the model code to DB
+                temp_model.save()
+
 
         # if events:
         #     print('\n*********************************MONDAY TASKS*********************************\n')
         #     for monday_tasks in mon:
         #         string_converted_date = convert(monday_tasks['start'])
         #         print('Task: %s during the time of %s' %(monday_tasks['summary'], str(string_converted_date['date'])))
-        #
-        #     print('\n*********************************TUESDAY TASKS*********************************\n')
-        #     for tuesday_tasks in tues:
-        #         string_converted_date = convert(tuesday_tasks['start'])
-        #         print('Task: %s during the time of %s' %(tuesday_tasks['summary'], str(string_converted_date['date'])))
-        #
-        #     print('\n*********************************WEDNESDAY TASKS*********************************\n')
-        #     for wednesday_tasks in wed:
-        #         string_converted_date = convert(wednesday_tasks['start'])
-        #         print('Task: %s during the time of %s' %(wednesday_tasks['summary'], str(string_converted_date['date'])))
-        #
-        #     print('\n*********************************THURSDAY TASKS*********************************\n')
-        #     for thursday_tasks in thurs:
-        #         string_converted_date = convert(thursday_tasks['start'])
-        #         print('Task: %s during the time of %s' %(thursday_tasks['summary'], str(string_converted_date['date'])))
-        #
-        #     print('\n*********************************FRIDAY TASKS*********************************\n')
-        #     for friday_tasks in fri:
-        #         string_converted_date = convert(friday_tasks['start'])
-        #         print('Task: %s during the time of %s' %(friday_tasks['summary'], str(string_converted_date['date'])))
-        #
-        #     print('\n*********************************SATURDAY TASKS*********************************\n')
-        #     for saturday_tasks in sat:
-        #         string_converted_date = convert(saturday_tasks['start'])
-        #         print('Task: %s during the time of %s' %(saturday_tasks['summary'], str(string_converted_date['date'])))
-        #
-        #     print('\n*********************************SUNDAY TASKS*********************************\n')
-        #     for sunday_tasks in sun:
-        #         string_converted_date = convert(sunday_tasks['start'])
-        #         print('Task: %s during the time of %s' %(sunday_tasks['summary'], str(string_converted_date['date'])))
 
-            print_examples.append(str(event['summary']))
 
         context = {
-            'user_cals' : user_cals,
-            'print_examples' : print_examples,
             'user_is_authenticated' : user_is_authenticated,
             'mon' : mon,
             'tues' : tues,
@@ -227,23 +217,49 @@ def get_calendar_data(request):
             'sun' : sun,
             'event_length' : len(events)
         }
+        return HttpResponseRedirect('/get_cal')
 
-        cache.delete('/get_cal')
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+Function to actually pull the data from the authenticated OAUTH user
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
-            #This is the redirect URL that is sent to the user once the OAUTH credentials have been validated successfully
-        return render(request, 'calender.html', context)
-    else:
-        return render(request, 'user_calendar.html')
+def get_calendar_data(request):
 
-#Remove authorization manually (Oauth token removal)
+    #Authentication bool to verify Oauth steps have been completed
+    user_is_authenticated = False
+
+    #Send request to pull data from the calendar API
+    current_user = User.objects.get(id=request.user.id)
+    storage = Storage(CredentialsModel, 'id', current_user, 'credential')
+    credential = storage.get()
+    if not credential is None:
+        user_is_authenticated = True
+        event_length = SNE.objects.filter(current_day = 'Monday').count
+
+    context = {
+
+        'user_is_authenticated' : user_is_authenticated,
+        'mon' : SNE.objects.filter(current_day = 'Monday'),
+        'tues' : SNE.objects.filter(current_day = 'Tuesday'),
+        'wed' : SNE.objects.filter(current_day = 'Wednesday'),
+        'thurs' : SNE.objects.filter(current_day = 'Thursday'),
+        'fri' : SNE.objects.filter(current_day = 'Friday'),
+        'sat' : SNE.objects.filter(current_day = 'Saturday'),
+        'sun' : SNE.objects.filter(current_day = 'Sunday'),
+        'event_length' : event_length
+        }
+
+    return render(request, 'calender.html', context)
+
+
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+Remove authorization manually (Oauth token removal)
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
 def unauthorize_account(request):
-
     if request.method == "POST":
         entry = CredentialsModel.objects.get(id=request.user.id)
         entry.delete()
         return render(request, 'user_calendar.html')
     else:
         return render(request, 'user_calendar.html')
-
-def cal(request):
-    return render(request, "calender.html", {})
