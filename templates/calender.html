@@ -24,14 +24,94 @@
 		// returns the year (four digits)
 		var year = currentTime.getFullYear();
 
-		print(new Date().getFullYear());
-
 
 		scheduler.config.xml_date="%Y-%m-%d %H:%i";
 		scheduler.config.default_date = "%j %M %Y";
+
+		var updateDayStatus = function(event_id, ev) {
+			$('.ajaxProgress').show();
+			$.ajax({
+				type: "POST",
+				url: "create_event/",
+				dataType: "json",
+				data: {
+					csrfmiddlewaretoken: '{{ csrf_token }}',
+					start: scheduler.getEvent(event_id).start_date,
+					end: scheduler.getEvent(event_id).end_date,
+					text: scheduler.getEvent(event_id).text,
+					id: scheduler.getEvent(event_id).id
+				},
+			});
+				// var day = scheduler.date.date_part(new Date(ev.start_date));
+				// var next_day = scheduler.date.add(day, 1, "day");
+				// var events = scheduler.getEvents(day, next_day);
+
+				// return true;
+		};
+
+		scheduler.attachEvent("onEventAdded", updateDayStatus);
+		//scheduler.attachEvent("onEventChanged", updateDayStatus);
+		//scheduler.attachEvent("onEventDeleted", updateDayStatus);
+
 		scheduler.init('scheduler_here',new Date(year,0,month),"week");
 		// scheduler.load("./data/events.xml");
-		scheduler.addEvent("16-12-2015 09:00","16-12-2015 12:00","Meeting", {holder:"John"})
+		
+		scheduler.parse( [
+				{% for monday_tasks in mon %}
+					{
+						text: '{{ monday_tasks.task_name }}',
+						start_date: '2015-12-14',
+						end_date: '2015-12-14'
+					},
+				{% endfor %}
+				{% for tuesday_tasks in tues %}
+					{
+						text: '{{ tuesday_tasks.task_name }}',
+						start_date: '2015-12-15',
+						end_date: '2015-12-15'
+					},
+				{% endfor %}
+				{% for wednesday_tasks in wed %}
+					{
+						text: '{{ wednesday_tasks.task_name }}',
+						start_date: '2015-12-16',
+						end_date: '2015-12-16'
+					},
+				{% endfor %}
+				{% for thursday_tasks in thurs %}
+					{
+						text: '{{ thursday_tasks.task_name }}',
+						start_date: '2015-12-17',
+						end_date: '2015-12-17'
+					},
+				{% endfor %}
+				{% for friday_tasks in fri %}
+					{
+						text: '{{ friday_tasks.task_name }}',
+						start_date: '2015-12-18',
+						end_date: '2015-12-18'
+					},
+				{% endfor %}
+				{% for saturday_tasks in sat %}
+					{
+						text: '{{ saturday_tasks.task_name }}',
+						start_date: '2015-12-19',
+						end_date: '2015-12-19'
+					},
+				{% endfor %}
+				{% for sunday_tasks in sun %}
+					{
+						text: '{{ sunday_tasks.task_name }}',
+						start_date: '2015-12-20',
+						end_date: '2015-12-19'
+					},
+				{% endfor %}
+		], "json");
+
+		scheduler.addEvent("16-12-2015 09:00","16-12-2015 12:00","Meeting", {holder:"John"});
+
+
+		
 	}
 
 	function show_minical(){
@@ -51,6 +131,8 @@
 
 
 
+
+
 </script>
 
 
@@ -58,8 +140,7 @@
 	html, body{
 		margin:0px;
 		padding:0px;
-		height:100%;
-		overflow: hidden;
+		height:90%;
 	}
 
 	.dhx_calendar_click {

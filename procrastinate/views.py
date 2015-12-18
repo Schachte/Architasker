@@ -247,6 +247,24 @@ def pull_user_event_data(request):
 
         return HttpResponseRedirect('/get_cal')
 
+
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+Function to store new event created on calendar into database
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+def create_event(request):
+    if request.method == 'POST':
+        temp_model = SNE.objects.create(
+            authenticated_user = current_user,
+            task_name = request.POST.get('text'),
+            start_time = request.POST.get('start'),
+            end_time = request.POST.get('end'),
+            special_event_id = request.POST.get('id')
+        )
+
+        temp_model.save()
+
+
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 Function to actually pull the data from the authenticated OAUTH user
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
