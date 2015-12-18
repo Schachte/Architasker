@@ -1,0 +1,41 @@
+{% load staticfiles %}
+{% load static %}
+
+
+div.dhx_menu_icon.icon_blue {
+  background-image: url("imgs/1blue.png");
+ background-repeat: no-repeat;
+ margin-top: 1px;
+ margin: auto;
+}
+
+
+div.dhx_menu_icon.icon_green {
+  background-image: url("imgs/1green.png");
+ background-repeat: no-repeat;
+ margin-top: 1px;
+ margin: auto;
+}
+
+div.dhx_menu_icon.icon_yellow {
+  background-image: url("imgs/1yellow.png");
+ background-repeat: no-repeat;
+ margin-top: 1px;
+ margin: auto;
+}
+
+div.dhx_menu_icon.icon_orange {
+  background-image: url("imgs/1orange.png");
+ background-repeat: no-repeat;
+ margin-top: 1px;
+ margin: auto;
+}
+
+.hidden {
+  position: absolute;
+  left: -10000px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}

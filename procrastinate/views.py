@@ -255,13 +255,15 @@ Function to store new event created on calendar into database
 def create_event(request):
     if request.method == 'POST':
 
+        print('called')
         current_user = User.objects.get(id=request.user.id)
         temp_model = SNE.objects.create(
             authenticated_user = current_user,
             task_name = request.POST.get('text'),
             start_time = request.POST.get('start'),
             end_time = request.POST.get('end'),
-            special_event_id = request.POST.get('id')
+            special_event_id = request.POST.get('id'),
+            color = request.POST.get('color')
         )
 
         temp_model.save()

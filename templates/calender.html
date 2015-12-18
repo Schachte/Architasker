@@ -8,6 +8,14 @@
 {% include 'css.html' %}
 {% include 'javascript.html' %}
 
+<link rel="stylesheet" href="http://kendo.cdn.telerik.com/2015.3.1111/styles/kendo.common.min.css"/>
+<link rel="stylesheet" href="http://kendo.cdn.telerik.com/2015.3.1111/styles/kendo.rtl.min.css"/>
+<link rel="stylesheet" href="http://kendo.cdn.telerik.com/2015.3.1111/styles/kendo.silver.min.css"/>
+<link rel="stylesheet" href="http://kendo.cdn.telerik.com/2015.3.1111/styles/kendo.mobile.all.min.css"/>
+
+<script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+<script src="http://kendo.cdn.telerik.com/2015.3.1111/js/kendo.all.min.js"></script>
+
 <script type="text/javascript" charset="utf-8">
 	function init() {
 		scheduler.config.multi_day = true;
@@ -39,7 +47,8 @@
 					start: scheduler.getEvent(event_id).start_date,
 					end: scheduler.getEvent(event_id).end_date,
 					text: scheduler.getEvent(event_id).text,
-					id: scheduler.getEvent(event_id).id
+					id: scheduler.getEvent(event_id).id,
+					color: scheduler.getEvent(event_id).color
 				},
 			});
 				// var day = scheduler.date.date_part(new Date(ev.start_date));
@@ -49,19 +58,58 @@
 				// return true;
 		};
 
+		// scheduler.attachEvent("onClick", function(id){
+		//
+		// 	scheduler.getEvent(id).color="blue";
+		// });
+
+
 		scheduler.attachEvent("onEventAdded", updateDayStatus);
+		scheduler.attachEvent("onEventChanged", updateDayStatus);
 		//scheduler.attachEvent("onEventChanged", updateDayStatus);
 		//scheduler.attachEvent("onEventDeleted", updateDayStatus);
 
+		//The icons are defined custom in the custom_icons.css file in the static dir for CSS
+		scheduler.config.icons_select = ['icon_details', 'icon_delete', 'icon_blue', 'icon_green', 'icon_yellow', 'icon_orange'];
+
+		scheduler.locale.labels.icon_blue = "Blue";
+		scheduler.locale.labels.icon_green = "Green";
+		scheduler.locale.labels.icon_yellow = "Yellow";
+		scheduler.locale.labels.icon_orange = "Orange";
+
 		scheduler.init('scheduler_here',new Date(year,0,month),"week");
-		// scheduler.load("./data/events.xml");
-		
+
+		scheduler._click.buttons.blue = function(id){
+			scheduler.getEvent(id).color = "#2196F3";
+			scheduler.updateEvent(id);
+			updateDayStatus(id);
+		};
+
+		scheduler._click.buttons.green = function(id){
+			scheduler.getEvent(id).color = "#8BC34A";
+			scheduler.updateEvent(id);
+			updateDayStatus(id);
+		};
+
+		scheduler._click.buttons.yellow = function(id){
+			scheduler.getEvent(id).color = "#FFC107";
+			scheduler.updateEvent(id);
+			updateDayStatus(id);
+		};
+
+		scheduler._click.buttons.orange = function(id){
+			scheduler.getEvent(id).color = "#FF9800";
+			scheduler.updateEvent(id);
+			updateDayStatus(id);
+		};
+
 		scheduler.parse( [
 				{% for monday_tasks in mon %}
 					{
 						text: '{{ monday_tasks.task_name }}',
 						start_date: '2015-12-14',
-						end_date: '2015-12-14'
+						end_date: '2015-12-14',
+						color: 'red'
 					},
 				{% endfor %}
 				{% for tuesday_tasks in tues %}
@@ -111,7 +159,7 @@
 		scheduler.addEvent("16-12-2015 09:00","16-12-2015 12:00","Meeting", {holder:"John"});
 
 
-		
+
 	}
 
 	function show_minical(){
@@ -199,7 +247,7 @@
 
 
 		{% endif %}
-
+		<!-- <input name="eventColor" type="color" onchange="getColorVal(eventColor.value)"/> -->
 
 </body>
 </html>
