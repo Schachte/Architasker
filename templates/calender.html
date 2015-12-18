@@ -1,4 +1,5 @@
 {% load staticfiles %}
+{% load static %}
 
 <!DOCTYPE html>
 <html>
@@ -6,136 +7,98 @@
 <meta charset='utf-8' />
 {% include 'css.html' %}
 {% include 'javascript.html' %}
-<!-- <link rel='stylesheet' href='../lib/cupertino/jquery-ui.min.css' />
-<link href='../fullcalendar.css' rel='stylesheet' />
-<link href='../fullcalendar.print.css' rel='stylesheet' media='print' /> -->
-<!-- <script src='../lib/moment.min.js'></script>
-<script src='../lib/jquery.min.js'></script>
-<script src='../fullcalendar.min.js'></script> -->
-<script>
 
-	$(document).ready(function() {
+<script type="text/javascript" charset="utf-8">
+	function init() {
+		scheduler.config.multi_day = true;
 
-		$('#calendar').fullCalendar({
-			theme: true,
-			height: 500,
-			maxTime: 14,
-			header: {
-				left: 'prev, today',
-				center: 'title',
-				right: 'agendaWeek,agendaDay'
-			},
+		// Return today's date and time
+		var currentTime = new Date();
 
-			defaultView: 'basicWeek',
-			selectable: true,
-			selectHelper: true,
-			select: function(start, end) {
-				var title = prompt('Event Title:');
-				var eventData;
-				if (title) {
-					eventData = {
-						title: title,
-						start: start,
-						end: end
-					};
-					$('#calendar').fullCalendar('renderEvent', eventData, true); // stick? = true
+		// returns the month (from 0 to 11)
+		var month = currentTime.getMonth() + 1;
+
+		// returns the day of the month (from 1 to 31)
+		var day = currentTime.getDate();
+
+		// returns the year (four digits)
+		var year = currentTime.getFullYear();
+
+		print(new Date().getFullYear());
+
+
+		scheduler.config.xml_date="%Y-%m-%d %H:%i";
+		scheduler.config.default_date = "%j %M %Y";
+		scheduler.init('scheduler_here',new Date(year,0,month),"week");
+		// scheduler.load("./data/events.xml");
+		scheduler.addEvent("16-12-2015 09:00","16-12-2015 12:00","Meeting", {holder:"John"})
+	}
+
+	function show_minical(){
+		if (scheduler.isCalendarVisible())
+			scheduler.destroyCalendar();
+		else
+			scheduler.renderCalendar({
+				position:"dhx_minical_icon",
+				date:scheduler._date,
+				navigation:true,
+				handler:function(date,calendar){
+					scheduler.setCurrentView(date);
+					scheduler.destroyCalendar()
 				}
-				$('#calendar').fullCalendar('unselect');
-			},
-			editable: true,
-			eventLimit: true, // allow "more" link when too many events
-			events: [
-				{% for monday_tasks in mon %}
-					{
-						title: '{{ monday_tasks.task_name }}',
-						start: '2015-12-14'
-					},
-				{% endfor %}
+			});
+	}
 
-				{% for tuesday_tasks in tues %}
-					{
-						title: '{{ tuesday_tasks.task_name }}',
-						start: '2015-12-15'
-					},
-				{% endfor %}
 
-				{% for wednesday_tasks in wed %}
-					{
-						title: '{{ wednesday_tasks.task_name }}',
-						start: '2015-12-16'
-					},
-				{% endfor %}
-
-				{% for thursday_tasks in thurs %}
-					{
-						title: '{{ thursday_tasks.task_name }}',
-						start: '2015-12-17'
-					},
-				{% endfor %}
-
-				{% for friday_tasks in fri %}
-					{
-						title: '{{ friday_tasks.task_name }}',
-						start: '2015-12-18'
-					},
-				{% endfor %}
-
-				{% for saturday_tasks in sat %}
-					{
-						title: '{{ saturday_tasks.task_name }}',
-						start: '2015-12-19'
-					},
-				{% endfor %}
-
-				{% for sunday_tasks in sun %}
-					{
-						title: '{{ sunday_tasks.task_name }}',
-						start: '2015-12-20'
-					},
-				{% endfor %}
-			]
-		});
-
-	});
 
 </script>
-<style>
 
-	body {
-		margin: 40px 10px;
-		padding: 0;
-		font-family: "Lucida Grande",Helvetica,Arial,Verdana,sans-serif;
-		font-size: 14px;
+
+<style type="text/css" media="screen">
+	html, body{
+		margin:0px;
+		padding:0px;
+		height:100%;
+		overflow: hidden;
 	}
 
-	#calendar {
-		max-width: 1200px;
-		max-height: 50px;
-		height: 200px;
-		margin: 0 auto;
+	.dhx_calendar_click {
+		background-color: #C2D5FC !important;
 	}
-
 </style>
+
 </head>
-<body>
+<body onload="init();">
+
 
 	{% if user_is_authenticated == True %}
 
 		{% if event_length > 0 %}
-		<div id='calendar'>
 
-			<form action="/unauthorize" method="POST">
-				{% csrf_token %}
-			<input type="submit" value="Remove Authorization From Procrastinator">
-			</form>
+		   <div id="scheduler_here" class="dhx_cal_container" style='width:100%; height:100%;'>
+		      <div class="dhx_cal_navline">
+		         <div class="dhx_cal_prev_button">&nbsp;</div>
+		         <div class="dhx_cal_next_button">&nbsp;</div>
+		         <div class="dhx_cal_today_button"></div>
+		         <div class="dhx_cal_date"></div>
+		         <div class="dhx_minical_icon" id="dhx_minical_icon" onclick="show_minical()">&nbsp;</div>
+		         <div class="dhx_cal_tab" name="day_tab" style="right:204px;"></div>
+		         <div class="dhx_cal_tab" name="week_tab" style="right:140px;"></div>
+		         <div class="dhx_cal_tab" name="month_tab" style="right:76px;"></div>
+		      </div>
+		      <div class="dhx_cal_header">
+		      </div>
+		      <div class="dhx_cal_data">
+		      </div>
+		   </div>
 
-			<form action="/sync" method="get">
-				{% csrf_token %}
-			<input type="submit" value="Sync Google Calendar">
-			</form>
+
+				<form action="/sync" method="get">
+					{% csrf_token %}
+				<input type="submit" value="Sync Google Calendar" class="btn waves-effect waves-light pink darken-1">
+				</form>
 
 
-		</div>
 		{% else %}
 		<h1>YOU HAVE NO EVENTS</h1>
 
