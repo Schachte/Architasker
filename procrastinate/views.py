@@ -42,13 +42,13 @@ FLOW = flow_from_clientsecrets(
     redirect_uri='http://127.0.0.1:8000/oauth2callback')
 
 #These arrays temp. hold the user event data (is there a more efficient way of doing this??)
-mon     = []
-tues    = []
-wed     = []
-thurs   = []
-fri     = []
-sat     = []
-sun     = []
+# mon     = []
+# tues    = []
+# wed     = []
+# thurs   = []
+# fri     = []
+# sat     = []
+# sun     = []
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 Function to convert unicode dictionaries into str dictionaries
@@ -196,49 +196,49 @@ def pull_user_event_data(request):
 
                 #Parsing out the different events to store into day arrays for the week
                 if (dt.weekday() == 0 ):
-                    mon.append(convert(event))
+                    #mon.append(convert(event))
 
                     if not_exists:
                         temp_model.current_day = "Monday"
                         temp_model.save()
 
                 elif (dt.weekday() == 1 ):
-                    tues.append(convert(event))
+                    #tues.append(convert(event))
 
                     if not_exists:
                         temp_model.current_day = "Tuesday"
                         temp_model.save()
 
                 elif (dt.weekday() == 2 ):
-                    wed.append(convert(event))
+                    #wed.append(convert(event))
 
                     if not_exists:
                         temp_model.current_day = "Wednesday"
                         temp_model.save()
 
                 elif (dt.weekday() == 3 ):
-                    thurs.append(convert(event))
+                    #thurs.append(convert(event))
 
                     if not_exists:
                         temp_model.current_day = "Thursday"
                         temp_model.save()
 
                 elif (dt.weekday() == 4 ):
-                    fri.append(convert(event))
+                    #fri.append(convert(event))
 
                     if not_exists:
                         temp_model.current_day = "Friday"
                         temp_model.save()
 
                 elif (dt.weekday() == 5 ):
-                    sat.append(convert(event))
+                    #sat.append(convert(event))
 
                     if not_exists:
                         temp_model.current_day = "Saturday"
                         temp_model.save()
 
                 elif (dt.weekday() == 6 ):
-                    sun.append(convert(event))
+                    #sun.append(convert(event))
 
                     if not_exists:
                         temp_model.current_day = "Sunday"
@@ -285,8 +285,7 @@ def create_event(request):
             temp_model.current_day = "Friday"
 
         elif (temp_model.start_time[0:3] == "Sat" ):
-            print("Here")
-            sat.append(temp_model)
+            #sat.append(temp_model)
             temp_model.current_day = "Saturday"              
 
         elif (temp_model.start_time[0:3] == "Sun" ):
@@ -301,9 +300,10 @@ Function to delete event from database
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
 def delete_event(request):
+    print("before if")
     if request.method == 'POST':
-
-        SNE.objects.filter(special_event_id=request.POST.get('id')).delete()
+        print("right before delete")
+        SNE.objects.get(special_event_id=request.POST.get('id')).delete()
         print("deleted")
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
