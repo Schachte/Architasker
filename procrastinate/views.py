@@ -115,6 +115,7 @@ def pull_user_event_data(request):
         #This is a shitty error-handling snippet for weirdly named calendars. We need to fix this
         calendar_list = service.calendarList().list(pageToken=page_token).execute()
 
+        #Deal with authentication and storing user auth data
         page_token = calendar_list.get('nextPageToken')
         if not page_token:
             pass
@@ -168,50 +169,36 @@ def pull_user_event_data(request):
 
                 #Parsing out the different events to store into day arrays for the week
                 if (dt.weekday() == 0 ):
-
-
                     if not_exists:
                         temp_model.current_day = "Monday"
                         temp_model.save()
 
                 elif (dt.weekday() == 1 ):
-
-
                     if not_exists:
                         temp_model.current_day = "Tuesday"
                         temp_model.save()
 
                 elif (dt.weekday() == 2 ):
-
-
                     if not_exists:
                         temp_model.current_day = "Wednesday"
                         temp_model.save()
 
                 elif (dt.weekday() == 3 ):
-
-
                     if not_exists:
                         temp_model.current_day = "Thursday"
                         temp_model.save()
 
                 elif (dt.weekday() == 4 ):
-
-
                     if not_exists:
                         temp_model.current_day = "Friday"
                         temp_model.save()
 
                 elif (dt.weekday() == 5 ):
-
-
                     if not_exists:
                         temp_model.current_day = "Saturday"
                         temp_model.save()
 
                 elif (dt.weekday() == 6 ):
-
-
                     if not_exists:
                         temp_model.current_day = "Sunday"
                         temp_model.save()
