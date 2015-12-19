@@ -17,5 +17,4 @@ class CredentialsModel(models.Model):
 class CredentialsAdmin(admin.ModelAdmin):
     pass
 
-
 admin.site.register(CredentialsModel, CredentialsAdmin)
