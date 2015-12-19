@@ -66,7 +66,7 @@ def convert(data):
 
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''
-Main function deailing with auth verification
+Main function dealing with auth verification
 '''''''''''''''''''''''''''''''''''''''''''''''''''
 
 def index(request):
@@ -81,7 +81,7 @@ def index(request):
 
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-User than calls the data function once authenticated
+User then calls the data function once authenticated
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
 def auth_return(request):
@@ -264,8 +264,61 @@ def create_event(request):
             special_event_id = request.POST.get('id')
         )
 
+        if (temp_model.start_time[0:3] == "Mon" ):
+            #mon.append(temp_model)
+            temp_model.current_day = "Monday"
+                        
+        elif (temp_model.start_time[0:3] == "Tue" ):
+            #tues.append(temp_model)
+            temp_model.current_day = "Tuesday"
+        
+        elif (temp_model.start_time[0:3] == "Wed" ):
+            #wed.append(temp_model)
+            temp_model.current_day = "Wednesday"
+
+        elif (temp_model.start_time[0:3] == "Thu" ):
+            #thurs.append(temp_model)
+            temp_model.current_day = "Thursday"
+
+        elif (temp_model.start_time[0:3] == "Fri" ):
+            #fri.append(temp_model)
+            temp_model.current_day = "Friday"
+
+        elif (temp_model.start_time[0:3] == "Sat" ):
+            print("Here")
+            sat.append(temp_model)
+            temp_model.current_day = "Saturday"              
+
+        elif (temp_model.start_time[0:3] == "Sun" ):
+            #sun.append(temp_model)
+            temp_model.current_day = "Sunday"
+
         temp_model.save()
         print("done")
+
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+Function to delete event from database
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+def delete_event(request):
+    if request.method == 'POST':
+
+        SNE.objects.filter(special_event_id=request.POST.get('id')).delete()
+        print("deleted")
+
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+Function to update event in database
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+def update_event(request):
+    if request.method == 'POST':
+
+        event = SNE.objects.get(special_event_id=request.POST.get('id'))
+        event.task_name = request.POST.get('text')
+        event.start_time = request.POST.get('start')
+        event.end_time = request.POST.get('end')
+        event.save()
+        print("updated")
 
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -298,7 +351,7 @@ def get_calendar_data(request):
         'sat' : SNE.objects.filter(current_day = 'Saturday'),
         'sun' : SNE.objects.filter(current_day = 'Sunday'),
         'event_length' : event_length
-        }
+    }
 
     return render(request, 'calender.html', context)
 

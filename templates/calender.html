@@ -29,6 +29,7 @@
 		scheduler.config.default_date = "%j %M %Y";
 
 		var updateDayStatus = function(event_id, ev) {
+
 			$('.ajaxProgress').show();
 			$.ajax({
 				type: "POST",
@@ -42,16 +43,63 @@
 					id: scheduler.getEvent(event_id).id
 				},
 			});
-				// var day = scheduler.date.date_part(new Date(ev.start_date));
-				// var next_day = scheduler.date.add(day, 1, "day");
-				// var events = scheduler.getEvents(day, next_day);
-
-				// return true;
 		};
 
+		var deleteEvent = function(event_id, e) {
+			$('.ajaxProgress').show();
+			$.ajax({
+				type: "POST",
+				url: "delete_event/",
+				dataType: "json",
+				data: {
+					csrfmiddlewaretoken: '{{ csrf_token }}',
+					id: event_id
+				},
+			});
+			return true;
+		};
+
+
+		scheduler.attachEvent("onEventDeleted", deleteEvent);
 		scheduler.attachEvent("onEventAdded", updateDayStatus);
-		//scheduler.attachEvent("onEventChanged", updateDayStatus);
-		//scheduler.attachEvent("onEventDeleted", updateDayStatus);
+		
+		scheduler.attachEvent("onEventChanged",function(id,ev){
+    		$('.ajaxProgress').show();
+			$.ajax({
+				type: "POST",
+				url: "update_event/",
+				dataType: "json",
+				data: {
+					csrfmiddlewaretoken: '{{ csrf_token }}',
+					start: ev.start_date,
+					end: ev.end_date,
+					text: ev.text,
+					id: id
+				},
+			});
+    		return true;
+		})
+
+		scheduler.attachEvent("onBeforeEventChanged", function(ev, e, is_new, original){
+  			if (!is_new) {
+  				$('.ajaxProgress').show();
+				$.ajax({
+					type: "POST",
+					url: "update_event/",
+					dataType: "json",
+					data: {
+						csrfmiddlewaretoken: '{{ csrf_token }}',
+						start: ev.start_date,
+						end: ev.end_date,
+						text: ev.text,
+						id: ev.id
+					},
+				});
+  			}
+
+    		return true;
+		});
+
 
 		scheduler.init('scheduler_here',new Date(year,0,month),"week");
 		// scheduler.load("./data/events.xml");
@@ -97,6 +145,7 @@
 						text: '{{ saturday_tasks.task_name }}',
 						start_date: '2015-12-19',
 						end_date: '2015-12-19'
+
 					},
 				{% endfor %}
 				{% for sunday_tasks in sun %}
