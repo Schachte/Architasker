@@ -41,14 +41,6 @@ FLOW = flow_from_clientsecrets(
     scope='https://www.googleapis.com/auth/calendar.readonly',
     redirect_uri='http://127.0.0.1:8000/oauth2callback')
 
-#These arrays temp. hold the user event data (is there a more efficient way of doing this??)
-mon     = []
-tues    = []
-wed     = []
-thurs   = []
-fri     = []
-sat     = []
-sun     = []
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 Function to convert unicode dictionaries into str dictionaries
@@ -91,31 +83,11 @@ def auth_return(request):
   storage.put(credential)
   return HttpResponseRedirect("/get_cal")
 
-def patch_broken_pipe_error():
-    """Monkey Patch BaseServer.handle_error to not write
-    a stacktrace to stderr on broken pipe.
-    http://stackoverflow.com/a/7913160"""
-    import sys
-    from SocketServer import BaseServer
-
-    handle_error = BaseServer.handle_error
-
-    def my_handle_error(self, request, client_address):
-        type, err, tb = sys.exc_info()
-        # there might be better ways to detect the specific erro
-        if repr(err) == "error(32, 'Broken pipe')":
-            # you may ignore it...
-            logging.getLogger('mylog').warn(err)
-        else:
-            handle_error(self, request, client_address)
-
-    BaseServer.handle_error = my_handle_error
-
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 Custom function to parse out the user events and store them on-click
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-
+#Current bug that the timed events are being ignored within the system
 def pull_user_event_data(request):
     user_is_authenticated = False
 
@@ -196,49 +168,49 @@ def pull_user_event_data(request):
 
                 #Parsing out the different events to store into day arrays for the week
                 if (dt.weekday() == 0 ):
-                    mon.append(convert(event))
+
 
                     if not_exists:
                         temp_model.current_day = "Monday"
                         temp_model.save()
 
                 elif (dt.weekday() == 1 ):
-                    tues.append(convert(event))
+
 
                     if not_exists:
                         temp_model.current_day = "Tuesday"
                         temp_model.save()
 
                 elif (dt.weekday() == 2 ):
-                    wed.append(convert(event))
+
 
                     if not_exists:
                         temp_model.current_day = "Wednesday"
                         temp_model.save()
 
                 elif (dt.weekday() == 3 ):
-                    thurs.append(convert(event))
+
 
                     if not_exists:
                         temp_model.current_day = "Thursday"
                         temp_model.save()
 
                 elif (dt.weekday() == 4 ):
-                    fri.append(convert(event))
+
 
                     if not_exists:
                         temp_model.current_day = "Friday"
                         temp_model.save()
 
                 elif (dt.weekday() == 5 ):
-                    sat.append(convert(event))
+
 
                     if not_exists:
                         temp_model.current_day = "Saturday"
                         temp_model.save()
 
                 elif (dt.weekday() == 6 ):
-                    sun.append(convert(event))
+
 
                     if not_exists:
                         temp_model.current_day = "Sunday"

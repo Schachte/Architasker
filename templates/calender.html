@@ -55,7 +55,7 @@
 
 		scheduler.init('scheduler_here',new Date(year,0,month),"week");
 		// scheduler.load("./data/events.xml");
-		
+
 		scheduler.parse( [
 				{% for monday_tasks in mon %}
 					{
@@ -111,7 +111,7 @@
 		scheduler.addEvent("16-12-2015 09:00","16-12-2015 12:00","Meeting", {holder:"John"});
 
 
-		
+
 	}
 
 	function show_minical(){
