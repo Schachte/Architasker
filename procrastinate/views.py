@@ -131,9 +131,9 @@ def pull_user_event_data(request):
         now = str(now[0:10]) + 'T00:00:01Z'
         then = str(then[0:10]) + 'T23:59:59Z'
 
-
-        print('The date for the now time is %s'%(str(now[0:10])) + 'T00:00:01Z')
-        print('The date for the then time is %s'%(str(then[0:10])) + 'T23:59:59Z')
+        #
+        # print('The date for the now time is %s'%(str(now[0:10])) + 'T00:00:01Z')
+        # print('The date for the then time is %s'%(str(then[0:10])) + 'T23:59:59Z')
 
 
         #Get the events off the primary calendar, this should be changed eventually so the user can select the calendar they please to use
@@ -143,7 +143,6 @@ def pull_user_event_data(request):
             timeMax=then).execute()
 
         events = eventsResult.get('items', [])
-
 
 
         #Get all the google events from the database when attempting the current sync
@@ -157,15 +156,25 @@ def pull_user_event_data(request):
         print(str(len(events)) + ' is length of events')
         #We need to start parsing and storing the data into the database with the most recent copy of google events
         for event in events:
-            print(str(event['start']) + ' is the start time for ' + str(event['summary']))
+            # print(str(event['start']) + ' is the start time for ' + str(event['summary']))
 
             start = event['start'].get('dateTime', event['start'].get('date'))
             string_converted_date = convert(event['start'])
 
             #Storing the physical event into the DB store
-            if 'date' in string_converted_date.keys():
-                current = str(string_converted_date['date'])
-                dt = datetime.datetime.strptime(current, '%Y-%m-%d')
+            if 'date' in string_converted_date.keys() or 'dateTime' in  string_converted_date.keys():
+                # print(str(event['start']) + ' is the start time for ' + str(event['summary']))
+
+                if 'dateTime' in string_converted_date.keys():
+                    current = str(string_converted_date['dateTime'])
+                    times = current[11:]
+                    dt = datetime.datetime.strptime(current, '%Y-%m-%dT' + times)
+
+                elif 'date' in string_converted_date.keys():
+                    current = str(string_converted_date['date'])
+                    dt = datetime.datetime.strptime(current, '%Y-%m-%d')
+
+
 
                 current_user = User.objects.get(username=request.user.username)
 
@@ -183,6 +192,7 @@ def pull_user_event_data(request):
                         special_event_id = str(event['id'])
                     )
 
+
                 #Parsing out the different events to store into day arrays for the week
                 if (dt.weekday() == 0 ):
                     if not_exists:
@@ -198,6 +208,8 @@ def pull_user_event_data(request):
                     if not_exists:
                         temp_model.current_day = "Wednesday"
                         temp_model.save()
+                        print(event['summary']),
+                        print('wednesday')
 
                 elif (dt.weekday() == 3 ):
                     if not_exists:
@@ -218,6 +230,11 @@ def pull_user_event_data(request):
                     if not_exists:
                         temp_model.current_day = "Sunday"
                         temp_model.save()
+
+                else:
+                    print("HIT THIS")
+            else:
+                print(str(event['start']) + ' is the start time for ' + str(event['summary']))
 
 
         return HttpResponseRedirect('/get_cal')
