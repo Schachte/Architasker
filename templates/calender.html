@@ -9,7 +9,39 @@
 {% include 'javascript.html' %}
 
 <script type="text/javascript" charset="utf-8">
+
 	function init() {
+
+		// when .dhx_cal_prev_button is clicked, JQuery toggle the current_view -= 1
+		var current_view = 0;
+		var prev_button = document.getElementsByClassName('dhx_cal_prev_button');
+		var next_button = document.getElementsByClassName('dhx_cal_next_button');
+		next_button[0].style.visibility='hidden';
+		// HANDLE PREVIOUS EVENTS
+		for (var i = 0; i < prev_button.length; i++) {
+				prev_button[i].addEventListener('click', function() {
+						current_view-=1;
+						if (current_view > 0) {
+							next_button[0].style.visibility='hidden';
+						}
+						else {
+							next_button[0].style.visibility='visible';
+						}
+				});
+		}
+
+		// HANDLE FUTURE EVENTS
+		for (var i = 0; i < next_button.length; i++) {
+				next_button[i].addEventListener('click', function() {
+						current_view+=1;
+						if (current_view >= 0) {
+							next_button[0].style.visibility='hidden';
+						}
+						else {
+							next_button[0].style.visibility='visible';
+						}
+				});
+		}
 
 
 		scheduler.config.xml_date="%Y-%m-%d %H:%i";
@@ -185,6 +217,11 @@
 			});
 	}
 
+	function locationEvaluation() {
+			console.log("tester");
+			return "";
+	}
+
 
 </script>
 
@@ -211,7 +248,7 @@
 
 		   <div id="scheduler_here" class="dhx_cal_container" style='width:100%; height:100%;'>
 		      <div class="dhx_cal_navline">
-		         <div class="dhx_cal_prev_button">&nbsp;</div>
+		         <div class="dhx_cal_prev_button" onclick="locationEvaluation()">&nbsp;</div>
 		         <div class="dhx_cal_next_button">&nbsp;</div>
 		         <div class="dhx_cal_today_button"></div>
 		         <div class="dhx_cal_date"></div>
