@@ -81,6 +81,11 @@ User then calls the data function once authenticated
 def auth_return(request):
   credential = FLOW.step2_exchange(request.REQUEST)
   current_user = User.objects.get(id=request.user.id)
+
+  #Error handling in case system doesn't recognize authenticated user
+  if current_user is None:
+      return HttpResponseRedirect("/login")
+
   storage = Storage(CredentialsModel, 'id', current_user, 'credential')
   storage.put(credential)
   return HttpResponseRedirect("/get_cal")
