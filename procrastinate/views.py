@@ -167,15 +167,20 @@ def pull_user_event_data(request):
                     current = str(string_converted_date['dateTime'])
                     times = current[11:]
                     dt = datetime.datetime.strptime(current, '%Y-%m-%dT' + times)
+                    current = current[0:19]
 
                 elif 'date' in string_converted_date.keys():
                     current = str(string_converted_date['date'])
                     dt = datetime.datetime.strptime(current, '%Y-%m-%d')
+                    current = current[0:19]
 
                 if 'dateTime' in string_converted_end.keys():
                     end_time = str(string_converted_end['dateTime'])
+                    end_time = end_time[0:19]
+
                 elif 'date' in string_converted_end.keys():
                     end_time = str(string_converted_date['date'])
+                    end_time = end_time[0:19]
 
                 current_user = User.objects.get(username=request.user.username)
 
