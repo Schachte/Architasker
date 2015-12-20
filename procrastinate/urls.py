@@ -22,7 +22,7 @@ from .views import *
 
 
 urlpatterns = [
-    # url(r'^', get_calendar_data, name="get_calendar_data"),
+    url(r'^$', login_render, name="login_render"),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^oauth/', index, name="oauthview"),                                   #Ability validate Oauth steps
     url(r'^oauth2callback', auth_return, name="auth_return"),                   #Ability validate Oauth steps
