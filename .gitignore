@@ -1,2 +1,4 @@
 db.sqllite3
+*.sqllite
+*.sqllite3
 *.pyc
