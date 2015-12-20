@@ -153,17 +153,15 @@ def pull_user_event_data(request):
             for each_google_task in google_tasks:
                 each_google_task.delete()
 
-        print(str(len(events)) + ' is length of events')
+
         #We need to start parsing and storing the data into the database with the most recent copy of google events
         for event in events:
-            # print(str(event['start']) + ' is the start time for ' + str(event['summary']))
-
             start = event['start'].get('dateTime', event['start'].get('date'))
             string_converted_date = convert(event['start'])
+            string_converted_end = convert(event['end'])
 
             #Storing the physical event into the DB store
             if 'date' in string_converted_date.keys() or 'dateTime' in  string_converted_date.keys():
-                # print(str(event['start']) + ' is the start time for ' + str(event['summary']))
 
                 if 'dateTime' in string_converted_date.keys():
                     current = str(string_converted_date['dateTime'])
@@ -174,7 +172,10 @@ def pull_user_event_data(request):
                     current = str(string_converted_date['date'])
                     dt = datetime.datetime.strptime(current, '%Y-%m-%d')
 
-
+                if 'dateTime' in string_converted_end.keys():
+                    end_time = str(string_converted_end['dateTime'])
+                elif 'date' in string_converted_end.keys():
+                    end_time = str(string_converted_date['date'])
 
                 current_user = User.objects.get(username=request.user.username)
 
@@ -187,8 +188,8 @@ def pull_user_event_data(request):
                         task_name = event['summary'],
                         is_google_task = True,
                         google_json = str(event),
-                        start_time = str(now),
-                        end_time = str(then),
+                        start_time = str(current),
+                        end_time = str(end_time),
                         special_event_id = str(event['id'])
                     )
 
@@ -208,8 +209,6 @@ def pull_user_event_data(request):
                     if not_exists:
                         temp_model.current_day = "Wednesday"
                         temp_model.save()
-                        print(event['summary']),
-                        print('wednesday')
 
                 elif (dt.weekday() == 3 ):
                     if not_exists:
@@ -230,11 +229,6 @@ def pull_user_event_data(request):
                     if not_exists:
                         temp_model.current_day = "Sunday"
                         temp_model.save()
-
-                else:
-                    print("HIT THIS")
-            else:
-                print(str(event['start']) + ' is the start time for ' + str(event['summary']))
 
 
         return HttpResponseRedirect('/get_cal')
