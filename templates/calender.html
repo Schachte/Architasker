@@ -11,6 +11,8 @@
 <script type="text/javascript" charset="utf-8">
 	function init() {
 
+		var currently_selected_id = "";
+
 
 		var current_view = 0;
 		var prev_button = document.getElementsByClassName('dhx_cal_prev_button');
@@ -51,6 +53,7 @@
 
 		// I think this is where the bug is where the data posting to the view is causing the error for the start and end times
 		var updateDayStatus = function(event_id, ev) {
+
 			$('.ajaxProgress').show();
 			$.ajax({
 				type: "POST",
@@ -86,41 +89,71 @@
 		// JS event for the onEventAdded function to do an AJAX call to the database for syncing the new event data
 		scheduler.attachEvent("onEventAdded", updateDayStatus);
 
-		scheduler.attachEvent("onEventChanged",function(id,ev){
-    		$('.ajaxProgress').show();
+		// scheduler.attachEvent("onEventChanged",function(id,ev){
+    // 	$('.ajaxProgress').show();
+			// $.ajax({
+			// 	type: "POST",
+			// 	url: "update_event/",
+			// 	dataType: "json",
+			// 	data: {
+			// 		csrfmiddlewaretoken: '{{ csrf_token }}',
+			// 		start: formatDateFunc(scheduler.getEvent(event_id).start_date),
+			// 		end: formatDateFunc(scheduler.getEvent(event_id).end_date),
+			// 		text: ev.text,
+			// 		id: id
+			//
+			// 	},
+			// });
+    	// 	return true;
+		// });
+
+		scheduler.attachEvent("onBeforeEventChanged", function(ev, e, is_new, original){
+
+				// alert(ev.id);
+				currently_selected_id = ev.id
+
+  			// if (!is_new) {
+  			// 	$('.ajaxProgress').show();
+				// $.ajax({
+				// 	type: "POST",
+				// 	url: "update_event/",
+				// 	dataType: "json",
+				// 	data: {
+				// 		csrfmiddlewaretoken: '{{ csrf_token }}',
+				// 		start: formatDateFunc(ev.start_date),
+				// 		end: formatDateFunc(ev.end_date),
+				// 		text: ev.text,
+				// 		id: ev.id,
+				// 		weekday: weekDay(scheduler.getEvent(event_id).start_date),
+				// 	},
+				// });
+  			// }
+    		return true;
+		});
+
+
+		scheduler.attachEvent("onEventChanged", function(id,ev){
+
+			if (currently_selected_id == ""){
+				console.log("null");
+			}
+			else {
+				id = currently_selected_id;
+			}
+			alert(id);
 			$.ajax({
 				type: "POST",
 				url: "update_event/",
 				dataType: "json",
 				data: {
 					csrfmiddlewaretoken: '{{ csrf_token }}',
-					start: formatDateFunc(scheduler.getEvent(event_id).start_date),
-					end: formatDateFunc(scheduler.getEvent(event_id).end_date),
+					start: formatDateFunc(scheduler.getEvent(id).start_date),
+					end: formatDateFunc(scheduler.getEvent(id).end_date),
 					text: ev.text,
-					id: id
-
+					id: id,
+					weekday: weekDay(scheduler.getEvent(id).start_date)
 				},
 			});
-    		return true;
-		});
-
-		scheduler.attachEvent("onBeforeEventChanged", function(ev, e, is_new, original){
-  			if (!is_new) {
-  				$('.ajaxProgress').show();
-				$.ajax({
-					type: "POST",
-					url: "update_event/",
-					dataType: "json",
-					data: {
-						csrfmiddlewaretoken: '{{ csrf_token }}',
-						start: formatDateFunc(ev.start_date),
-						end: formatDateFunc(ev.end_date),
-						text: ev.text,
-						id: ev.id,
-						weekday: weekDay(scheduler.getEvent(event_id).start_date),
-					},
-				});
-  			}
     		return true;
 		});
 
@@ -142,7 +175,7 @@
 				{% for monday_tasks in mon %}
 					{
 						text: '{{ monday_tasks.task_name }}',
-
+						id: '{{ monday_tasks.special_event_id }}',
 						start_date: '{{ monday_tasks.start_time }}'.substring(0, 10)+" "+'{{ monday_tasks.start_time }}'.substring(11, 16),
 						end_date: '{{ monday_tasks.end_time }}'.substring(0, 10)+" "+'{{ monday_tasks.end_time }}'.substring(11, 16)
 					},
@@ -150,7 +183,7 @@
 				{% for tuesday_tasks in tues %}
 					{
 						text: '{{ tuesday_tasks.task_name }}',
-
+						id: '{{ tuesday_tasks.special_event_id }}',
 						start_date: '{{ tuesday_tasks.start_time }}'.substring(0, 10)+" "+'{{ tuesday_tasks.start_time }}'.substring(11, 16),
 						end_date: '{{ tuesday_tasks.end_time }}'.substring(0, 10)+" "+'{{ tuesday_tasks.end_time }}'.substring(11, 16)
 					},
@@ -158,7 +191,7 @@
 				{% for wednesday_tasks in wed %}
 					{
 						text: '{{ wednesday_tasks.task_name }}',
-
+						id: '{{ wednesday_tasks.special_event_id }}',
 						start_date: '{{ wednesday_tasks.start_time }}'.substring(0, 10)+" "+'{{ wednesday_tasks.start_time }}'.substring(11, 16),
 						end_date: '{{ wednesday_tasks.end_time }}'.substring(0, 10)+" "+'{{ wednesday_tasks.end_time }}'.substring(11, 16)
 					},
@@ -166,7 +199,7 @@
 				{% for thursday_tasks in thurs %}
 					{
 						text: '{{ thursday_tasks.task_name }}',
-
+						id: '{{ thursday_tasks.special_event_id }}',
 						start_date: '{{ thursday_tasks.start_time }}'.substring(0, 10)+" "+'{{ thursday_tasks.start_time }}'.substring(11, 16),
 						end_date: '{{ thursday_tasks.end_time }}'.substring(0, 10)+" "+'{{ thursday_tasks.end_time }}'.substring(11, 16)
 					},
@@ -174,7 +207,7 @@
 				{% for friday_tasks in fri %}
 					{
 						text: '{{ friday_tasks.task_name }}',
-
+						id: '{{ friday_tasks.special_event_id }}',
 						start_date: '{{ friday_tasks.start_time }}'.substring(0, 10)+" "+'{{ friday_tasks.start_time }}'.substring(11, 16),
 						end_date: '{{ friday_tasks.end_time }}'.substring(0, 10)+" "+'{{ friday_tasks.end_time }}'.substring(11, 16)
 					},
@@ -182,6 +215,7 @@
 				{% for saturday_tasks in sat %}
 					{
 						text: '{{ saturday_tasks.task_name }}',
+						id: '{{ saturday_tasks.special_event_id }}',
 						start_date: '{{ saturday_tasks.start_time }}'.substring(0, 10)+" "+'{{ saturday_tasks.start_time }}'.substring(11, 16),
 						end_date: '{{ saturday_tasks.end_time }}'.substring(0, 10)+" "+'{{ saturday_tasks.end_time }}'.substring(11, 16)
 					},
@@ -189,13 +223,12 @@
 				{% for sunday_tasks in sun %}
 					{
 						text: '{{ sunday_tasks.task_name }}',
+						id: '{{ sunday_tasks.special_event_id }}',
 						start_date: '{{ sunday_tasks.start_time }}'.substring(0, 10)+" "+'{{ sunday_tasks.start_time }}'.substring(11, 16),
 						end_date: '{{ sunday_tasks.end_time }}'.substring(0, 10)+" "+'{{ sunday_tasks.end_time }}'.substring(11, 16)
 					},
 				{% endfor %}
 		], "json");
-
-		scheduler.addEvent("16-12-2015 09:00","16-12-2015 12:00","Meeting", {holder:"John"});
 
 
 
@@ -216,6 +249,8 @@
 			});
 	}
 
+
+
 </script>
 
 
@@ -235,9 +270,6 @@
 <body onload="init();">
 
 	{% if user_is_authenticated == True %}
-
-		{% if event_length > 0 %}
-
 		   <div id="scheduler_here" class="dhx_cal_container" style='width:100%; height:100%;'>
 		      <div class="dhx_cal_navline">
 		         <div class="dhx_cal_prev_button">&nbsp;</div>
@@ -247,7 +279,6 @@
 		         <div class="dhx_minical_icon" id="dhx_minical_icon" onclick="show_minical()">&nbsp;</div>
 		         <div class="dhx_cal_tab" name="day_tab" style="right:204px;"></div>
 		         <div class="dhx_cal_tab rounding_week_tab" name="week_tab" style="right:140px; border-top-right-radius: 5px; border-bottom-right-radius: 5px;"></div>
-		         <!-- <div class="dhx_cal_tab" name="month_tab" style="right:76px;"></div> remove month tab-->
 		      </div>
 		      <div class="dhx_cal_header">
 		      </div>
@@ -255,22 +286,10 @@
 		      </div>
 		   </div>
 
-
 				<form action="/sync" method="get">
 					{% csrf_token %}
 				<input type="submit" value="Sync Google Calendar" class="btn waves-effect waves-light pink darken-1">
 				</form>
-
-
-		{% else %}
-		<h1>YOU HAVE NO EVENTS</h1>
-
-		<form action="/sync" method="get">
-			{% csrf_token %}
-		<input type="submit" value="Sync Google Calendar">
-		</form>
-
-		{% endif %}
 
 		<form action="/logout" method="GET">
 			{% csrf_token %}
@@ -286,6 +305,11 @@
 
 
 		{% endif %}
+
+		<!-- <script>
+		var evs = scheduler.getEvents();
+		console.log(evs);
+		</script> -->
 
 
 </body>

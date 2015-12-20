@@ -287,6 +287,7 @@ def create_event(request):
 
         temp_model.save()
         print("done")
+        return HttpResponse("none")
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 Function to delete event from database
@@ -298,42 +299,60 @@ def delete_event(request):
         print("right before delete")
         SNE.objects.get(special_event_id=request.POST.get('id')).delete()
         print("deleted")
+        return HttpResponse("deleted")
+
+
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 Function to update event in database
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-@login_required(login_url='/login')
 def update_event(request):
+
     if request.method == 'POST':
 
-        event = SNE.objects.get(special_event_id=request.POST.get('id'))
-        event.task_name = request.POST.get('text')
-        event.start_time = request.POST.get('start')
-        event.end_time = request.POST.get('end')
+        data_dict = convert(request.POST)
+        EVENT_ID = data_dict['id']
+        TASK_NAME = data_dict['text']
+        TASK_NAME = str(TASK_NAME)
 
-        if(event.task_name.current_day != request.POST.get('weekday')):
+        if SNE.objects.filter(special_event_id=EVENT_ID).exists():
+            print("EXISTS")
+            event_task = SNE.objects.get(
+                    special_event_id=EVENT_ID).update(
+                    task_name=data_dict['text'],
+                    start_time = data_dict['start'],
+                    end_time = data_dict['end'])
+
+            print("All vars obained")
+
+        if(event_task.current_day != request.POST.get('weekday')):
+            print("Inside ")
             if (request.POST.get('weekday') == "Mon" ):
-                temp_model.current_day = "Monday"
+                event_task.current_day = "Monday"
             elif (request.POST.get('weekday') == "Tue" ):
-                temp_model.current_day = "Tuesday"
+                event_task.current_day = "Tuesday"
 
             elif (request.POST.get('weekday') == "Wed" ):
-                temp_model.current_day = "Wednesday"
+                event_task.current_day = "Wednesday"
 
             elif (request.POST.get('weekday') == "Thu" ):
-                temp_model.current_day = "Thursday"
+                event_task.current_day = "Thursday"
 
             elif (request.POST.get('weekday') == "Fri" ):
-                temp_model.current_day = "Friday"
+                event_task.current_day = "Friday"
 
             elif (request.POST.get('weekday') == "Sat" ):
-                temp_model.current_day = "Saturday"
+                event_task.current_day = "Saturday"
 
             elif (request.POST.get('weekday') == "Sun" ):
-                temp_model.current_day = "Sunday"
+                event_task.current_day = "Sunday"
 
-        event.save()
-        print("updated")
+            event_task.save()
+            print("updated")
+            return HttpResponse("true")
+        else:
+            print("false")
+            return HttpResponse("none")
 
 
 
