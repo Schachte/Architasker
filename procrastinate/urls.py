@@ -24,5 +24,7 @@ urlpatterns = [
     url(r'^get_cal', get_calendar_data, name="get_calendar_data"),              #Ability to actually view the users calendar data for the tool (will port this to control panel)
     url(r'^unauthorize', unauthorize_account, name="unauthorize_account"),      #Ability to remove OAUTH token from DB for the current authenticated user
     url(r'^sync', pull_user_event_data, name="pull_user_event_data"),
-    url(r'^create_event', create_event, name="create_event")
+    url(r'^create_event', create_event, name="create_event"),
+    url(r'^delete_event', delete_event, name="delete_event"),
+    url(r'^update_event', update_event, name="update_event")
 ]
