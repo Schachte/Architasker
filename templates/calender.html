@@ -13,8 +13,11 @@
 
 
 		scheduler.config.xml_date="%Y-%m-%d %H:%i";
+		//scheduler.config.xml_date="%Y-%m-%dT%H:%i:%s";
 		scheduler.config.default_date = "%j %M %Y";
 
+		var formatDateFunc = scheduler.date.date_to_str("%Y-%m-%dT%H:%i:%s"); 
+		var weekDay = scheduler.date.date_to_str("%D")
 
 		// I think this is where the bug is where the data posting to the view is causing the error for the start and end times
 		var updateDayStatus = function(event_id, ev) {
@@ -25,21 +28,73 @@
 				dataType: "json",
 				data: {
 					csrfmiddlewaretoken: '{{ csrf_token }}',
-					start: scheduler.getEvent(event_id).start_date,
-					end: scheduler.getEvent(event_id).end_date,
+					start: formatDateFunc(scheduler.getEvent(event_id).start_date),
+					end: formatDateFunc(scheduler.getEvent(event_id).end_date),
 					text: scheduler.getEvent(event_id).text,
-					id: scheduler.getEvent(event_id).id
+					id: scheduler.getEvent(event_id).id,
+					weekday: weekDay(scheduler.getEvent(event_id).start_date) //what if the event was a multi-day event?!?!
 				},
 			});
-				// var day = scheduler.date.date_part(new Date(ev.start_date));
-				// var next_day = scheduler.date.add(day, 1, "day");
-				// var events = scheduler.getEvents(day, next_day);
-
-				// return true;
 		};
+
+		var deleteEvent = function(event_id, e) {
+			$('.ajaxProgress').show();
+			$.ajax({
+				type: "POST",
+				url: "delete_event/",
+				dataType: "json",
+				data: {
+					csrfmiddlewaretoken: '{{ csrf_token }}',
+					id: event_id
+				},
+			});
+			return true;
+		};
+
+		scheduler.attachEvent("onEventDeleted", deleteEvent);
 
 		// JS event for the onEventAdded function to do an AJAX call to the database for syncing the new event data
 		scheduler.attachEvent("onEventAdded", updateDayStatus);
+		
+		scheduler.attachEvent("onEventChanged",function(id,ev){
+    		$('.ajaxProgress').show();
+			$.ajax({
+				type: "POST",
+				url: "update_event/",
+				dataType: "json",
+				data: {
+					csrfmiddlewaretoken: '{{ csrf_token }}',
+					start: formatDateFunc(scheduler.getEvent(event_id).start_date),
+					end: formatDateFunc(scheduler.getEvent(event_id).end_date),
+					text: ev.text,
+					id: id
+
+				},
+			});
+    		return true;
+		});
+
+		scheduler.attachEvent("onBeforeEventChanged", function(ev, e, is_new, original){
+  			if (!is_new) {
+  				$('.ajaxProgress').show();
+				$.ajax({
+					type: "POST",
+					url: "update_event/",
+					dataType: "json",
+					data: {
+						csrfmiddlewaretoken: '{{ csrf_token }}',
+						start: formatDateFunc(ev.start_date),
+						end: formatDateFunc(ev.end_date),
+						text: ev.text,
+						id: ev.id,
+						weekday: weekDay(scheduler.getEvent(event_id).start_date),
+					},
+				});
+  			}
+    		return true;
+		});
+
+		
 
 		// Create a new date for gatehring the default times that load into the calendar
 		var d = new Date();
@@ -62,50 +117,64 @@
 				{% for monday_tasks in mon %}
 					{
 						text: '{{ monday_tasks.task_name }}',
-						start_date: '2015-12-14',
-						end_date: '2015-12-14'
+						//start_date: '2015-12-14',
+						//end_date: '2015-12-14'
+						start_date: '{{ monday_tasks.start_time }}'.substring(0, 10)+" "+'{{ monday_tasks.start_time }}'.substring(11, 16),
+						end_date: '{{ monday_tasks.end_time }}'.substring(0, 10)+" "+'{{ monday_tasks.end_time }}'.substring(11, 16)
 					},
 				{% endfor %}
 				{% for tuesday_tasks in tues %}
 					{
 						text: '{{ tuesday_tasks.task_name }}',
-						start_date: '2015-12-15',
-						end_date: '2015-12-15'
+						//start_date: '2015-12-15',
+						//end_date: '2015-12-15'
+						start_date: '{{ tuesday_tasks.start_time }}'.substring(0, 10)+" "+'{{ tuesday_tasks.start_time }}'.substring(11, 16),
+						end_date: '{{ tuesday_tasks.end_time }}'.substring(0, 10)+" "+'{{ tuesday_tasks.end_time }}'.substring(11, 16)
 					},
 				{% endfor %}
 				{% for wednesday_tasks in wed %}
 					{
 						text: '{{ wednesday_tasks.task_name }}',
-						start_date: '2015-12-16',
-						end_date: '2015-12-16'
+						//start_date: '2015-12-16',
+						//end_date: '2015-12-16'
+						start_date: '{{ wednesday_tasks.start_time }}'.substring(0, 10)+" "+'{{ wednesday_tasks.start_time }}'.substring(11, 16),
+						end_date: '{{ wednesday_tasks.end_time }}'.substring(0, 10)+" "+'{{ wednesday_tasks.end_time }}'.substring(11, 16)
 					},
 				{% endfor %}
 				{% for thursday_tasks in thurs %}
 					{
 						text: '{{ thursday_tasks.task_name }}',
-						start_date: '2015-12-17',
-						end_date: '2015-12-17'
+						//start_date: '2015-12-17',
+						//end_date: '2015-12-17'
+						start_date: '{{ thursday_tasks.start_time }}'.substring(0, 10)+" "+'{{ thursday_tasks.start_time }}'.substring(11, 16),
+						end_date: '{{ thursday_tasks.end_time }}'.substring(0, 10)+" "+'{{ thursday_tasks.end_time }}'.substring(11, 16)
 					},
 				{% endfor %}
 				{% for friday_tasks in fri %}
 					{
 						text: '{{ friday_tasks.task_name }}',
-						start_date: '2015-12-18',
-						end_date: '2015-12-18'
+						//start_date: '{{ friday_tasks.start_end }}',
+						//end_date: '{{ friday_tasks.end_time }}'
+						start_date: '{{ friday_tasks.start_time }}'.substring(0, 10)+" "+'{{ friday_tasks.start_time }}'.substring(11, 16),
+						end_date: '{{ friday_tasks.end_time }}'.substring(0, 10)+" "+'{{ friday_tasks.end_time }}'.substring(11, 16)
 					},
 				{% endfor %}
 				{% for saturday_tasks in sat %}
 					{
 						text: '{{ saturday_tasks.task_name }}',
-						start_date: '2015-12-19',
-						end_date: '2015-12-19'
+						//start_date: '2015-12-19',
+						//end_date: '2015-12-19'
+						start_date: '{{ saturday_tasks.start_time }}'.substring(0, 10)+" "+'{{ saturday_tasks.start_time }}'.substring(11, 16),
+						end_date: '{{ saturday_tasks.end_time }}'.substring(0, 10)+" "+'{{ saturday_tasks.end_time }}'.substring(11, 16)
 					},
 				{% endfor %}
 				{% for sunday_tasks in sun %}
 					{
 						text: '{{ sunday_tasks.task_name }}',
-						start_date: '2015-12-20',
-						end_date: '2015-12-20'
+						//start_date: '2015-12-20',
+						//end_date: '2015-12-20'
+						start_date: '{{ sunday_tasks.start_time }}'.substring(0, 10)+" "+'{{ sunday_tasks.start_time }}'.substring(11, 16),
+						end_date: '{{ sunday_tasks.end_time }}'.substring(0, 10)+" "+'{{ sunday_tasks.end_time }}'.substring(11, 16)
 					},
 				{% endfor %}
 		], "json");
@@ -163,7 +232,7 @@
 		         <div class="dhx_minical_icon" id="dhx_minical_icon" onclick="show_minical()">&nbsp;</div>
 		         <div class="dhx_cal_tab" name="day_tab" style="right:204px;"></div>
 		         <div class="dhx_cal_tab" name="week_tab" style="right:140px;"></div>
-		         <div class="dhx_cal_tab" name="month_tab" style="right:76px;"></div>
+		         <!-- <div class="dhx_cal_tab" name="month_tab" style="right:76px;"></div> remove month tab-->
 		      </div>
 		      <div class="dhx_cal_header">
 		      </div>

@@ -262,33 +262,26 @@ def create_event(request):
             end_time = request.POST.get('end'),
             special_event_id = request.POST.get('id')
         )
-
-        if (temp_model.start_time[0:3] == "Mon" ):
-            #mon.append(temp_model)
+        
+        if (request.POST.get('weekday') == "Mon" ):
             temp_model.current_day = "Monday"
 
-        elif (temp_model.start_time[0:3] == "Tue" ):
-            #tues.append(temp_model)
+        elif (request.POST.get('weekday') == "Tue" ):
             temp_model.current_day = "Tuesday"
 
-        elif (temp_model.start_time[0:3] == "Wed" ):
-            #wed.append(temp_model)
+        elif (request.POST.get('weekday') == "Wed" ):
             temp_model.current_day = "Wednesday"
 
-        elif (temp_model.start_time[0:3] == "Thu" ):
-            #thurs.append(temp_model)
+        elif (request.POST.get('weekday') == "Thu" ):
             temp_model.current_day = "Thursday"
 
-        elif (temp_model.start_time[0:3] == "Fri" ):
-            #fri.append(temp_model)
+        elif (request.POST.get('weekday') == "Fri" ):
             temp_model.current_day = "Friday"
 
-        elif (temp_model.start_time[0:3] == "Sat" ):
-            #sat.append(temp_model)
+        elif (request.POST.get('weekday') == "Sat" ):
             temp_model.current_day = "Saturday"
 
-        elif (temp_model.start_time[0:3] == "Sun" ):
-            #sun.append(temp_model)
+        elif (request.POST.get('weekday') == "Sun" ):
             temp_model.current_day = "Sunday"
 
         temp_model.save()
@@ -316,8 +309,31 @@ def update_event(request):
         event.task_name = request.POST.get('text')
         event.start_time = request.POST.get('start')
         event.end_time = request.POST.get('end')
+        
+        if(event.task_name.current_day != request.POST.get('weekday')):
+            if (request.POST.get('weekday') == "Mon" ):
+                temp_model.current_day = "Monday"
+            elif (request.POST.get('weekday') == "Tue" ):
+                temp_model.current_day = "Tuesday"
+
+            elif (request.POST.get('weekday') == "Wed" ):
+                temp_model.current_day = "Wednesday"
+
+            elif (request.POST.get('weekday') == "Thu" ):
+                temp_model.current_day = "Thursday"
+
+            elif (request.POST.get('weekday') == "Fri" ):
+                temp_model.current_day = "Friday"
+
+            elif (request.POST.get('weekday') == "Sat" ):
+                temp_model.current_day = "Saturday"
+
+            elif (request.POST.get('weekday') == "Sun" ):
+                temp_model.current_day = "Sunday"
+
         event.save()
         print("updated")
+
 
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
