@@ -41,17 +41,7 @@ FLOW = flow_from_clientsecrets(
     scope='https://www.googleapis.com/auth/calendar.readonly',
     redirect_uri='http://127.0.0.1:8000/oauth2callback')
 
-<<<<<<< HEAD
-#These arrays temp. hold the user event data (is there a more efficient way of doing this??)
-# mon     = []
-# tues    = []
-# wed     = []
-# thurs   = []
-# fri     = []
-# sat     = []
-# sun     = []
-=======
->>>>>>> branch_fixing_timed_events_from_google
+
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 Function to convert unicode dictionaries into str dictionaries
@@ -212,71 +202,43 @@ def pull_user_event_data(request):
 
                 #Parsing out the different events to store into day arrays for the week
                 if (dt.weekday() == 0 ):
-<<<<<<< HEAD
-                    #mon.append(convert(event))
 
-=======
->>>>>>> branch_fixing_timed_events_from_google
                     if not_exists:
                         temp_model.current_day = "Monday"
                         temp_model.save()
 
                 elif (dt.weekday() == 1 ):
-<<<<<<< HEAD
-                    #tues.append(convert(event))
 
-=======
->>>>>>> branch_fixing_timed_events_from_google
                     if not_exists:
                         temp_model.current_day = "Tuesday"
                         temp_model.save()
 
                 elif (dt.weekday() == 2 ):
-<<<<<<< HEAD
-                    #wed.append(convert(event))
 
-=======
->>>>>>> branch_fixing_timed_events_from_google
                     if not_exists:
                         temp_model.current_day = "Wednesday"
                         temp_model.save()
 
                 elif (dt.weekday() == 3 ):
-<<<<<<< HEAD
-                    #thurs.append(convert(event))
 
-=======
->>>>>>> branch_fixing_timed_events_from_google
                     if not_exists:
                         temp_model.current_day = "Thursday"
                         temp_model.save()
 
                 elif (dt.weekday() == 4 ):
-<<<<<<< HEAD
-                    #fri.append(convert(event))
 
-=======
->>>>>>> branch_fixing_timed_events_from_google
                     if not_exists:
                         temp_model.current_day = "Friday"
                         temp_model.save()
 
                 elif (dt.weekday() == 5 ):
-<<<<<<< HEAD
-                    #sat.append(convert(event))
 
-=======
->>>>>>> branch_fixing_timed_events_from_google
                     if not_exists:
                         temp_model.current_day = "Saturday"
                         temp_model.save()
 
                 elif (dt.weekday() == 6 ):
-<<<<<<< HEAD
-                    #sun.append(convert(event))
 
-=======
->>>>>>> branch_fixing_timed_events_from_google
                     if not_exists:
                         temp_model.current_day = "Sunday"
                         temp_model.save()
@@ -304,11 +266,11 @@ def create_event(request):
         if (temp_model.start_time[0:3] == "Mon" ):
             #mon.append(temp_model)
             temp_model.current_day = "Monday"
-                        
+
         elif (temp_model.start_time[0:3] == "Tue" ):
             #tues.append(temp_model)
             temp_model.current_day = "Tuesday"
-        
+
         elif (temp_model.start_time[0:3] == "Wed" ):
             #wed.append(temp_model)
             temp_model.current_day = "Wednesday"
@@ -323,7 +285,7 @@ def create_event(request):
 
         elif (temp_model.start_time[0:3] == "Sat" ):
             #sat.append(temp_model)
-            temp_model.current_day = "Saturday"              
+            temp_model.current_day = "Saturday"
 
         elif (temp_model.start_time[0:3] == "Sun" ):
             #sun.append(temp_model)

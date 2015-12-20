@@ -18,7 +18,6 @@
 
 		// I think this is where the bug is where the data posting to the view is causing the error for the start and end times
 		var updateDayStatus = function(event_id, ev) {
-
 			$('.ajaxProgress').show();
 			$.ajax({
 				type: "POST",
@@ -32,68 +31,15 @@
 					id: scheduler.getEvent(event_id).id
 				},
 			});
+				// var day = scheduler.date.date_part(new Date(ev.start_date));
+				// var next_day = scheduler.date.add(day, 1, "day");
+				// var events = scheduler.getEvents(day, next_day);
+
+				// return true;
 		};
 
-		var deleteEvent = function(event_id, e) {
-			$('.ajaxProgress').show();
-			$.ajax({
-				type: "POST",
-				url: "delete_event/",
-				dataType: "json",
-				data: {
-					csrfmiddlewaretoken: '{{ csrf_token }}',
-					id: event_id
-				},
-			});
-			return true;
-		};
-
-<<<<<<< HEAD
-
-		scheduler.attachEvent("onEventDeleted", deleteEvent);
-		scheduler.attachEvent("onEventAdded", updateDayStatus);
-		
-		scheduler.attachEvent("onEventChanged",function(id,ev){
-    		$('.ajaxProgress').show();
-			$.ajax({
-				type: "POST",
-				url: "update_event/",
-				dataType: "json",
-				data: {
-					csrfmiddlewaretoken: '{{ csrf_token }}',
-					start: ev.start_date,
-					end: ev.end_date,
-					text: ev.text,
-					id: id
-				},
-			});
-    		return true;
-		})
-
-		scheduler.attachEvent("onBeforeEventChanged", function(ev, e, is_new, original){
-  			if (!is_new) {
-  				$('.ajaxProgress').show();
-				$.ajax({
-					type: "POST",
-					url: "update_event/",
-					dataType: "json",
-					data: {
-						csrfmiddlewaretoken: '{{ csrf_token }}',
-						start: ev.start_date,
-						end: ev.end_date,
-						text: ev.text,
-						id: ev.id
-					},
-				});
-  			}
-
-    		return true;
-		});
-
-=======
 		// JS event for the onEventAdded function to do an AJAX call to the database for syncing the new event data
 		scheduler.attachEvent("onEventAdded", updateDayStatus);
->>>>>>> branch_fixing_timed_events_from_google
 
 		// Create a new date for gatehring the default times that load into the calendar
 		var d = new Date();
@@ -153,7 +99,6 @@
 						text: '{{ saturday_tasks.task_name }}',
 						start_date: '2015-12-19',
 						end_date: '2015-12-19'
-
 					},
 				{% endfor %}
 				{% for sunday_tasks in sun %}
