@@ -41,6 +41,7 @@ FLOW = flow_from_clientsecrets(
     scope='https://www.googleapis.com/auth/calendar.readonly',
     redirect_uri='http://127.0.0.1:8000/oauth2callback')
 
+<<<<<<< HEAD
 #These arrays temp. hold the user event data (is there a more efficient way of doing this??)
 # mon     = []
 # tues    = []
@@ -49,6 +50,8 @@ FLOW = flow_from_clientsecrets(
 # fri     = []
 # sat     = []
 # sun     = []
+=======
+>>>>>>> branch_fixing_timed_events_from_google
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 Function to convert unicode dictionaries into str dictionaries
@@ -91,31 +94,11 @@ def auth_return(request):
   storage.put(credential)
   return HttpResponseRedirect("/get_cal")
 
-def patch_broken_pipe_error():
-    """Monkey Patch BaseServer.handle_error to not write
-    a stacktrace to stderr on broken pipe.
-    http://stackoverflow.com/a/7913160"""
-    import sys
-    from SocketServer import BaseServer
-
-    handle_error = BaseServer.handle_error
-
-    def my_handle_error(self, request, client_address):
-        type, err, tb = sys.exc_info()
-        # there might be better ways to detect the specific erro
-        if repr(err) == "error(32, 'Broken pipe')":
-            # you may ignore it...
-            logging.getLogger('mylog').warn(err)
-        else:
-            handle_error(self, request, client_address)
-
-    BaseServer.handle_error = my_handle_error
-
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 Custom function to parse out the user events and store them on-click
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-
+#Current bug that the timed events are being ignored within the system
 def pull_user_event_data(request):
     user_is_authenticated = False
 
@@ -132,10 +115,13 @@ def pull_user_event_data(request):
         service = discovery.build('calendar', 'v3', http=http)
 
         '''These calculations below calculate the beginning of the week as well as the end of the week'''
+
+        #Need to fix the timing issues. Do not use UTC NOW, use 12AM or something
         now = datetime.datetime.utcnow()
-        now = now - datetime.timedelta(now.weekday())
-        then = datetime.timedelta(days=6) #Indexed at 0
+        now = now - datetime.timedelta(now.weekday() - 1)
+        then = datetime.timedelta(days=5) #Indexed at 0
         then = now + then
+
 
         #Oauth handling var
         page_token = None
@@ -143,6 +129,7 @@ def pull_user_event_data(request):
         #This is a shitty error-handling snippet for weirdly named calendars. We need to fix this
         calendar_list = service.calendarList().list(pageToken=page_token).execute()
 
+        #Deal with authentication and storing user auth data
         page_token = calendar_list.get('nextPageToken')
         if not page_token:
             pass
@@ -152,6 +139,14 @@ def pull_user_event_data(request):
         now = now.isoformat() + 'Z'
         then = then.isoformat() + 'Z'
 
+        now = str(now[0:10]) + 'T00:00:01Z'
+        then = str(then[0:10]) + 'T23:59:59Z'
+
+        #
+        # print('The date for the now time is %s'%(str(now[0:10])) + 'T00:00:01Z')
+        # print('The date for the then time is %s'%(str(then[0:10])) + 'T23:59:59Z')
+
+
         #Get the events off the primary calendar, this should be changed eventually so the user can select the calendar they please to use
         eventsResult = service.events().list(
 
@@ -159,6 +154,7 @@ def pull_user_event_data(request):
             timeMax=then).execute()
 
         events = eventsResult.get('items', [])
+
 
         #Get all the google events from the database when attempting the current sync
         google_tasks = SNE.objects.filter(is_google_task = True)
@@ -168,15 +164,34 @@ def pull_user_event_data(request):
             for each_google_task in google_tasks:
                 each_google_task.delete()
 
+
         #We need to start parsing and storing the data into the database with the most recent copy of google events
         for event in events:
             start = event['start'].get('dateTime', event['start'].get('date'))
             string_converted_date = convert(event['start'])
+            string_converted_end = convert(event['end'])
 
             #Storing the physical event into the DB store
-            if 'date' in string_converted_date.keys():
-                current = str(string_converted_date['date'])
-                dt = datetime.datetime.strptime(current, '%Y-%m-%d')
+            if 'date' in string_converted_date.keys() or 'dateTime' in  string_converted_date.keys():
+
+                if 'dateTime' in string_converted_date.keys():
+                    current = str(string_converted_date['dateTime'])
+                    times = current[11:]
+                    dt = datetime.datetime.strptime(current, '%Y-%m-%dT' + times)
+                    current = current[0:19]
+
+                elif 'date' in string_converted_date.keys():
+                    current = str(string_converted_date['date'])
+                    dt = datetime.datetime.strptime(current, '%Y-%m-%d')
+                    current = current[0:19]
+
+                if 'dateTime' in string_converted_end.keys():
+                    end_time = str(string_converted_end['dateTime'])
+                    end_time = end_time[0:19]
+
+                elif 'date' in string_converted_end.keys():
+                    end_time = str(string_converted_date['date'])
+                    end_time = end_time[0:19]
 
                 current_user = User.objects.get(username=request.user.username)
 
@@ -189,57 +204,79 @@ def pull_user_event_data(request):
                         task_name = event['summary'],
                         is_google_task = True,
                         google_json = str(event),
-                        start_time = str(now),
-                        end_time = str(then),
+                        start_time = str(current),
+                        end_time = str(end_time),
                         special_event_id = str(event['id'])
                     )
 
+
                 #Parsing out the different events to store into day arrays for the week
                 if (dt.weekday() == 0 ):
+<<<<<<< HEAD
                     #mon.append(convert(event))
 
+=======
+>>>>>>> branch_fixing_timed_events_from_google
                     if not_exists:
                         temp_model.current_day = "Monday"
                         temp_model.save()
 
                 elif (dt.weekday() == 1 ):
+<<<<<<< HEAD
                     #tues.append(convert(event))
 
+=======
+>>>>>>> branch_fixing_timed_events_from_google
                     if not_exists:
                         temp_model.current_day = "Tuesday"
                         temp_model.save()
 
                 elif (dt.weekday() == 2 ):
+<<<<<<< HEAD
                     #wed.append(convert(event))
 
+=======
+>>>>>>> branch_fixing_timed_events_from_google
                     if not_exists:
                         temp_model.current_day = "Wednesday"
                         temp_model.save()
 
                 elif (dt.weekday() == 3 ):
+<<<<<<< HEAD
                     #thurs.append(convert(event))
 
+=======
+>>>>>>> branch_fixing_timed_events_from_google
                     if not_exists:
                         temp_model.current_day = "Thursday"
                         temp_model.save()
 
                 elif (dt.weekday() == 4 ):
+<<<<<<< HEAD
                     #fri.append(convert(event))
 
+=======
+>>>>>>> branch_fixing_timed_events_from_google
                     if not_exists:
                         temp_model.current_day = "Friday"
                         temp_model.save()
 
                 elif (dt.weekday() == 5 ):
+<<<<<<< HEAD
                     #sat.append(convert(event))
 
+=======
+>>>>>>> branch_fixing_timed_events_from_google
                     if not_exists:
                         temp_model.current_day = "Saturday"
                         temp_model.save()
 
                 elif (dt.weekday() == 6 ):
+<<<<<<< HEAD
                     #sun.append(convert(event))
 
+=======
+>>>>>>> branch_fixing_timed_events_from_google
                     if not_exists:
                         temp_model.current_day = "Sunday"
                         temp_model.save()

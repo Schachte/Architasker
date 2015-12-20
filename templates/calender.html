@@ -10,24 +10,13 @@
 
 <script type="text/javascript" charset="utf-8">
 	function init() {
-		scheduler.config.multi_day = true;
-
-		// Return today's date and time
-		var currentTime = new Date();
-
-		// returns the month (from 0 to 11)
-		var month = currentTime.getMonth() + 1;
-
-		// returns the day of the month (from 1 to 31)
-		var day = currentTime.getDate();
-
-		// returns the year (four digits)
-		var year = currentTime.getFullYear();
 
 
 		scheduler.config.xml_date="%Y-%m-%d %H:%i";
 		scheduler.config.default_date = "%j %M %Y";
 
+
+		// I think this is where the bug is where the data posting to the view is causing the error for the start and end times
 		var updateDayStatus = function(event_id, ev) {
 
 			$('.ajaxProgress').show();
@@ -59,6 +48,7 @@
 			return true;
 		};
 
+<<<<<<< HEAD
 
 		scheduler.attachEvent("onEventDeleted", deleteEvent);
 		scheduler.attachEvent("onEventAdded", updateDayStatus);
@@ -100,10 +90,28 @@
     		return true;
 		});
 
+=======
+		// JS event for the onEventAdded function to do an AJAX call to the database for syncing the new event data
+		scheduler.attachEvent("onEventAdded", updateDayStatus);
+>>>>>>> branch_fixing_timed_events_from_google
 
-		scheduler.init('scheduler_here',new Date(year,0,month),"week");
-		// scheduler.load("./data/events.xml");
-		
+		// Create a new date for gatehring the default times that load into the calendar
+		var d = new Date();
+
+		//Get an integer value for getting the full year of the current year in the calendar
+		var calendar_year = d.getFullYear();
+
+		//Get the current default month to load into the initial view for the calendar
+		var calendar_month = d.getMonth();
+
+		//Get the current day for the calendar to load into the default value for the calendar
+		var calendar_day = d.getDate();
+
+
+		// #Current bug is that the shit is not displaying properly inside of the calendar even though the integers are valid
+		scheduler.init('scheduler_here',new Date(calendar_year,calendar_month,calendar_day),"week");
+		// scheduler.setCurrentView(new Date(2015,11,20));
+
 		scheduler.parse( [
 				{% for monday_tasks in mon %}
 					{
@@ -152,7 +160,7 @@
 					{
 						text: '{{ sunday_tasks.task_name }}',
 						start_date: '2015-12-20',
-						end_date: '2015-12-19'
+						end_date: '2015-12-20'
 					},
 				{% endfor %}
 		], "json");
@@ -160,7 +168,7 @@
 		scheduler.addEvent("16-12-2015 09:00","16-12-2015 12:00","Meeting", {holder:"John"});
 
 
-		
+
 	}
 
 	function show_minical(){
@@ -177,10 +185,6 @@
 				}
 			});
 	}
-
-
-
-
 
 </script>
 
