@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <title>User Login</title>
+  </head>
+
+  <body>
+
+    <form action="logmein" method="POST">
+      {% csrf_token %}
+      Username:<br>
+      <input type="text" name="user_name" value="Username">
+      <br>
+      Password:<br>
+      <input type="password" name="pass_word" value="Password">
+      <br><br>
+      <input type="submit" value="Submit">
+    </form>
+
+
+
+  </body>
+</html>

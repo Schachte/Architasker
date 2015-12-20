@@ -15,7 +15,11 @@ Including another URLconf
 """
 from django.conf.urls import include, url
 from django.contrib import admin
+from account_management.views import login_process as processor_login
+from account_management.views import login_view as login_render
+from account_management.views import *
 from .views import *
+
 
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
@@ -26,5 +30,8 @@ urlpatterns = [
     url(r'^sync', pull_user_event_data, name="pull_user_event_data"),
     url(r'^create_event', create_event, name="create_event"),
     url(r'^delete_event', delete_event, name="delete_event"),
-    url(r'^update_event', update_event, name="update_event")
+    url(r'^update_event', update_event, name="update_event"),
+    url(r'^login', login_render, name="login_render"),
+    url(r'^logmein', processor_login, name="processor_login"),
+    url(r'^logout', logout_process, name="logout_process"),
 ]

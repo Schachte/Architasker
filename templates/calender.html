@@ -16,7 +16,7 @@
 		//scheduler.config.xml_date="%Y-%m-%dT%H:%i:%s";
 		scheduler.config.default_date = "%j %M %Y";
 
-		var formatDateFunc = scheduler.date.date_to_str("%Y-%m-%dT%H:%i:%s"); 
+		var formatDateFunc = scheduler.date.date_to_str("%Y-%m-%dT%H:%i:%s");
 		var weekDay = scheduler.date.date_to_str("%D")
 
 		// I think this is where the bug is where the data posting to the view is causing the error for the start and end times
@@ -55,7 +55,7 @@
 
 		// JS event for the onEventAdded function to do an AJAX call to the database for syncing the new event data
 		scheduler.attachEvent("onEventAdded", updateDayStatus);
-		
+
 		scheduler.attachEvent("onEventChanged",function(id,ev){
     		$('.ajaxProgress').show();
 			$.ajax({
@@ -94,7 +94,7 @@
     		return true;
 		});
 
-		
+
 
 		// Create a new date for gatehring the default times that load into the calendar
 		var d = new Date();
@@ -256,6 +256,11 @@
 		</form>
 
 		{% endif %}
+
+		<form action="/logout" method="GET">
+			{% csrf_token %}
+		<input type="submit" value="Logout" class="btn waves-effect waves-light pink darken-1">
+		</form>
 
 		{% else %}
 

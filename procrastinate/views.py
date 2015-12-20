@@ -31,6 +31,7 @@ from django.core.cache import cache
 from django.utils.cache import get_cache_key
 import time
 from store_new_events.models import UserEvent as SNE
+from django.contrib.auth.decorators import login_required
 
 #Load the API key
 CLIENT_SECRETS = os.path.join(os.path.dirname(__file__), '..', 'client_secrets.json')
@@ -132,10 +133,6 @@ def pull_user_event_data(request):
         now = str(now[0:10]) + 'T00:00:01Z'
         then = str(then[0:10]) + 'T23:59:59Z'
 
-        #
-        # print('The date for the now time is %s'%(str(now[0:10])) + 'T00:00:01Z')
-        # print('The date for the then time is %s'%(str(then[0:10])) + 'T23:59:59Z')
-
 
         #Get the events off the primary calendar, this should be changed eventually so the user can select the calendar they please to use
         eventsResult = service.events().list(
@@ -144,7 +141,6 @@ def pull_user_event_data(request):
             timeMax=then).execute()
 
         events = eventsResult.get('items', [])
-
 
         #Get all the google events from the database when attempting the current sync
         google_tasks = SNE.objects.filter(is_google_task = True)
@@ -250,7 +246,7 @@ def pull_user_event_data(request):
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 Function to store new event created on calendar into database
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-
+@login_required(login_url='/login')
 def create_event(request):
     if request.method == 'POST':
 
@@ -262,7 +258,7 @@ def create_event(request):
             end_time = request.POST.get('end'),
             special_event_id = request.POST.get('id')
         )
-        
+
         if (request.POST.get('weekday') == "Mon" ):
             temp_model.current_day = "Monday"
 
@@ -290,7 +286,7 @@ def create_event(request):
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 Function to delete event from database
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-
+@login_required(login_url='/login')
 def delete_event(request):
     print("before if")
     if request.method == 'POST':
@@ -301,7 +297,7 @@ def delete_event(request):
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 Function to update event in database
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-
+@login_required(login_url='/login')
 def update_event(request):
     if request.method == 'POST':
 
@@ -309,7 +305,7 @@ def update_event(request):
         event.task_name = request.POST.get('text')
         event.start_time = request.POST.get('start')
         event.end_time = request.POST.get('end')
-        
+
         if(event.task_name.current_day != request.POST.get('weekday')):
             if (request.POST.get('weekday') == "Mon" ):
                 temp_model.current_day = "Monday"
@@ -339,7 +335,7 @@ def update_event(request):
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 Function to actually pull the data from the authenticated OAUTH user
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-
+@login_required(login_url='/login')
 def get_calendar_data(request):
 
     #Authentication bool to verify Oauth steps have been completed
@@ -365,7 +361,8 @@ def get_calendar_data(request):
         'fri' : SNE.objects.filter(current_day = 'Friday'),
         'sat' : SNE.objects.filter(current_day = 'Saturday'),
         'sun' : SNE.objects.filter(current_day = 'Sunday'),
-        'event_length' : event_length
+        'event_length' : event_length,
+        'current_user' : current_user.username
     }
 
     return render(request, 'calender.html', context)
@@ -374,7 +371,7 @@ def get_calendar_data(request):
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 Remove authorization manually (Oauth token removal)
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-
+@login_required(login_url='/login')
 def unauthorize_account(request):
     if request.method == "POST":
         entry = CredentialsModel.objects.get(id=request.user.id)
