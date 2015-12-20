@@ -89,58 +89,8 @@
 		// JS event for the onEventAdded function to do an AJAX call to the database for syncing the new event data
 		scheduler.attachEvent("onEventAdded", updateDayStatus);
 
-		// scheduler.attachEvent("onEventChanged",function(id,ev){
-    // 	$('.ajaxProgress').show();
-			// $.ajax({
-			// 	type: "POST",
-			// 	url: "update_event/",
-			// 	dataType: "json",
-			// 	data: {
-			// 		csrfmiddlewaretoken: '{{ csrf_token }}',
-			// 		start: formatDateFunc(scheduler.getEvent(event_id).start_date),
-			// 		end: formatDateFunc(scheduler.getEvent(event_id).end_date),
-			// 		text: ev.text,
-			// 		id: id
-			//
-			// 	},
-			// });
-    	// 	return true;
-		// });
-
-		scheduler.attachEvent("onBeforeEventChanged", function(ev, e, is_new, original){
-
-				// alert(ev.id);
-				currently_selected_id = ev.id
-
-  			// if (!is_new) {
-  			// 	$('.ajaxProgress').show();
-				// $.ajax({
-				// 	type: "POST",
-				// 	url: "update_event/",
-				// 	dataType: "json",
-				// 	data: {
-				// 		csrfmiddlewaretoken: '{{ csrf_token }}',
-				// 		start: formatDateFunc(ev.start_date),
-				// 		end: formatDateFunc(ev.end_date),
-				// 		text: ev.text,
-				// 		id: ev.id,
-				// 		weekday: weekDay(scheduler.getEvent(event_id).start_date),
-				// 	},
-				// });
-  			// }
-    		return true;
-		});
-
-
-		scheduler.attachEvent("onEventChanged", function(id,ev){
-
-			if (currently_selected_id == ""){
-				console.log("null");
-			}
-			else {
-				id = currently_selected_id;
-			}
-			alert(id);
+		scheduler.attachEvent("onEventChanged",function(id,ev){
+    	$('.ajaxProgress').show();
 			$.ajax({
 				type: "POST",
 				url: "update_event/",
@@ -150,12 +100,62 @@
 					start: formatDateFunc(scheduler.getEvent(id).start_date),
 					end: formatDateFunc(scheduler.getEvent(id).end_date),
 					text: ev.text,
-					id: id,
-					weekday: weekDay(scheduler.getEvent(id).start_date)
+					id: id
+
 				},
 			});
     		return true;
 		});
+
+		// scheduler.attachEvent("onBeforeEventChanged", function(ev, e, is_new, original){
+		//
+		// 		// alert(ev.id);
+		// 		currently_selected_id = ev.id
+		//
+  	// 		if (!is_new) {
+  	// 			$('.ajaxProgress').show();
+		// 		$.ajax({
+		// 			type: "POST",
+		// 			url: "update_event/",
+		// 			dataType: "json",
+		// 			data: {
+		// 				csrfmiddlewaretoken: '{{ csrf_token }}',
+		// 				start: formatDateFunc(ev.start_date),
+		// 				end: formatDateFunc(ev.end_date),
+		// 				text: ev.text,
+		// 				id: ev.id,
+		// 				weekday: weekDay(scheduler.getEvent(ev.id).start_date),
+		// 			},
+		// 		});
+  	// 		}
+    // 		return true;
+		// });
+
+
+		// scheduler.attachEvent("onEventChanged", function(id,ev){
+
+		// 	if (currently_selected_id == ""){
+		// 		console.log("null");
+		// 	}
+		// 	else {
+		// 		id = currently_selected_id;
+		// 	}
+		// 	alert(id);
+		// 	$.ajax({
+		// 		type: "POST",
+		// 		url: "update_event/",
+		// 		dataType: "json",
+		// 		data: {
+		// 			csrfmiddlewaretoken: '{{ csrf_token }}',
+		// 			start: formatDateFunc(scheduler.getEvent(id).start_date),
+		// 			end: formatDateFunc(scheduler.getEvent(id).end_date),
+		// 			text: ev.text,
+		// 			id: id,
+		// 			weekday: weekDay(scheduler.getEvent(id).start_date)
+		// 		},
+		// 	});
+    // 		return true;
+		// });
 
 		// Create a new date for gatehring the default times that load into the calendar
 		var d = new Date();

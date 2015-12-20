@@ -317,7 +317,7 @@ def update_event(request):
 
         if SNE.objects.filter(special_event_id=EVENT_ID).exists():
             print("EXISTS")
-            event_task = SNE.objects.get(
+            event_task = SNE.objects.filter(
                     special_event_id=EVENT_ID).update(
                     task_name=data_dict['text'],
                     start_time = data_dict['start'],
@@ -325,29 +325,29 @@ def update_event(request):
 
             print("All vars obained")
 
-        if(event_task.current_day != request.POST.get('weekday')):
-            print("Inside ")
-            if (request.POST.get('weekday') == "Mon" ):
-                event_task.current_day = "Monday"
-            elif (request.POST.get('weekday') == "Tue" ):
-                event_task.current_day = "Tuesday"
+        # if(event_task.current_day != request.POST.get('weekday')):
+        #     print("Inside ")
+        #     if (request.POST.get('weekday') == "Mon" ):
+        #         event_task.current_day = "Monday"
+        #     elif (request.POST.get('weekday') == "Tue" ):
+        #         event_task.current_day = "Tuesday"
+        #
+        #     elif (request.POST.get('weekday') == "Wed" ):
+        #         event_task.current_day = "Wednesday"
+        #
+        #     elif (request.POST.get('weekday') == "Thu" ):
+        #         event_task.current_day = "Thursday"
+        #
+        #     elif (request.POST.get('weekday') == "Fri" ):
+        #         event_task.current_day = "Friday"
+        #
+        #     elif (request.POST.get('weekday') == "Sat" ):
+        #         event_task.current_day = "Saturday"
+        #
+        #     elif (request.POST.get('weekday') == "Sun" ):
+        #         event_task.current_day = "Sunday"
 
-            elif (request.POST.get('weekday') == "Wed" ):
-                event_task.current_day = "Wednesday"
-
-            elif (request.POST.get('weekday') == "Thu" ):
-                event_task.current_day = "Thursday"
-
-            elif (request.POST.get('weekday') == "Fri" ):
-                event_task.current_day = "Friday"
-
-            elif (request.POST.get('weekday') == "Sat" ):
-                event_task.current_day = "Saturday"
-
-            elif (request.POST.get('weekday') == "Sun" ):
-                event_task.current_day = "Sunday"
-
-            event_task.save()
+            # event_task.save()
             print("updated")
             return HttpResponse("true")
         else:
