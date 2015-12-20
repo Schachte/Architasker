@@ -1,4 +1,4 @@
-db.sqllite3
-*.sqllite
-*.sqllite3
+db.sqlite3
+*.sqlite
+*.sqlite3
 *.pyc
