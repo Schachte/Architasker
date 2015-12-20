@@ -171,6 +171,8 @@
 
 		scheduler.init('scheduler_here',new Date(calendar_year,calendar_month,calendar_day),"week");
 
+
+
 		scheduler.parse( [
 				{% for monday_tasks in mon %}
 					{
@@ -187,6 +189,7 @@
 						start_date: '{{ tuesday_tasks.start_time }}'.substring(0, 10)+" "+'{{ tuesday_tasks.start_time }}'.substring(11, 16),
 						end_date: '{{ tuesday_tasks.end_time }}'.substring(0, 10)+" "+'{{ tuesday_tasks.end_time }}'.substring(11, 16)
 					},
+
 				{% endfor %}
 				{% for wednesday_tasks in wed %}
 					{
@@ -250,6 +253,38 @@
 	}
 
 
+	//Array to store all the currently gathered google events for the user on the calendar
+	google_ids = [];
+
+	//Storing all the google events to enable ability to make read-only
+	{% for monday_tasks in mon %}
+			google_ids.push('{{ monday_tasks.special_event_id }}');
+	{% endfor %}
+	{% for tuesday_tasks in tues %}
+			google_ids.push('{{ tuesday_tasks.special_event_id }}');
+	{% endfor %}
+	{% for wednesday_tasks in wed %}
+			google_ids.push('{{ wednesday_tasks.special_event_id }}');
+	{% endfor %}
+	{% for thursday_tasks in thurs %}
+			google_ids.push('{{ thursday_tasks.special_event_id }}');
+	{% endfor %}
+	{% for friday_tasks in fri %}
+			google_ids.push('{{ friday_tasks.special_event_id }}');
+	{% endfor %}
+	{% for saturday_tasks in sat %}
+			google_ids.push('{{ saturday_tasks.special_event_id }}');
+	{% endfor %}
+	{% for sunday_tasks in sun %}
+			google_ids.push('{{ sunday_tasks.special_event_id }}');
+	{% endfor %}
+
+	for (i = 0; i < google_ids.length; i++) {
+		var eventObj = scheduler.getEvent(google_ids[i]);
+		alert(eventObj);
+		alert(google_ids[i]);
+    // scheduler.getEvent(eventObj.id).readonly = true;
+	}
 
 </script>
 
