@@ -104,10 +104,13 @@ def pull_user_event_data(request):
         service = discovery.build('calendar', 'v3', http=http)
 
         '''These calculations below calculate the beginning of the week as well as the end of the week'''
+
+        #Need to fix the timing issues. Do not use UTC NOW, use 12AM or something
         now = datetime.datetime.utcnow()
-        now = now - datetime.timedelta(now.weekday())
-        then = datetime.timedelta(days=6) #Indexed at 0
+        now = now - datetime.timedelta(now.weekday() - 1)
+        then = datetime.timedelta(days=5) #Indexed at 0
         then = now + then
+
 
         #Oauth handling var
         page_token = None
@@ -125,6 +128,14 @@ def pull_user_event_data(request):
         now = now.isoformat() + 'Z'
         then = then.isoformat() + 'Z'
 
+        now = str(now[0:10]) + 'T00:00:01Z'
+        then = str(then[0:10]) + 'T23:59:59Z'
+
+
+        print('The date for the now time is %s'%(str(now[0:10])) + 'T00:00:01Z')
+        print('The date for the then time is %s'%(str(then[0:10])) + 'T23:59:59Z')
+
+
         #Get the events off the primary calendar, this should be changed eventually so the user can select the calendar they please to use
         eventsResult = service.events().list(
 
@@ -132,6 +143,8 @@ def pull_user_event_data(request):
             timeMax=then).execute()
 
         events = eventsResult.get('items', [])
+
+
 
         #Get all the google events from the database when attempting the current sync
         google_tasks = SNE.objects.filter(is_google_task = True)
@@ -141,8 +154,11 @@ def pull_user_event_data(request):
             for each_google_task in google_tasks:
                 each_google_task.delete()
 
+        print(str(len(events)) + ' is length of events')
         #We need to start parsing and storing the data into the database with the most recent copy of google events
         for event in events:
+            print(str(event['start']) + ' is the start time for ' + str(event['summary']))
+
             start = event['start'].get('dateTime', event['start'].get('date'))
             string_converted_date = convert(event['start'])
 
