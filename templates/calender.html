@@ -176,7 +176,8 @@
 						text: '{{ monday_tasks.task_name }}',
 						id: '{{ monday_tasks.special_event_id }}',
 						start_date: '{{ monday_tasks.start_time }}'.substring(0, 10)+" "+'{{ monday_tasks.start_time }}'.substring(11, 16),
-						end_date: '{{ monday_tasks.end_time }}'.substring(0, 10)+" "+'{{ monday_tasks.end_time }}'.substring(11, 16)
+						end_date: '{{ monday_tasks.end_time }}'.substring(0, 10)+" "+'{{ monday_tasks.end_time }}'.substring(11, 16),
+						color: '{{ monday_tasks.color }}'
 					},
 				{% endfor %}
 				{% for tuesday_tasks in tues %}
@@ -184,7 +185,8 @@
 						text: '{{ tuesday_tasks.task_name }}',
 						id: '{{ tuesday_tasks.special_event_id }}',
 						start_date: '{{ tuesday_tasks.start_time }}'.substring(0, 10)+" "+'{{ tuesday_tasks.start_time }}'.substring(11, 16),
-						end_date: '{{ tuesday_tasks.end_time }}'.substring(0, 10)+" "+'{{ tuesday_tasks.end_time }}'.substring(11, 16)
+						end_date: '{{ tuesday_tasks.end_time }}'.substring(0, 10)+" "+'{{ tuesday_tasks.end_time }}'.substring(11, 16),
+						color: '{{ tuesday_tasks.color }}'
 					},
 				{% endfor %}
 				{% for wednesday_tasks in wed %}
@@ -192,7 +194,8 @@
 						text: '{{ wednesday_tasks.task_name }}',
 						id: '{{ wednesday_tasks.special_event_id }}',
 						start_date: '{{ wednesday_tasks.start_time }}'.substring(0, 10)+" "+'{{ wednesday_tasks.start_time }}'.substring(11, 16),
-						end_date: '{{ wednesday_tasks.end_time }}'.substring(0, 10)+" "+'{{ wednesday_tasks.end_time }}'.substring(11, 16)
+						end_date: '{{ wednesday_tasks.end_time }}'.substring(0, 10)+" "+'{{ wednesday_tasks.end_time }}'.substring(11, 16),
+						color: '{{ tuesday_tasks.color }}'
 					},
 				{% endfor %}
 				{% for thursday_tasks in thurs %}
@@ -200,7 +203,8 @@
 						text: '{{ thursday_tasks.task_name }}',
 						id: '{{ thursday_tasks.special_event_id }}',
 						start_date: '{{ thursday_tasks.start_time }}'.substring(0, 10)+" "+'{{ thursday_tasks.start_time }}'.substring(11, 16),
-						end_date: '{{ thursday_tasks.end_time }}'.substring(0, 10)+" "+'{{ thursday_tasks.end_time }}'.substring(11, 16)
+						end_date: '{{ thursday_tasks.end_time }}'.substring(0, 10)+" "+'{{ thursday_tasks.end_time }}'.substring(11, 16),
+						color: '{{ thursday_tasks.color }}'
 					},
 				{% endfor %}
 				{% for friday_tasks in fri %}
@@ -208,7 +212,8 @@
 						text: '{{ friday_tasks.task_name }}',
 						id: '{{ friday_tasks.special_event_id }}',
 						start_date: '{{ friday_tasks.start_time }}'.substring(0, 10)+" "+'{{ friday_tasks.start_time }}'.substring(11, 16),
-						end_date: '{{ friday_tasks.end_time }}'.substring(0, 10)+" "+'{{ friday_tasks.end_time }}'.substring(11, 16)
+						end_date: '{{ friday_tasks.end_time }}'.substring(0, 10)+" "+'{{ friday_tasks.end_time }}'.substring(11, 16),
+						color: '{{ friday_tasks.color }}'
 					},
 				{% endfor %}
 				{% for saturday_tasks in sat %}
@@ -216,7 +221,8 @@
 						text: '{{ saturday_tasks.task_name }}',
 						id: '{{ saturday_tasks.special_event_id }}',
 						start_date: '{{ saturday_tasks.start_time }}'.substring(0, 10)+" "+'{{ saturday_tasks.start_time }}'.substring(11, 16),
-						end_date: '{{ saturday_tasks.end_time }}'.substring(0, 10)+" "+'{{ saturday_tasks.end_time }}'.substring(11, 16)
+						end_date: '{{ saturday_tasks.end_time }}'.substring(0, 10)+" "+'{{ saturday_tasks.end_time }}'.substring(11, 16),
+						color: '{{ saturday_tasks.color }}'
 					},
 				{% endfor %}
 				{% for sunday_tasks in sun %}
@@ -224,7 +230,8 @@
 						text: '{{ sunday_tasks.task_name }}',
 						id: '{{ sunday_tasks.special_event_id }}',
 						start_date: '{{ sunday_tasks.start_time }}'.substring(0, 10)+" "+'{{ sunday_tasks.start_time }}'.substring(11, 16),
-						end_date: '{{ sunday_tasks.end_time }}'.substring(0, 10)+" "+'{{ sunday_tasks.end_time }}'.substring(11, 16)
+						end_date: '{{ sunday_tasks.end_time }}'.substring(0, 10)+" "+'{{ sunday_tasks.end_time }}'.substring(11, 16),
+						color: '{{ sunday_tasks.color }}'
 					},
 				{% endfor %}
 		], "json");
