@@ -9,15 +9,21 @@
 {% include 'javascript.html' %}
 
 <script type="text/javascript" charset="utf-8">
+	// document.domain = 'http://localhost:8000';
+	// google_ids = [];
 	function init() {
+		google_ids = [];
 
+
+
+		// scheduler.config.readonly = true;
 		var currently_selected_id = "";
-
 
 		var current_view = 0;
 		var prev_button = document.getElementsByClassName('dhx_cal_prev_button');
 		var next_button = document.getElementsByClassName('dhx_cal_next_button');
 		next_button[0].style.visibility='hidden';
+
 		// HANDLE PREVIOUS EVENTS
 		for (var i = 0; i < prev_button.length; i++) {
 				prev_button[i].addEventListener('click', function() {
@@ -45,10 +51,11 @@
 
 
 		scheduler.config.xml_date="%Y-%m-%d %H:%i";
-		//scheduler.config.xml_date="%Y-%m-%dT%H:%i:%s";
+
 		scheduler.config.default_date = "%j %M %Y";
 
 		var formatDateFunc = scheduler.date.date_to_str("%Y-%m-%dT%H:%i:%s");
+
 		var weekDay = scheduler.date.date_to_str("%D")
 
 		// I think this is where the bug is where the data posting to the view is causing the error for the start and end times
@@ -107,55 +114,6 @@
     		return true;
 		});
 
-		// scheduler.attachEvent("onBeforeEventChanged", function(ev, e, is_new, original){
-		//
-		// 		// alert(ev.id);
-		// 		currently_selected_id = ev.id
-		//
-  	// 		if (!is_new) {
-  	// 			$('.ajaxProgress').show();
-		// 		$.ajax({
-		// 			type: "POST",
-		// 			url: "update_event/",
-		// 			dataType: "json",
-		// 			data: {
-		// 				csrfmiddlewaretoken: '{{ csrf_token }}',
-		// 				start: formatDateFunc(ev.start_date),
-		// 				end: formatDateFunc(ev.end_date),
-		// 				text: ev.text,
-		// 				id: ev.id,
-		// 				weekday: weekDay(scheduler.getEvent(ev.id).start_date),
-		// 			},
-		// 		});
-  	// 		}
-    // 		return true;
-		// });
-
-
-		// scheduler.attachEvent("onEventChanged", function(id,ev){
-
-		// 	if (currently_selected_id == ""){
-		// 		console.log("null");
-		// 	}
-		// 	else {
-		// 		id = currently_selected_id;
-		// 	}
-		// 	alert(id);
-		// 	$.ajax({
-		// 		type: "POST",
-		// 		url: "update_event/",
-		// 		dataType: "json",
-		// 		data: {
-		// 			csrfmiddlewaretoken: '{{ csrf_token }}',
-		// 			start: formatDateFunc(scheduler.getEvent(id).start_date),
-		// 			end: formatDateFunc(scheduler.getEvent(id).end_date),
-		// 			text: ev.text,
-		// 			id: id,
-		// 			weekday: weekDay(scheduler.getEvent(id).start_date)
-		// 		},
-		// 	});
-    // 		return true;
-		// });
 
 		// Create a new date for gatehring the default times that load into the calendar
 		var d = new Date();
@@ -169,9 +127,11 @@
 		//Get the current day for the calendar to load into the default value for the calendar
 		var calendar_day = d.getDate();
 
+
+		scheduler.attachEvent("onBeforeDrag", readonly_check);
+
+		// scheduler.config.readonly = true;
 		scheduler.init('scheduler_here',new Date(calendar_year,calendar_month,calendar_day),"week");
-
-
 
 		scheduler.parse( [
 				{% for monday_tasks in mon %}
@@ -235,56 +195,73 @@
 
 
 
-	}
 
-	function show_minical(){
-		if (scheduler.isCalendarVisible())
-			scheduler.destroyCalendar();
-		else
-			scheduler.renderCalendar({
-				position:"dhx_minical_icon",
-				date:scheduler._date,
-				navigation:true,
-				handler:function(date,calendar){
-					scheduler.setCurrentView(date);
-					scheduler.destroyCalendar()
+
+		//Array to store all the currently gathered google events for the user on the calendar
+
+
+		//Storing all the google events to enable ability to make read-only
+		{% for monday_tasks in mon %}
+				{% if monday_tasks.is_google_task %}
+					google_ids.push('{{ monday_tasks.special_event_id }}');
+				{% endif %}
+		{% endfor %}
+		{% for tuesday_tasks in tues %}
+			{% if tuesday_tasks.is_google_task %}
+				google_ids.push('{{ tuesday_tasks.special_event_id }}');
+			{% endif %}
+		{% endfor %}
+		{% for wednesday_tasks in wed %}
+			{% if wednesday_tasks.is_google_task %}
+				google_ids.push('{{ wednesday_tasks.special_event_id }}');
+			{% endif %}
+		{% endfor %}
+		{% for thursday_tasks in thurs %}
+			{% if thursday_tasks.is_google_task %}
+				google_ids.push('{{ thursday_tasks.special_event_id }}');
+			{% endif %}
+		{% endfor %}
+		{% for friday_tasks in fri %}
+			{% if friday_tasks.is_google_task %}
+				google_ids.push('{{ friday_tasks.special_event_id }}');
+			{% endif %}
+		{% endfor %}
+		{% for saturday_tasks in sat %}
+			{% if saturday_tasks.is_google_task %}
+				google_ids.push('{{ saturday_tasks.special_event_id }}');
+			{% endif %}
+		{% endfor %}
+		{% for sunday_tasks in sun %}
+			{% if sunday_tasks.is_google_task %}
+				google_ids.push('{{ sunday_tasks.special_event_id }}');
+			{% endif %}
+		{% endfor %}
+
+
+		//Function to deal with making google tasks read only
+		function readonly_check(id) {
+
+			var found_google_task = false;
+
+			for (i = 0; i < google_ids.length; i++) {
+				if (google_ids[i] == id) {
+					console.log('found');
+					found_google_task = true;
 				}
-			});
+			}
+			if (found_google_task) {
+				var readOnly = scheduler.getEvent(id).readonly;
+				scheduler.config.drag_move = true;
+				scheduler.config.drag_resize = readOnly;
+				return false;
+			}
+			else {
+				return true;
+			}
+		}
+
 	}
 
-
-	//Array to store all the currently gathered google events for the user on the calendar
-	google_ids = [];
-
-	//Storing all the google events to enable ability to make read-only
-	{% for monday_tasks in mon %}
-			google_ids.push('{{ monday_tasks.special_event_id }}');
-	{% endfor %}
-	{% for tuesday_tasks in tues %}
-			google_ids.push('{{ tuesday_tasks.special_event_id }}');
-	{% endfor %}
-	{% for wednesday_tasks in wed %}
-			google_ids.push('{{ wednesday_tasks.special_event_id }}');
-	{% endfor %}
-	{% for thursday_tasks in thurs %}
-			google_ids.push('{{ thursday_tasks.special_event_id }}');
-	{% endfor %}
-	{% for friday_tasks in fri %}
-			google_ids.push('{{ friday_tasks.special_event_id }}');
-	{% endfor %}
-	{% for saturday_tasks in sat %}
-			google_ids.push('{{ saturday_tasks.special_event_id }}');
-	{% endfor %}
-	{% for sunday_tasks in sun %}
-			google_ids.push('{{ sunday_tasks.special_event_id }}');
-	{% endfor %}
-
-	for (i = 0; i < google_ids.length; i++) {
-		var eventObj = scheduler.getEvent(google_ids[i]);
-		alert(eventObj);
-		alert(google_ids[i]);
-    // scheduler.getEvent(eventObj.id).readonly = true;
-	}
 
 </script>
 
