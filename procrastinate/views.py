@@ -115,7 +115,7 @@ def pull_user_event_data(request):
         #Need to fix the timing issues. Do not use UTC NOW, use 12AM or something
         now = datetime.datetime.utcnow()
         now = now - datetime.timedelta(now.weekday() + 365)
-        then = datetime.timedelta(days=365) #Indexed at 0
+        then = datetime.timedelta(days=371) #Indexed at 0
         then = now + then
         print(now)
         print(then)
@@ -161,6 +161,9 @@ def pull_user_event_data(request):
             try:
                 string_converted_date = convert(event['start'])
                 string_converted_end = convert(event['end'])
+                string_colors = convert(event)
+
+
 
                 # print (string_converted_date.keys())
                 #Storing the physical event into the DB store
@@ -200,6 +203,17 @@ def pull_user_event_data(request):
                             end_time = str(end_time),
                             special_event_id = str(event['id'])
                         )
+
+
+                    HEX_ASSOCIATION = {
+                        '1': '#A4BDFC', '2': '#7AE7BF', '3': '#DBADFF', '4': '#FF887C', '5': '#FBD75B', '6': '#FFB878', '7': '#46D6DB', '8': '#E1E1E1', '9': '#5484ED', '10': '#51B749',
+                        '11': '#DC2127'
+                    }
+
+                    if 'colorId' in event:
+                        temp_model.color = HEX_ASSOCIATION[event['colorId']]
+                    else:
+                        temp_model.color = HEX_ASSOCIATION['1']
 
 
                     #Parsing out the different events to store into day arrays for the week
@@ -264,7 +278,8 @@ def create_event(request):
             task_name = request.POST.get('text'),
             start_time = request.POST.get('start'),
             end_time = request.POST.get('end'),
-            special_event_id = request.POST.get('id')
+            special_event_id = request.POST.get('id'),
+            color = request.POST.get('color')
         )
 
         if (request.POST.get('weekday') == "Mon" ):
