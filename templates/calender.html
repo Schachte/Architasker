@@ -158,7 +158,7 @@
 						id: '{{ wednesday_tasks.special_event_id }}',
 						start_date: '{{ wednesday_tasks.start_time }}'.substring(0, 10)+" "+'{{ wednesday_tasks.start_time }}'.substring(11, 16),
 						end_date: '{{ wednesday_tasks.end_time }}'.substring(0, 10)+" "+'{{ wednesday_tasks.end_time }}'.substring(11, 16),
-						color: '{{ tuesday_tasks.color }}'
+						color: '{{ wednesday_tasks.color }}'
 					},
 				{% endfor %}
 				{% for thursday_tasks in thurs %}
