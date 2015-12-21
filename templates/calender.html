@@ -106,56 +106,6 @@
     		return true;
 		});
 
-		// scheduler.attachEvent("onBeforeEventChanged", function(ev, e, is_new, original){
-		//
-		// 		// alert(ev.id);
-		// 		currently_selected_id = ev.id
-		//
-  	// 		if (!is_new) {
-  	// 			$('.ajaxProgress').show();
-		// 		$.ajax({
-		// 			type: "POST",
-		// 			url: "update_event/",
-		// 			dataType: "json",
-		// 			data: {
-		// 				csrfmiddlewaretoken: '{{ csrf_token }}',
-		// 				start: formatDateFunc(ev.start_date),
-		// 				end: formatDateFunc(ev.end_date),
-		// 				text: ev.text,
-		// 				id: ev.id,
-		// 				weekday: weekDay(scheduler.getEvent(ev.id).start_date),
-		// 			},
-		// 		});
-  	// 		}
-    // 		return true;
-		// });
-
-
-		// scheduler.attachEvent("onEventChanged", function(id,ev){
-
-		// 	if (currently_selected_id == ""){
-		// 		console.log("null");
-		// 	}
-		// 	else {
-		// 		id = currently_selected_id;
-		// 	}
-		// 	alert(id);
-		// 	$.ajax({
-		// 		type: "POST",
-		// 		url: "update_event/",
-		// 		dataType: "json",
-		// 		data: {
-		// 			csrfmiddlewaretoken: '{{ csrf_token }}',
-		// 			start: formatDateFunc(scheduler.getEvent(id).start_date),
-		// 			end: formatDateFunc(scheduler.getEvent(id).end_date),
-		// 			text: ev.text,
-		// 			id: id,
-		// 			weekday: weekDay(scheduler.getEvent(id).start_date)
-		// 		},
-		// 	});
-    // 		return true;
-		// });
-
 		// Create a new date for gatehring the default times that load into the calendar
 		var d = new Date();
 
@@ -236,26 +186,7 @@
 				{% endfor %}
 		], "json");
 
-
-
 	}
-
-	function show_minical(){
-		if (scheduler.isCalendarVisible())
-			scheduler.destroyCalendar();
-		else
-			scheduler.renderCalendar({
-				position:"dhx_minical_icon",
-				date:scheduler._date,
-				navigation:true,
-				handler:function(date,calendar){
-					scheduler.setCurrentView(date);
-					scheduler.destroyCalendar()
-				}
-			});
-	}
-
-
 
 </script>
 
@@ -282,7 +213,7 @@
 		         <div class="dhx_cal_next_button">&nbsp;</div>
 		         <div class="dhx_cal_today_button"></div>
 		         <div class="dhx_cal_date"></div>
-		         <div class="dhx_minical_icon" id="dhx_minical_icon" onclick="show_minical()">&nbsp;</div>
+		         <!-- <div class="dhx_minical_icon" id="dhx_minical_icon" onclick="show_minical()">&nbsp;</div> -->
 		         <div class="dhx_cal_tab" name="day_tab" style="right:204px;"></div>
 		         <div class="dhx_cal_tab rounding_week_tab" name="week_tab" style="right:140px; border-top-right-radius: 5px; border-bottom-right-radius: 5px;"></div>
 		      </div>
