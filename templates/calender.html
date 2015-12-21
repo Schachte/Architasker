@@ -12,12 +12,11 @@
 	function init() {
 
 		var currently_selected_id = "";
-
-
 		var current_view = 0;
 		var prev_button = document.getElementsByClassName('dhx_cal_prev_button');
 		var next_button = document.getElementsByClassName('dhx_cal_next_button');
 		next_button[0].style.visibility='hidden';
+
 		// HANDLE PREVIOUS EVENTS
 		for (var i = 0; i < prev_button.length; i++) {
 				prev_button[i].addEventListener('click', function() {

@@ -50,7 +50,7 @@ Function to convert unicode dictionaries into str dictionaries
 
 def convert(data):
     if isinstance(data, basestring):
-        return str(data)
+        return data.encode('utf-8')
     elif isinstance(data, collections.Mapping):
         return dict(map(convert, data.iteritems()))
     elif isinstance(data, collections.Iterable):
@@ -114,10 +114,11 @@ def pull_user_event_data(request):
 
         #Need to fix the timing issues. Do not use UTC NOW, use 12AM or something
         now = datetime.datetime.utcnow()
-        now = now - datetime.timedelta(now.weekday() - 1)
-        then = datetime.timedelta(days=5) #Indexed at 0
+        now = now - datetime.timedelta(now.weekday() + 365)
+        then = datetime.timedelta(days=365) #Indexed at 0
         then = now + then
-
+        print(now)
+        print(then)
 
         #Oauth handling var
         page_token = None
@@ -138,12 +139,11 @@ def pull_user_event_data(request):
         now = str(now[0:10]) + 'T00:00:01Z'
         then = str(then[0:10]) + 'T23:59:59Z'
 
-
         #Get the events off the primary calendar, this should be changed eventually so the user can select the calendar they please to use
         eventsResult = service.events().list(
 
             calendarId='primary', timeMin=now,
-            timeMax=then).execute()
+            timeMax=then, maxResults=1500).execute()
 
         events = eventsResult.get('items', [])
 
@@ -158,91 +158,94 @@ def pull_user_event_data(request):
 
         #We need to start parsing and storing the data into the database with the most recent copy of google events
         for event in events:
-            start = event['start'].get('dateTime', event['start'].get('date'))
-            string_converted_date = convert(event['start'])
-            string_converted_end = convert(event['end'])
+            try:
+                string_converted_date = convert(event['start'])
+                string_converted_end = convert(event['end'])
 
-            #Storing the physical event into the DB store
-            if 'date' in string_converted_date.keys() or 'dateTime' in  string_converted_date.keys():
+                # print (string_converted_date.keys())
+                #Storing the physical event into the DB store
+                if 'date' in string_converted_date.keys() or 'dateTime' in  string_converted_date.keys():
 
-                if 'dateTime' in string_converted_date.keys():
-                    current = str(string_converted_date['dateTime'])
-                    times = current[11:]
-                    dt = datetime.datetime.strptime(current, '%Y-%m-%dT' + times)
-                    current = current[0:19]
+                    if 'dateTime' in string_converted_date.keys():
+                        current = str(string_converted_date['dateTime'])
+                        times = current[11:]
+                        dt = datetime.datetime.strptime(current, '%Y-%m-%dT' + times)
+                        current = current[0:19]
 
-                elif 'date' in string_converted_date.keys():
-                    current = str(string_converted_date['date'])
-                    dt = datetime.datetime.strptime(current, '%Y-%m-%d')
-                    current = current[0:19]
+                    elif 'date' in string_converted_date.keys():
+                        current = str(string_converted_date['date'])
+                        dt = datetime.datetime.strptime(current, '%Y-%m-%d')
+                        current = current[0:19]
 
-                if 'dateTime' in string_converted_end.keys():
-                    end_time = str(string_converted_end['dateTime'])
-                    end_time = end_time[0:19]
+                    if 'dateTime' in string_converted_end.keys():
+                        end_time = str(string_converted_end['dateTime'])
+                        end_time = end_time[0:19]
 
-                elif 'date' in string_converted_end.keys():
-                    end_time = str(string_converted_date['date'])
-                    end_time = end_time[0:19]
+                    elif 'date' in string_converted_end.keys():
+                        end_time = str(string_converted_date['date'])
+                        end_time = end_time[0:19]
 
-                current_user = User.objects.get(username=request.user.username)
+                    current_user = User.objects.get(username=request.user.username)
 
-                not_exists = False
-                if not SNE.objects.filter(special_event_id=str(event['id'])).exists():
-                    not_exists = True
+                    not_exists = False
+                    if not SNE.objects.filter(special_event_id=str(event['id'])).exists():
+                        not_exists = True
 
-                    temp_model = SNE.objects.create(
-                        authenticated_user = current_user,
-                        task_name = event['summary'],
-                        is_google_task = True,
-                        google_json = str(event),
-                        start_time = str(current),
-                        end_time = str(end_time),
-                        special_event_id = str(event['id'])
-                    )
+                        temp_model = SNE.objects.create(
+                            authenticated_user = current_user,
+                            task_name = event['summary'],
+                            is_google_task = True,
+                            google_json = str(event),
+                            start_time = str(current),
+                            end_time = str(end_time),
+                            special_event_id = str(event['id'])
+                        )
 
 
-                #Parsing out the different events to store into day arrays for the week
-                if (dt.weekday() == 0 ):
+                    #Parsing out the different events to store into day arrays for the week
+                    if (dt.weekday() == 0 ):
 
-                    if not_exists:
-                        temp_model.current_day = "Monday"
-                        temp_model.save()
+                        if not_exists:
+                            temp_model.current_day = "Monday"
+                            temp_model.save()
 
-                elif (dt.weekday() == 1 ):
+                    elif (dt.weekday() == 1 ):
 
-                    if not_exists:
-                        temp_model.current_day = "Tuesday"
-                        temp_model.save()
+                        if not_exists:
+                            temp_model.current_day = "Tuesday"
+                            temp_model.save()
 
-                elif (dt.weekday() == 2 ):
+                    elif (dt.weekday() == 2 ):
 
-                    if not_exists:
-                        temp_model.current_day = "Wednesday"
-                        temp_model.save()
+                        if not_exists:
+                            temp_model.current_day = "Wednesday"
+                            temp_model.save()
 
-                elif (dt.weekday() == 3 ):
+                    elif (dt.weekday() == 3 ):
 
-                    if not_exists:
-                        temp_model.current_day = "Thursday"
-                        temp_model.save()
+                        if not_exists:
+                            temp_model.current_day = "Thursday"
+                            temp_model.save()
 
-                elif (dt.weekday() == 4 ):
+                    elif (dt.weekday() == 4 ):
 
-                    if not_exists:
-                        temp_model.current_day = "Friday"
-                        temp_model.save()
+                        if not_exists:
+                            temp_model.current_day = "Friday"
+                            temp_model.save()
 
-                elif (dt.weekday() == 5 ):
+                    elif (dt.weekday() == 5 ):
 
-                    if not_exists:
-                        temp_model.current_day = "Saturday"
-                        temp_model.save()
+                        if not_exists:
+                            temp_model.current_day = "Saturday"
+                            temp_model.save()
 
-                elif (dt.weekday() == 6 ):
+                    elif (dt.weekday() == 6 ):
 
-                    if not_exists:
-                        temp_model.current_day = "Sunday"
-                        temp_model.save()
+                        if not_exists:
+                            temp_model.current_day = "Sunday"
+                            temp_model.save()
+            except:
+                pass
 
 
         return HttpResponseRedirect('/get_cal')
@@ -316,14 +319,14 @@ def update_event(request):
         TASK_NAME = str(TASK_NAME)
 
         if SNE.objects.filter(special_event_id=EVENT_ID).exists():
-            print("EXISTS")
+
             event_task = SNE.objects.filter(
                     special_event_id=EVENT_ID).update(
                     task_name=data_dict['text'],
                     start_time = data_dict['start'],
                     end_time = data_dict['end'])
 
-            print("All vars obained")
+
 
         # if(event_task.current_day != request.POST.get('weekday')):
         #     print("Inside ")
