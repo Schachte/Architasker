@@ -140,16 +140,21 @@ filter: alpha(opacity=95) !important;
 	color: #fff;
 }
 
+.mybutton_standard:hover {
+	border: 1px solid #e67e22;
+	color: #e67e22;
+}
+
 .mybutton_cyano{
-	border: 1px solid #4A90BE;
+	border: 1px solid #e67e22;
 	color: #fff;
-	background-color:#4A90BE;
+	background-color:#e67e22;
 }
 
 .mybutton_cyano:hover{
-	border: 1px solid #4A90BE;
-	color: #4A90BE !important;
-	background: rgba(204, 204, 204, 0);
+	border: 1px solid #d35400;
+	color: #ffffff !important;
+	background: #d35400;
 }
 
 .button_down img {
