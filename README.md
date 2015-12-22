@@ -1,7 +1,9 @@
 #Architasker.
-<hr>
+
 #Background
 <p>Architaskr is an automated tool that integrates with a personalized calendar as well as Google calendar to maximize the efficiency of your week. Architaskr will analyze the tasks you have along with the tasks you need to complete and figure out times that you should complete them at. The application incorporates modern study techniques, break times and advanced algorithmic calculations to achieve all of the following.</p>
+
+
 #The Development Team
 <ul>
   <li>Ryan Schachte</li>
@@ -21,7 +23,7 @@
 
 
 #For The Developers
-<hr>
+
 #GIT Instructions
 
 <hr>
