@@ -173,6 +173,8 @@ def pull_user_event_data(request):
                     elif 'date' in string_converted_date.keys():
                         current = str(string_converted_date['date'])
                         dt = datetime.datetime.strptime(current, '%Y-%m-%d')
+                        #appends T00:00:00Z to the end of the start date
+                        #This is how dhtmlxscheduler defines an all day event
                         current = current[0:10] + 'T00:00:00Z'
 
                     if 'dateTime' in string_converted_end.keys():
@@ -181,6 +183,7 @@ def pull_user_event_data(request):
 
                     elif 'date' in string_converted_end.keys():
                         end_time = str(string_converted_end['date'])
+                        #appends T00:00:00Z to the end of the end date
                         end_time = end_time[0:10] + 'T00:00:00Z'
 
                     current_user = User.objects.get(username=request.user.username)
