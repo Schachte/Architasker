@@ -69,7 +69,7 @@
 					text: scheduler.getEvent(event_id).text,
 					id: scheduler.getEvent(event_id).id,
 					weekday: weekDay(scheduler.getEvent(event_id).start_date), //what if the event was a multi-day event?!?!
-					color: '#1796B0'
+					color: '#34495E'
 
 				},
 			});
@@ -92,6 +92,8 @@
 		scheduler.attachEvent("onEventDeleted", deleteEvent);
 		scheduler.attachEvent("onClick", readonly_check);
 		scheduler.attachEvent("onDblClick", readonly_check);
+
+
 
 		// JS event for the onEventAdded function to do an AJAX call to the database for syncing the new event data
 		scheduler.attachEvent("onEventAdded", updateDayStatus);

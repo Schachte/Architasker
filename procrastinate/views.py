@@ -204,8 +204,8 @@ def pull_user_event_data(request):
 
 
                     HEX_ASSOCIATION = {
-                        '1': '#A4BDFC', '2': '#7AE7BF', '3': '#DBADFF', '4': '#FF887C', '5': '#FBD75B', '6': '#FFB878', '7': '#46D6DB', '8': '#E1E1E1', '9': '#5484ED', '10': '#51B749',
-                        '11': '#DC2127'
+                        '1': '#AEA8D3', '2': '#87D37C', '3': '#BE90D4', '4': '#E26A6A', '5': '#F9BF3B', '6': '#EB974E', '7': '#19B5FE', '8': '#D2D7D3', '9': '#4B77BE', '10': '#26A65B',
+                        '11': '#D24D57'
                     }
 
                     if 'colorId' in event:

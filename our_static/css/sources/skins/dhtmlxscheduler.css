@@ -1614,7 +1614,7 @@ input.dhx_repeat_checkbox {
 .dhx_cal_event .dhx_footer,
 .dhx_cal_event .dhx_body,
 .dhx_cal_event .dhx_title {
-  background-color: #1796b0;
+  background-color: #34495E;
   border-color: transparent;
   color: white;
 }
@@ -1631,7 +1631,7 @@ div.dhx_menu_icon {
 }
 .dhx_cal_event_line {
   border: 1px solid transparent;
-  background-color: #1796b0;
+  background-color: #34495E;
   color: white;
   height: 17px;
   line-height: 17px;
@@ -2197,7 +2197,7 @@ div.dhx_menu_icon {
   background: rgba(50, 50, 50, 0.5);
 }
 .dhx_qi_big_icon {
-  background: #1796b0;
+  background: #34495E;
   color: white;
 }
 /* export to PDF and iCal buttons start */
