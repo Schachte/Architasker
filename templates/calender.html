@@ -9,8 +9,7 @@
 {% include 'javascript.html' %}
 
 <script type="text/javascript" charset="utf-8">
-	// document.domain = 'http://localhost:8000';
-	// google_ids = [];
+
 	function init() {
 		google_ids = [];
 
@@ -127,6 +126,8 @@
 		//Get the current day for the calendar to load into the default value for the calendar
 		var calendar_day = d.getDate();
 
+		// document.write({{ mon.0 }});
+
 
 		scheduler.attachEvent("onBeforeDrag", readonly_check);
 
@@ -135,6 +136,7 @@
 
 		scheduler.parse( [
 				{% for monday_tasks in mon %}
+				{% if monday_tasks.authenticated_user.username == current_user %}
 					{
 						text: '{{ monday_tasks.task_name }}',
 						id: '{{ monday_tasks.special_event_id }}',
@@ -142,8 +144,10 @@
 						end_date: '{{ monday_tasks.end_time }}'.substring(0, 10)+" "+'{{ monday_tasks.end_time }}'.substring(11, 16),
 						color: '{{ monday_tasks.color }}'
 					},
+				{% endif %}
 				{% endfor %}
 				{% for tuesday_tasks in tues %}
+				{% if tuesday_tasks.authenticated_user.username == current_user %}
 					{
 						text: '{{ tuesday_tasks.task_name }}',
 						id: '{{ tuesday_tasks.special_event_id }}',
@@ -151,9 +155,10 @@
 						end_date: '{{ tuesday_tasks.end_time }}'.substring(0, 10)+" "+'{{ tuesday_tasks.end_time }}'.substring(11, 16),
 						color: '{{ tuesday_tasks.color }}'
 					},
-
+					{% endif %}
 				{% endfor %}
 				{% for wednesday_tasks in wed %}
+				{% if wednesday_tasks.authenticated_user.username == current_user %}
 					{
 						text: '{{ wednesday_tasks.task_name }}',
 						id: '{{ wednesday_tasks.special_event_id }}',
@@ -161,8 +166,10 @@
 						end_date: '{{ wednesday_tasks.end_time }}'.substring(0, 10)+" "+'{{ wednesday_tasks.end_time }}'.substring(11, 16),
 						color: '{{ wednesday_tasks.color }}'
 					},
+					{% endif %}
 				{% endfor %}
 				{% for thursday_tasks in thurs %}
+				{% if thursday_tasks.authenticated_user.username == current_user %}
 					{
 						text: '{{ thursday_tasks.task_name }}',
 						id: '{{ thursday_tasks.special_event_id }}',
@@ -170,8 +177,10 @@
 						end_date: '{{ thursday_tasks.end_time }}'.substring(0, 10)+" "+'{{ thursday_tasks.end_time }}'.substring(11, 16),
 						color: '{{ thursday_tasks.color }}'
 					},
+					{% endif %}
 				{% endfor %}
 				{% for friday_tasks in fri %}
+				{% if friday_tasks.authenticated_user.username == current_user %}
 					{
 						text: '{{ friday_tasks.task_name }}',
 						id: '{{ friday_tasks.special_event_id }}',
@@ -179,8 +188,10 @@
 						end_date: '{{ friday_tasks.end_time }}'.substring(0, 10)+" "+'{{ friday_tasks.end_time }}'.substring(11, 16),
 						color: '{{ friday_tasks.color }}'
 					},
+					{% endif %}
 				{% endfor %}
 				{% for saturday_tasks in sat %}
+				{% if saturday_tasks.authenticated_user.username == current_user %}
 					{
 						text: '{{ saturday_tasks.task_name }}',
 						id: '{{ saturday_tasks.special_event_id }}',
@@ -188,8 +199,10 @@
 						end_date: '{{ saturday_tasks.end_time }}'.substring(0, 10)+" "+'{{ saturday_tasks.end_time }}'.substring(11, 16),
 						color: '{{ saturday_tasks.color }}'
 					},
+					{% endif %}
 				{% endfor %}
 				{% for sunday_tasks in sun %}
+				{% if sunday_tasks.authenticated_user.username == current_user %}
 					{
 						text: '{{ sunday_tasks.task_name }}',
 						id: '{{ sunday_tasks.special_event_id }}',
@@ -197,6 +210,7 @@
 						end_date: '{{ sunday_tasks.end_time }}'.substring(0, 10)+" "+'{{ sunday_tasks.end_time }}'.substring(11, 16),
 						color: '{{ sunday_tasks.color }}'
 					},
+					{% endif %}
 				{% endfor %}
 		], "json");
 
@@ -281,7 +295,6 @@
 
 </head>
 <body onload="init();">
-
 	{% if user_is_authenticated == True %}
 		   <div id="scheduler_here" class="dhx_cal_container" style='width:100%; height:100%;'>
 		      <div class="dhx_cal_navline">
@@ -315,15 +328,7 @@
 			<h1> You're not authenticated....</h1>
 			<a href="/oauth">Click Here to authenticate via OAUTH</a>
 
-
-
 		{% endif %}
-
-		<!-- <script>
-		var evs = scheduler.getEvents();
-		console.log(evs);
-		</script> -->
-
 
 </body>
 </html>

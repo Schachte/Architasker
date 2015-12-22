@@ -64,7 +64,7 @@ Main function dealing with auth verification
 '''''''''''''''''''''''''''''''''''''''''''''''''''
 
 def index(request):
-  current_user = User.objects.get(id=request.user.id)
+  current_user = User.objects.get(username=request.user.username)
   storage = Storage(CredentialsModel, 'id', current_user, 'credential')
   credential = storage.get()
   if credential is None or credential.invalid == True:
@@ -339,30 +339,6 @@ def update_event(request):
                     start_time = data_dict['start'],
                     end_time = data_dict['end'])
 
-
-
-        # if(event_task.current_day != request.POST.get('weekday')):
-        #     print("Inside ")
-        #     if (request.POST.get('weekday') == "Mon" ):
-        #         event_task.current_day = "Monday"
-        #     elif (request.POST.get('weekday') == "Tue" ):
-        #         event_task.current_day = "Tuesday"
-        #
-        #     elif (request.POST.get('weekday') == "Wed" ):
-        #         event_task.current_day = "Wednesday"
-        #
-        #     elif (request.POST.get('weekday') == "Thu" ):
-        #         event_task.current_day = "Thursday"
-        #
-        #     elif (request.POST.get('weekday') == "Fri" ):
-        #         event_task.current_day = "Friday"
-        #
-        #     elif (request.POST.get('weekday') == "Sat" ):
-        #         event_task.current_day = "Saturday"
-        #
-        #     elif (request.POST.get('weekday') == "Sun" ):
-        #         event_task.current_day = "Sunday"
-
             # event_task.save()
             print("updated")
             return HttpResponse("true")
@@ -380,9 +356,9 @@ def get_calendar_data(request):
 
     #Authentication bool to verify Oauth steps have been completed
     user_is_authenticated = False
-
+    print(request.user.username)
     #Send request to pull data from the calendar API
-    current_user = User.objects.get(id=request.user.id)
+    current_user = User.objects.get(username=request.user.username)
     storage = Storage(CredentialsModel, 'id', current_user, 'credential')
     credential = storage.get()
     if not credential is None:
@@ -402,7 +378,7 @@ def get_calendar_data(request):
         'sat' : SNE.objects.filter(current_day = 'Saturday'),
         'sun' : SNE.objects.filter(current_day = 'Sunday'),
         'event_length' : event_length,
-        'current_user' : current_user.username
+        'current_user' : request.user.username
     }
 
     return render(request, 'calender.html', context)
