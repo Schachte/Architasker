@@ -117,8 +117,6 @@ def pull_user_event_data(request):
         now = now - datetime.timedelta(now.weekday() + 365)
         then = datetime.timedelta(days=371) #Indexed at 0
         then = now + then
-        print(now)
-        print(then)
 
         #Oauth handling var
         page_token = None
@@ -146,7 +144,6 @@ def pull_user_event_data(request):
             timeMax=then, maxResults=1500).execute()
 
         events = eventsResult.get('items', [])
-
         #Get all the google events from the database when attempting the current sync
         google_tasks = SNE.objects.filter(is_google_task = True)
 
@@ -163,8 +160,6 @@ def pull_user_event_data(request):
                 string_converted_end = convert(event['end'])
                 string_colors = convert(event)
 
-
-
                 # print (string_converted_date.keys())
                 #Storing the physical event into the DB store
                 if 'date' in string_converted_date.keys() or 'dateTime' in  string_converted_date.keys():
@@ -178,15 +173,15 @@ def pull_user_event_data(request):
                     elif 'date' in string_converted_date.keys():
                         current = str(string_converted_date['date'])
                         dt = datetime.datetime.strptime(current, '%Y-%m-%d')
-                        current = current[0:19]
+                        current = current[0:10] + 'T00:00:00Z'
 
                     if 'dateTime' in string_converted_end.keys():
                         end_time = str(string_converted_end['dateTime'])
                         end_time = end_time[0:19]
 
                     elif 'date' in string_converted_end.keys():
-                        end_time = str(string_converted_date['date'])
-                        end_time = end_time[0:19]
+                        end_time = str(string_converted_end['date'])
+                        end_time = end_time[0:10] + 'T00:00:00Z'
 
                     current_user = User.objects.get(username=request.user.username)
 
