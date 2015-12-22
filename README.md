@@ -14,5 +14,3 @@ Naming conventions for the branches:<br>
 &nbsp;&nbsp;&nbsp; <li> When you're ready to push your changes, run the command "git push origin branch_YOURBRANCHNAME" to send the changes to GitHub</li>
 </ul>
 <hr>
-
-

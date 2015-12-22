@@ -35,4 +35,5 @@ urlpatterns = [
     url(r'^login', login_render, name="login_render"),
     url(r'^logmein', processor_login, name="processor_login"),
     url(r'^logout', logout_process, name="logout_process"),
+    url(r'^tester', tester_login_form, name="tester_login_form"),
 ]

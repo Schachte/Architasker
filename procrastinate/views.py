@@ -398,3 +398,6 @@ def unauthorize_account(request):
 
 def home(request):
     return render(request, 'home.html')
+
+def tester_login_form(request):
+    return render(request, 'login_form.html')
