@@ -24,14 +24,14 @@ from .views import *
 urlpatterns = [
     url(r'^$', home, name="home"),
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^oauth/', index, name="oauthview"),                                   #Ability validate Oauth steps
-    url(r'^oauth2callback', auth_return, name="auth_return"),                   #Ability validate Oauth steps
-    url(r'^get_cal', get_calendar_data, name="get_calendar_data"),              #Ability to actually view the users calendar data for the tool (will port this to control panel)
-    url(r'^unauthorize', unauthorize_account, name="unauthorize_account"),      #Ability to remove OAUTH token from DB for the current authenticated user
-    url(r'^sync', pull_user_event_data, name="pull_user_event_data"),
-    url(r'^create_event/', create_event, name="create_event"),
-    url(r'^delete_event/', delete_event, name="delete_event"),
-    url(r'^update_event/', update_event, name="update_event"),
+    url(r'^oauth/', 'calendar.views.index', name="oauthview"),                                   #Ability validate Oauth steps
+    url(r'^oauth2callback', 'calendar.views.auth_return', name="auth_return"),                   #Ability validate Oauth steps
+    url(r'^get_cal', 'calendar.views.get_calendar_data', name="get_calendar_data"),              #Ability to actually view the users calendar data for the tool (will port this to control panel)
+    url(r'^unauthorize', 'calendar.views.unauthorize_account', name="unauthorize_account"),      #Ability to remove OAUTH token from DB for the current authenticated user
+    url(r'^sync', 'calendar.views.pull_user_event_data', name="pull_user_event_data"),
+    url(r'^create_event/', 'calendar.views.create_event', name="create_event"),
+    url(r'^delete_event/', 'calendar.views.delete_event', name="delete_event"),
+    url(r'^update_event/', 'calendar.views.update_event', name="update_event"),
     url(r'^login', login_render, name="login_render"),
     url(r'^logmein', processor_login, name="processor_login"),
     url(r'^logout', logout_process, name="logout_process"),
