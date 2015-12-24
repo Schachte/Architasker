@@ -71,6 +71,12 @@ TEMPLATES = [
 WSGI_APPLICATION = 'procrastinate.wsgi.application'
 
 
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+    'procrastinate.auth_backend.PasswordlessAuthBackend',
+)
+
+
 # Database
 # https://docs.djangoproject.com/en/1.8/ref/settings/#databases
 
