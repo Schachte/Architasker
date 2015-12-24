@@ -144,12 +144,13 @@ def pull_user_event_data(request):
             timeMax=then, maxResults=1500).execute()
 
         events = eventsResult.get('items', [])
-        #Get all the google events from the database when attempting the current sync
+        
         
         #subtracting one day from the now time
         new_now_day = int(now[8:10])
         new_now_day = new_now_day - 1
 
+        #Get all the google events from the database when attempting the current sync
         google_tasks = SNE.objects.filter(is_google_task = True)
 
         #generating start and end of time range for the week
