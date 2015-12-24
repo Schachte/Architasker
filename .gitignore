@@ -2,3 +2,5 @@ db.sqlite3
 *.sqlite
 *.sqlite3
 *.pyc
+client_secrets.json
+
