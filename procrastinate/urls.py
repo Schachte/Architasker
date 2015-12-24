@@ -25,10 +25,12 @@ from account_management.views import login_process as processor_login
 from account_management.views import login_view as login_render
 from account_management.views import *
 from .views import *
-
+from jet import *
 
 urlpatterns = [
     url(r'^$', home, name="home"),                                              #Index loader
+    url(r'^jet/', include('jet.urls', 'jet')),
+    url(r'^jet/dashboard/', include('jet.dashboard.urls', 'jet-dashboard')),  # Django JET dashboard URLS
     url(r'^admin/', include(admin.site.urls)),                                  #Admin login page
     url(r'^oauth/', index, name="oauthview"),                                   #Ability validate Oauth steps
     url(r'^oauth2callback', auth_return, name="auth_return"),                   #Ability validate Oauth steps
