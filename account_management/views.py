@@ -14,9 +14,8 @@ from django.contrib.auth import logout
 
 
 def login_view(request):
-
     if not request.user.username:
-        return render(request, 'login.html')
+        return render(request, 'HOME_PAGE/login.html')
     else:
         return HttpResponseRedirect('/get_cal')
 

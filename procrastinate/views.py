@@ -32,6 +32,11 @@ from django.utils.cache import get_cache_key
 import time
 from store_new_events.models import UserEvent as SNE
 from django.contrib.auth.decorators import login_required
+from django.shortcuts import redirect
+from django.contrib.sessions.models import Session
+from django.contrib.auth.backends import ModelBackend
+import urlparse
+import urllib
 
 #Load the API key
 CLIENT_SECRETS = os.path.join(os.path.dirname(__file__), '..', 'client_secrets.json')
@@ -70,8 +75,18 @@ def index(request):
   if credential is None or credential.invalid == True:
     FLOW.params['state'] = xsrfutil.generate_token(settings.SECRET_KEY,
                                                    request.user.id)
+
+
+    logged_in_username = request.user.username
+    user_data = {'var_test' : logged_in_username}
+    pass_param = urllib.urlencode(user_data)
+    FLOW.params['state']=pass_param
     authorize_url = FLOW.step1_get_authorize_url()
-    return HttpResponseRedirect(authorize_url)
+    # authorize_url = authorize_url + '&state=' +  pass_param
+    print(authorize_url)
+    pass_param = urllib.urlencode(user_data)
+    state = pass_param
+    return redirect(authorize_url, request)
 
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -79,16 +94,28 @@ User then calls the data function once authenticated
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
 def auth_return(request):
-  credential = FLOW.step2_exchange(request.REQUEST)
-  current_user = User.objects.get(id=request.user.id)
 
-  #Error handling in case system doesn't recognize authenticated user
-  if current_user is None:
-      return HttpResponseRedirect("/login")
+    #Get the currently logged in username
+    user_variable_data = str(FLOW.params['state'])
 
-  storage = Storage(CredentialsModel, 'id', current_user, 'credential')
-  storage.put(credential)
-  return HttpResponseRedirect("/get_cal")
+    #get rid of the var_test= preprended text data for parsing reasons
+    user_variable_data = user_variable_data[9:]
+
+    #Get that user from the database in the form of a user object
+    current_user = User.objects.get(username=user_variable_data)
+    print("current user is %s"%(current_user))
+
+    credential = FLOW.step2_exchange(request.REQUEST)
+
+
+    storage = Storage(CredentialsModel, 'id', current_user, 'credential')
+    storage.put(credential)
+
+    user = authenticate(username=user_variable_data)
+    login(request, user)
+    print("AUTHENTICATED")
+
+    return HttpResponseRedirect("/get_cal")
 
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -160,7 +187,6 @@ def pull_user_event_data(request):
                 string_converted_end = convert(event['end'])
                 string_colors = convert(event)
 
-                # print (string_converted_date.keys())
                 #Storing the physical event into the DB store
                 if 'date' in string_converted_date.keys() or 'dateTime' in  string_converted_date.keys():
 
@@ -397,7 +423,4 @@ def unauthorize_account(request):
         return render(request, 'user_calendar.html')
 
 def home(request):
-    return render(request, 'home.html')
-
-def tester_login_form(request):
-    return render(request, 'login_form.html')
+    return render(request, 'HOME_PAGE/index.html')
