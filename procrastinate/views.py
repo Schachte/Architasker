@@ -30,8 +30,8 @@ from apiclient import discovery
 from django.core.cache import cache
 from django.utils.cache import get_cache_key
 import time
-from store_new_events.models import UserEvent as SNE
-from account_management.models import UserExtended as UE
+from app_store_new_events.models import UserEvent as SNE
+from app_account_management.models import UserExtended as UE
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
 from django.contrib.sessions.models import Session
