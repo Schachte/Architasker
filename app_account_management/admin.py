@@ -1,6 +1,7 @@
 from django.contrib import admin
-from .models import UserExtended as UE
+from .models import UserExtended as UserExtended
 
-admin.site.register(UE)
+class UserExtendedAdmin(admin.ModelAdmin):
+  list_display = ['authenticated_user', 'dob', 'google_auth', 'google_initial_sync']
 
-# Register your models here.
+admin.site.register(UserExtended, UserExtendedAdmin)
