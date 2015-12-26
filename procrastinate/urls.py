@@ -41,6 +41,11 @@ urlpatterns = [
     url(r'^delete_event/', delete_event, name="delete_event"),                  #Delete event task AJAX URl
     url(r'^update_event/', update_event, name="update_event"),                  #Update event task AJAX URl
     url(r'^login', login_render, name="login_render"),                          #Login template render page
+    url(r'^register$', register_view, name="register_view"),
+    url(r'^registermein', processor_register, name="processor_register"),
     url(r'^logmein', processor_login, name="processor_login"),                  #Background process to process the server request to authenticate user
     url(r'^logout', logout_process, name="logout_process")                      #Logout the requested user session
 ]
+
+admin.site.site_header = 'Architasker'
+admin.site.login_header = "Architasker"
