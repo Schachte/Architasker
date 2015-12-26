@@ -113,7 +113,6 @@ def auth_return(request):
 
     user = authenticate(username=user_variable_data)
     login(request, user)
-    print("AUTHENTICATED")
 
     return HttpResponseRedirect("/get_cal")
 
@@ -141,8 +140,8 @@ def pull_user_event_data(request):
 
         #Need to fix the timing issues. Do not use UTC NOW, use 12AM or something
         now = datetime.datetime.utcnow()
-        now = now - datetime.timedelta(now.weekday() + 365)
-        then = datetime.timedelta(days=371) #Indexed at 0
+        now = now - datetime.timedelta(now.weekday() - 1)
+        then = datetime.timedelta(days=5) #Indexed at 0
         then = now + then
 
         #Oauth handling var
@@ -171,13 +170,29 @@ def pull_user_event_data(request):
             timeMax=then, maxResults=1500).execute()
 
         events = eventsResult.get('items', [])
+
+
+        #subtracting one day from the now time
+        new_now_day = int(now[8:10])
+        new_now_day = new_now_day - 1
+
         #Get all the google events from the database when attempting the current sync
         google_tasks = SNE.objects.filter(is_google_task = True)
 
-        #If they exist, then loop through and delete each one from the database
+        #generating start and end of time range for the week
+        start_range = datetime.datetime.strptime(now[0:10], '%Y-%m-%d')
+        start_range = start_range.replace(day = new_now_day)
+        end_range = datetime.datetime.strptime(then[0:10], '%Y-%m-%d')
+
+        #deleting tasks only for the current week
         if google_tasks is not None:
-            for each_google_task in google_tasks:
-                each_google_task.delete()
+            for task in google_tasks:
+                task_start_time = convert(task.start_time)
+                task_start_time = datetime.datetime.strptime(task_start_time[0:10], '%Y-%m-%d')
+
+                if task_start_time >= start_range and task_start_time <= end_range:
+                    print(task.task_name)
+                    task.delete()
 
 
         #We need to start parsing and storing the data into the database with the most recent copy of google events
