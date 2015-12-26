@@ -31,6 +31,7 @@ from django.core.cache import cache
 from django.utils.cache import get_cache_key
 import time
 from store_new_events.models import UserEvent as SNE
+from account_management.models import UserExtended as UE
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
 from django.contrib.sessions.models import Session
@@ -137,168 +138,323 @@ def pull_user_event_data(request):
         service = discovery.build('calendar', 'v3', http=http)
 
         '''These calculations below calculate the beginning of the week as well as the end of the week'''
+        user_extension = UE.objects.get(authenticated_user=request.user)
 
-        #Need to fix the timing issues. Do not use UTC NOW, use 12AM or something
-        now = datetime.datetime.utcnow()
-        now = now - datetime.timedelta(now.weekday() - 1)
-        then = datetime.timedelta(days=5) #Indexed at 0
-        then = now + then
+        #Sync everything since the user has created the account from their google calendar
+        if (user_extension.google_initial_sync == False):
+            '''Grab everything since that account date to the current week'''
+            #Days left in the current week (to get the date for Sunday)
+            delta_for_EOW = 6 - datetime.datetime.today().weekday()
 
-        #Oauth handling var
-        page_token = None
+            #Get the date for the end of the current week
+            current_EOW = datetime.datetime.utcnow() + datetime.timedelta(days=delta_for_EOW)
 
-        #This is a shitty error-handling snippet for weirdly named calendars. We need to fix this
-        calendar_list = service.calendarList().list(pageToken=page_token).execute()
+            now = request.user.date_joined #Date user joined the site
+            then = current_EOW #End of week for the current week
 
-        #Deal with authentication and storing user auth data
-        page_token = calendar_list.get('nextPageToken')
-        if not page_token:
-            pass
+            #Sync everything from these two dates
 
-        #Setting the beginning of the week as well as the end of the week
-        # 'Z' indicates UTC time
-        now = now.isoformat() + 'Z'
-        then = then.isoformat() + 'Z'
+            #Oauth handling var
+            page_token = None
 
-        now = str(now[0:10]) + 'T00:00:01Z'
-        then = str(then[0:10]) + 'T23:59:59Z'
+            #This is a shitty error-handling snippet for weirdly named calendars. We need to fix this
+            calendar_list = service.calendarList().list(pageToken=page_token).execute()
 
-        #Get the events off the primary calendar, this should be changed eventually so the user can select the calendar they please to use
-        eventsResult = service.events().list(
-
-            calendarId='primary', timeMin=now,
-            timeMax=then, maxResults=1500).execute()
-
-        events = eventsResult.get('items', [])
-
-
-        #subtracting one day from the now time
-        new_now_day = int(now[8:10])
-        new_now_day = new_now_day - 1
-
-        #Get all the google events from the database when attempting the current sync
-        google_tasks = SNE.objects.filter(is_google_task = True)
-
-        #generating start and end of time range for the week
-        start_range = datetime.datetime.strptime(now[0:10], '%Y-%m-%d')
-        start_range = start_range.replace(day = new_now_day)
-        end_range = datetime.datetime.strptime(then[0:10], '%Y-%m-%d')
-
-        #deleting tasks only for the current week
-        if google_tasks is not None:
-            for task in google_tasks:
-                task_start_time = convert(task.start_time)
-                task_start_time = datetime.datetime.strptime(task_start_time[0:10], '%Y-%m-%d')
-
-                if task_start_time >= start_range and task_start_time <= end_range:
-                    print(task.task_name)
-                    task.delete()
-
-
-        #We need to start parsing and storing the data into the database with the most recent copy of google events
-        for event in events:
-            try:
-                string_converted_date = convert(event['start'])
-                string_converted_end = convert(event['end'])
-                string_colors = convert(event)
-
-                #Storing the physical event into the DB store
-                if 'date' in string_converted_date.keys() or 'dateTime' in  string_converted_date.keys():
-
-                    if 'dateTime' in string_converted_date.keys():
-                        current = str(string_converted_date['dateTime'])
-                        times = current[11:]
-                        dt = datetime.datetime.strptime(current, '%Y-%m-%dT' + times)
-                        current = current[0:19]
-
-                    elif 'date' in string_converted_date.keys():
-                        current = str(string_converted_date['date'])
-                        dt = datetime.datetime.strptime(current, '%Y-%m-%d')
-                        #appends T00:00:00Z to the end of the start date
-                        #This is how dhtmlxscheduler defines an all day event
-                        current = current[0:10] + 'T00:00:00Z'
-
-                    if 'dateTime' in string_converted_end.keys():
-                        end_time = str(string_converted_end['dateTime'])
-                        end_time = end_time[0:19]
-
-                    elif 'date' in string_converted_end.keys():
-                        end_time = str(string_converted_end['date'])
-                        #appends T00:00:00Z to the end of the end date
-                        end_time = end_time[0:10] + 'T00:00:00Z'
-
-                    current_user = User.objects.get(username=request.user.username)
-
-                    not_exists = False
-                    if not SNE.objects.filter(special_event_id=str(event['id'])).exists():
-                        not_exists = True
-
-                        temp_model = SNE.objects.create(
-                            authenticated_user = current_user,
-                            task_name = event['summary'],
-                            is_google_task = True,
-                            google_json = str(event),
-                            start_time = str(current),
-                            end_time = str(end_time),
-                            special_event_id = str(event['id'])
-                        )
-
-
-                    HEX_ASSOCIATION = {
-                        '1': '#AEA8D3', '2': '#87D37C', '3': '#BE90D4', '4': '#E26A6A', '5': '#F9BF3B', '6': '#EB974E', '7': '#19B5FE', '8': '#D2D7D3', '9': '#4B77BE', '10': '#26A65B',
-                        '11': '#D24D57'
-                    }
-
-                    if 'colorId' in event:
-                        temp_model.color = HEX_ASSOCIATION[event['colorId']]
-                    else:
-                        temp_model.color = HEX_ASSOCIATION['1']
-
-
-                    #Parsing out the different events to store into day arrays for the week
-                    if (dt.weekday() == 0 ):
-
-                        if not_exists:
-                            temp_model.current_day = "Monday"
-                            temp_model.save()
-
-                    elif (dt.weekday() == 1 ):
-
-                        if not_exists:
-                            temp_model.current_day = "Tuesday"
-                            temp_model.save()
-
-                    elif (dt.weekday() == 2 ):
-
-                        if not_exists:
-                            temp_model.current_day = "Wednesday"
-                            temp_model.save()
-
-                    elif (dt.weekday() == 3 ):
-
-                        if not_exists:
-                            temp_model.current_day = "Thursday"
-                            temp_model.save()
-
-                    elif (dt.weekday() == 4 ):
-
-                        if not_exists:
-                            temp_model.current_day = "Friday"
-                            temp_model.save()
-
-                    elif (dt.weekday() == 5 ):
-
-                        if not_exists:
-                            temp_model.current_day = "Saturday"
-                            temp_model.save()
-
-                    elif (dt.weekday() == 6 ):
-
-                        if not_exists:
-                            temp_model.current_day = "Sunday"
-                            temp_model.save()
-            except:
+            #Deal with authentication and storing user auth data
+            page_token = calendar_list.get('nextPageToken')
+            if not page_token:
                 pass
+
+            #Setting the beginning of the week as well as the end of the week
+            # 'Z' indicates UTC time
+            now = now.isoformat() + 'Z'
+            then = then.isoformat() + 'Z'
+
+            now = str(now[0:10]) + 'T00:00:01Z'
+            then = str(then[0:10]) + 'T23:59:59Z'
+
+            #Get the events off the primary calendar, this should be changed eventually so the user can select the calendar they please to use
+            eventsResult = service.events().list(
+
+                calendarId='primary', timeMin=now,
+                timeMax=then, maxResults=1500).execute()
+
+            events = eventsResult.get('items', [])
+            #We need to start parsing and storing the data into the database with the most recent copy of google events
+
+            '''I WANT TO MAKE A FUNCTION FOR THIS TO REDUCE THE AMOUNT OF CODE DUPLICATION FOR THE SAME FUNCTION'''
+
+            for event in events:
+                try:
+                    string_converted_date = convert(event['start'])
+                    string_converted_end = convert(event['end'])
+                    string_colors = convert(event)
+
+                    #Storing the physical event into the DB store
+                    if 'date' in string_converted_date.keys() or 'dateTime' in  string_converted_date.keys():
+
+                        if 'dateTime' in string_converted_date.keys():
+                            current = str(string_converted_date['dateTime'])
+                            times = current[11:]
+                            dt = datetime.datetime.strptime(current, '%Y-%m-%dT' + times)
+                            current = current[0:19]
+
+                        elif 'date' in string_converted_date.keys():
+                            current = str(string_converted_date['date'])
+                            dt = datetime.datetime.strptime(current, '%Y-%m-%d')
+                            #appends T00:00:00Z to the end of the start date
+                            #This is how dhtmlxscheduler defines an all day event
+                            current = current[0:10] + 'T00:00:00Z'
+
+                        if 'dateTime' in string_converted_end.keys():
+                            end_time = str(string_converted_end['dateTime'])
+                            end_time = end_time[0:19]
+
+                        elif 'date' in string_converted_end.keys():
+                            end_time = str(string_converted_end['date'])
+                            #appends T00:00:00Z to the end of the end date
+                            end_time = end_time[0:10] + 'T00:00:00Z'
+
+                        current_user = User.objects.get(username=request.user.username)
+
+                        not_exists = False
+                        if not SNE.objects.filter(special_event_id=str(event['id'])).exists():
+                            not_exists = True
+
+                            temp_model = SNE.objects.create(
+                                authenticated_user = current_user,
+                                task_name = event['summary'],
+                                is_google_task = True,
+                                google_json = str(event),
+                                start_time = str(current),
+                                end_time = str(end_time),
+                                special_event_id = str(event['id'])
+                            )
+
+
+                        HEX_ASSOCIATION = {
+                            '1': '#AEA8D3', '2': '#87D37C', '3': '#BE90D4', '4': '#E26A6A', '5': '#F9BF3B', '6': '#EB974E', '7': '#19B5FE', '8': '#D2D7D3', '9': '#4B77BE', '10': '#26A65B',
+                            '11': '#D24D57'
+                        }
+
+                        if 'colorId' in event:
+                            temp_model.color = HEX_ASSOCIATION[event['colorId']]
+                        else:
+                            temp_model.color = HEX_ASSOCIATION['1']
+
+
+                        #Parsing out the different events to store into day arrays for the week
+                        if (dt.weekday() == 0 ):
+
+                            if not_exists:
+                                temp_model.current_day = "Monday"
+                                temp_model.save()
+
+                        elif (dt.weekday() == 1 ):
+
+                            if not_exists:
+                                temp_model.current_day = "Tuesday"
+                                temp_model.save()
+
+                        elif (dt.weekday() == 2 ):
+
+                            if not_exists:
+                                temp_model.current_day = "Wednesday"
+                                temp_model.save()
+
+                        elif (dt.weekday() == 3 ):
+
+                            if not_exists:
+                                temp_model.current_day = "Thursday"
+                                temp_model.save()
+
+                        elif (dt.weekday() == 4 ):
+
+                            if not_exists:
+                                temp_model.current_day = "Friday"
+                                temp_model.save()
+
+                        elif (dt.weekday() == 5 ):
+
+                            if not_exists:
+                                temp_model.current_day = "Saturday"
+                                temp_model.save()
+
+                        elif (dt.weekday() == 6 ):
+
+                            if not_exists:
+                                temp_model.current_day = "Sunday"
+                                temp_model.save()
+                except:
+                    pass
+
+                user_extension.google_initial_sync = True
+                user_extension.save()
+
+
+        else:
+            #Need to fix the timing issues. Do not use UTC NOW, use 12AM or something
+            now = datetime.datetime.utcnow()
+            now = now - datetime.timedelta(now.weekday() - 1)
+            then = datetime.timedelta(days=5) #Indexed at 0
+            then = now + then
+
+            #Oauth handling var
+            page_token = None
+
+            #This is a shitty error-handling snippet for weirdly named calendars. We need to fix this
+            calendar_list = service.calendarList().list(pageToken=page_token).execute()
+
+            #Deal with authentication and storing user auth data
+            page_token = calendar_list.get('nextPageToken')
+            if not page_token:
+                pass
+
+            #Setting the beginning of the week as well as the end of the week
+            # 'Z' indicates UTC time
+            now = now.isoformat() + 'Z'
+            then = then.isoformat() + 'Z'
+
+            now = str(now[0:10]) + 'T00:00:01Z'
+            then = str(then[0:10]) + 'T23:59:59Z'
+
+            #Get the events off the primary calendar, this should be changed eventually so the user can select the calendar they please to use
+            eventsResult = service.events().list(
+
+                calendarId='primary', timeMin=now,
+                timeMax=then, maxResults=1500).execute()
+
+            events = eventsResult.get('items', [])
+
+
+            #subtracting one day from the now time
+            new_now_day = int(now[8:10])
+            new_now_day = new_now_day - 1
+
+            #Get all the google events from the database when attempting the current sync
+            google_tasks = SNE.objects.filter(is_google_task = True)
+
+            #generating start and end of time range for the week
+            start_range = datetime.datetime.strptime(now[0:10], '%Y-%m-%d')
+            start_range = start_range.replace(day = new_now_day)
+            end_range = datetime.datetime.strptime(then[0:10], '%Y-%m-%d')
+
+            #deleting tasks only for the current week
+            if google_tasks is not None:
+                for task in google_tasks:
+                    task_start_time = convert(task.start_time)
+                    task_start_time = datetime.datetime.strptime(task_start_time[0:10], '%Y-%m-%d')
+
+                    if task_start_time >= start_range and task_start_time <= end_range:
+                        print(task.task_name),
+                        print("Has been deleted ")
+                        task.delete()
+
+
+            #We need to start parsing and storing the data into the database with the most recent copy of google events
+            for event in events:
+                try:
+                    string_converted_date = convert(event['start'])
+                    string_converted_end = convert(event['end'])
+                    string_colors = convert(event)
+
+                    #Storing the physical event into the DB store
+                    if 'date' in string_converted_date.keys() or 'dateTime' in  string_converted_date.keys():
+
+                        if 'dateTime' in string_converted_date.keys():
+                            current = str(string_converted_date['dateTime'])
+                            times = current[11:]
+                            dt = datetime.datetime.strptime(current, '%Y-%m-%dT' + times)
+                            current = current[0:19]
+
+                        elif 'date' in string_converted_date.keys():
+                            current = str(string_converted_date['date'])
+                            dt = datetime.datetime.strptime(current, '%Y-%m-%d')
+                            #appends T00:00:00Z to the end of the start date
+                            #This is how dhtmlxscheduler defines an all day event
+                            current = current[0:10] + 'T00:00:00Z'
+
+                        if 'dateTime' in string_converted_end.keys():
+                            end_time = str(string_converted_end['dateTime'])
+                            end_time = end_time[0:19]
+
+                        elif 'date' in string_converted_end.keys():
+                            end_time = str(string_converted_end['date'])
+                            #appends T00:00:00Z to the end of the end date
+                            end_time = end_time[0:10] + 'T00:00:00Z'
+
+                        current_user = User.objects.get(username=request.user.username)
+
+                        not_exists = False
+                        if not SNE.objects.filter(special_event_id=str(event['id'])).exists():
+                            not_exists = True
+
+                            temp_model = SNE.objects.create(
+                                authenticated_user = current_user,
+                                task_name = event['summary'],
+                                is_google_task = True,
+                                google_json = str(event),
+                                start_time = str(current),
+                                end_time = str(end_time),
+                                special_event_id = str(event['id'])
+                            )
+
+
+                        HEX_ASSOCIATION = {
+                            '1': '#AEA8D3', '2': '#87D37C', '3': '#BE90D4', '4': '#E26A6A', '5': '#F9BF3B', '6': '#EB974E', '7': '#19B5FE', '8': '#D2D7D3', '9': '#4B77BE', '10': '#26A65B',
+                            '11': '#D24D57'
+                        }
+
+                        if 'colorId' in event:
+                            temp_model.color = HEX_ASSOCIATION[event['colorId']]
+                        else:
+                            temp_model.color = HEX_ASSOCIATION['1']
+
+
+                        #Parsing out the different events to store into day arrays for the week
+                        if (dt.weekday() == 0 ):
+
+                            if not_exists:
+                                temp_model.current_day = "Monday"
+                                temp_model.save()
+
+                        elif (dt.weekday() == 1 ):
+
+                            if not_exists:
+                                temp_model.current_day = "Tuesday"
+                                temp_model.save()
+
+                        elif (dt.weekday() == 2 ):
+
+                            if not_exists:
+                                temp_model.current_day = "Wednesday"
+                                temp_model.save()
+
+                        elif (dt.weekday() == 3 ):
+
+                            if not_exists:
+                                temp_model.current_day = "Thursday"
+                                temp_model.save()
+
+                        elif (dt.weekday() == 4 ):
+
+                            if not_exists:
+                                temp_model.current_day = "Friday"
+                                temp_model.save()
+
+                        elif (dt.weekday() == 5 ):
+
+                            if not_exists:
+                                temp_model.current_day = "Saturday"
+                                temp_model.save()
+
+                        elif (dt.weekday() == 6 ):
+
+                            if not_exists:
+                                temp_model.current_day = "Sunday"
+                                temp_model.save()
+                except:
+                    pass
 
 
         return HttpResponseRedirect('/get_cal')
