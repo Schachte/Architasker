@@ -21,9 +21,9 @@ Load the necessary functions from the APP views files.
 '''
 from django.conf.urls import include, url
 from django.contrib import admin
-from account_management.views import login_process as processor_login
-from account_management.views import login_view as login_render
-from account_management.views import *
+from app_account_management.views import login_process as processor_login
+from app_account_management.views import login_view as login_render
+from app_account_management.views import *
 from .views import *
 from jet import *
 
