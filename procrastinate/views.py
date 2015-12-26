@@ -113,7 +113,6 @@ def auth_return(request):
 
     user = authenticate(username=user_variable_data)
     login(request, user)
-    print("AUTHENTICATED")
 
     return HttpResponseRedirect("/get_cal")
 
@@ -144,7 +143,7 @@ def pull_user_event_data(request):
         now = now - datetime.timedelta(now.weekday() - 1)
         then = datetime.timedelta(days=5) #Indexed at 0
         then = now + then
-        
+
         #Oauth handling var
         page_token = None
 
@@ -171,8 +170,8 @@ def pull_user_event_data(request):
             timeMax=then, maxResults=1500).execute()
 
         events = eventsResult.get('items', [])
-        
-        
+
+
         #subtracting one day from the now time
         new_now_day = int(now[8:10])
         new_now_day = new_now_day - 1
@@ -184,7 +183,7 @@ def pull_user_event_data(request):
         start_range = datetime.datetime.strptime(now[0:10], '%Y-%m-%d')
         start_range = start_range.replace(day = new_now_day)
         end_range = datetime.datetime.strptime(then[0:10], '%Y-%m-%d')
-        
+
         #deleting tasks only for the current week
         if google_tasks is not None:
             for task in google_tasks:
@@ -192,6 +191,7 @@ def pull_user_event_data(request):
                 task_start_time = datetime.datetime.strptime(task_start_time[0:10], '%Y-%m-%d')
 
                 if task_start_time >= start_range and task_start_time <= end_range:
+                    print(task.task_name)
                     task.delete()
 
 
