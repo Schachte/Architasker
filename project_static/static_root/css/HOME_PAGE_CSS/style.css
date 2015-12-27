@@ -4846,7 +4846,7 @@ footer p {
 
   .login-box {
   	background-color: white;
-  	max-width: 340px;
+  	max-width: 540px;
   	margin: 0 auto;
   	position: relative;
   	top: 80px;
@@ -4878,6 +4878,7 @@ footer p {
   	border-radius: 2px;
   	font-size: .9em;
   	color: #888;
+    width: 90%;
   }
 
   .login-box input:focus {

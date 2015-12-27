@@ -10,3 +10,4 @@ class UserExtended(models.Model):
 	# dob = models.DateField(default=None, null=True)
 	time_zone = models.CharField(max_length=255, default='None')
 	google_auth = models.BooleanField(default=False, unique=False)
+	user_login_count = models.IntegerField(default=0)

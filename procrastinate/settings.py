@@ -40,7 +40,8 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'procrastinate',
     'app_store_new_events',
-    'app_account_management'
+    'app_account_management',
+    'app_dashboard'
 )
 
 MIDDLEWARE_CLASSES = (

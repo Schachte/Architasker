@@ -18,13 +18,13 @@ def login_view(request):
     if not request.user.username:
         return render(request, 'HOME_PAGE/login.html')
     else:
-        return HttpResponseRedirect('/get_cal')
+        return HttpResponseRedirect('/dashboard')
 
 def register_view(request):
     if not request.user.username:
         return render(request, 'HOME_PAGE/register.html')
     else:
-        return HttpResponseRedirect('/get_cal')
+        return HttpResponseRedirect('/dashboard')
 
 #View that requires the user to login to his/her account
 def login_process(request):
@@ -40,7 +40,10 @@ def login_process(request):
         if user is not None:
             if user.is_active:
                 login(request, user)
-            return HttpResponseRedirect('/get_cal')
+                UE_model = UserExtended.objects.get(authenticated_user=user)
+                UE_model.user_login_count += 1
+                UE_model.save()
+            return HttpResponseRedirect('/dashboard')
 
         else:
             print('There was an error processing this login request')
