@@ -8,6 +8,7 @@ import os
 import logging
 import collections
 import time
+import urllib
 from apiclient import discovery
 from oauth2client import client
 from oauth2client import tools
@@ -34,6 +35,7 @@ from django.contrib.auth.decorators import login_required
 from .models import UserEvent as SNE
 from .models import CredentialsModel
 from procrastinate import settings
+from app_account_management.models import UserExtended
 
 #Load the API key
 CLIENT_SECRETS = os.path.join(os.path.dirname(__file__), '..', 'client_secrets.json')
@@ -72,8 +74,18 @@ def index(request):
   if credential is None or credential.invalid == True:
     FLOW.params['state'] = xsrfutil.generate_token(settings.SECRET_KEY,
                                                    request.user.id)
+
+
+    logged_in_username = request.user.username
+    user_data = {'var_test' : logged_in_username}
+    pass_param = urllib.urlencode(user_data)
+    FLOW.params['state']=pass_param
     authorize_url = FLOW.step1_get_authorize_url()
-    return HttpResponseRedirect(authorize_url)
+    # authorize_url = authorize_url + '&state=' +  pass_param
+    print(authorize_url)
+    pass_param = urllib.urlencode(user_data)
+    state = pass_param
+    return redirect(authorize_url, request)
 
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -81,16 +93,27 @@ User then calls the data function once authenticated
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
 def auth_return(request):
-  credential = FLOW.step2_exchange(request.REQUEST)
-  current_user = User.objects.get(id=request.user.id)
 
-  #Error handling in case system doesn't recognize authenticated user
-  if current_user is None:
-      return HttpResponseRedirect("/login")
+    #Get the currently logged in username
+    user_variable_data = str(FLOW.params['state'])
 
-  storage = Storage(CredentialsModel, 'id', current_user, 'credential')
-  storage.put(credential)
-  return HttpResponseRedirect("/get_cal")
+    #get rid of the var_test= preprended text data for parsing reasons
+    user_variable_data = user_variable_data[9:]
+
+    #Get that user from the database in the form of a user object
+    current_user = User.objects.get(username=user_variable_data)
+    print("current user is %s"%(current_user))
+
+    credential = FLOW.step2_exchange(request.REQUEST)
+
+
+    storage = Storage(CredentialsModel, 'id', current_user, 'credential')
+    storage.put(credential)
+
+    user = authenticate(username=user_variable_data)
+    login(request, user)
+
+    return HttpResponseRedirect("/dashboard")
 
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -100,13 +123,12 @@ Custom function to parse out the user events and store them on-click
 def pull_user_event_data(request):
     user_is_authenticated = False
 
+
     #Send request to pull data from the calendar API
     current_user = User.objects.get(id=request.user.id)
     storage = Storage(CredentialsModel, 'id', current_user, 'credential')
     credential = storage.get()
     if not credential is None:
-
-        print("OAUTH DEBUG")
 
         '''Dealing with OAUTH verification'''
         user_is_authenticated = True
@@ -114,12 +136,11 @@ def pull_user_event_data(request):
         http = credential.authorize(http)
         service = discovery.build('calendar', 'v3', http=http)
 
-        '''These calculations below calculate the beginning of the week as well as the end of the week'''
 
         #Need to fix the timing issues. Do not use UTC NOW, use 12AM or something
         now = datetime.datetime.utcnow()
-        now = now - datetime.timedelta(now.weekday() + 365)
-        then = datetime.timedelta(days=371) #Indexed at 0
+        now = now - datetime.timedelta(now.weekday() - 1)
+        then = datetime.timedelta(days=5) #Indexed at 0
         then = now + then
 
         #Oauth handling var
@@ -149,18 +170,29 @@ def pull_user_event_data(request):
 
         events = eventsResult.get('items', [])
 
-        print(events)
+        #subtracting one day from the now time
+        new_now_day = int(now[8:10])
+        new_now_day = new_now_day - 1
+
         #Get all the google events from the database when attempting the current sync
         google_tasks = SNE.objects.filter(is_google_task = True)
 
-        print("GOOGLE RECEIVED")
+        #generating start and end of time range for the week
+        start_range = datetime.datetime.strptime(now[0:10], '%Y-%m-%d')
+        start_range = start_range.replace(day = new_now_day)
+        end_range = datetime.datetime.strptime(then[0:10], '%Y-%m-%d')
 
-        #If they exist, then loop through and delete each one from the database
+        #deleting tasks only for the current week
         if google_tasks is not None:
-            for each_google_task in google_tasks:
-                each_google_task.delete()
+            for task in google_tasks:
+                task_start_time = convert(task.start_time)
+                task_start_time = datetime.datetime.strptime(task_start_time[0:10], '%Y-%m-%d')
 
-        print("GOOGLE DELETED")
+                if task_start_time >= start_range and task_start_time <= end_range:
+                    print(task.task_name),
+                    print("Has been deleted ")
+                    task.delete()
+
 
         #We need to start parsing and storing the data into the database with the most recent copy of google events
         for event in events:
@@ -169,7 +201,6 @@ def pull_user_event_data(request):
                 string_converted_end = convert(event['end'])
                 string_colors = convert(event)
 
-                # print (string_converted_date.keys())
                 #Storing the physical event into the DB store
                 if 'date' in string_converted_date.keys() or 'dateTime' in  string_converted_date.keys():
 
@@ -199,7 +230,6 @@ def pull_user_event_data(request):
 
                     not_exists = False
                     if not SNE.objects.filter(special_event_id=str(event['id'])).exists():
-                        print("MODEL DIDNT EXIST, SO CREATING")
                         not_exists = True
 
                         temp_model = SNE.objects.create(
@@ -267,12 +297,13 @@ def pull_user_event_data(request):
                             temp_model.current_day = "Sunday"
                             temp_model.save()
             except:
-                print("IN EXCEPT CLAUSE")
-                # print(e)
                 pass
 
+        extension_model = UserExtended.objects.get(authenticated_user=request.user)
+        extension_model.google_auth = True
+        extension_model.save()
 
-        return HttpResponseRedirect('/get_cal')
+    return HttpResponseRedirect('/dashboard')
 
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -289,7 +320,7 @@ def create_event(request):
             start_time = request.POST.get('start'),
             end_time = request.POST.get('end'),
             special_event_id = request.POST.get('id'),
-            color = request.POST.get('color')
+            color = '#34495e'
         )
 
         if (request.POST.get('weekday') == "Mon" ):
@@ -368,9 +399,16 @@ def get_calendar_data(request):
 
     #Authentication bool to verify Oauth steps have been completed
     user_is_authenticated = False
-    print(request.user.username)
+    user_login_count = True
     #Send request to pull data from the calendar API
     current_user = User.objects.get(username=request.user.username)
+    extended_user = UserExtended.objects.get(authenticated_user=current_user)
+
+    if (extended_user.user_login_count > 0):
+        user_login_count = True
+    else:
+        user_login_count = False
+
     storage = Storage(CredentialsModel, 'id', current_user, 'credential')
     credential = storage.get()
     if not credential is None:
@@ -390,11 +428,13 @@ def get_calendar_data(request):
         'sat' : SNE.objects.filter(current_day = 'Saturday'),
         'sun' : SNE.objects.filter(current_day = 'Sunday'),
         'event_length' : event_length,
-        'current_user' : request.user.username
+        'current_user' : request.user.username,
+        'first_name' : request.user.first_name,
+        'last_name' : request.user.last_name,
+        'user_login_count' : user_login_count
     }
 
-    return render(request, 'calender.html', context)
-
+    return render(request, 'DASHBOARD_PAGE/index.html', context)
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 Remove authorization manually (Oauth token removal)

@@ -27,12 +27,10 @@ from django.contrib.auth.backends import ModelBackend
 import urlparse
 import urllib
 from app_account_management.models import UserExtended
-
-
 from procrastinate import settings
 
 def home(request):
-    return render(request, 'home.html')
-
-def tester_login_form(request):
-    return render(request, 'login_form.html')
+    if not request.user:
+        return render(request, 'HOME_PAGE/index.html')
+    else:
+        return HttpResponseRedirect('/dashboard')
