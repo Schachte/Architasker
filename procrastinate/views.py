@@ -30,7 +30,8 @@ from app_account_management.models import UserExtended
 from procrastinate import settings
 
 def home(request):
-    if not request.user:
+    if request.user == None or request.user.username == 'AnonymousUser' or request.user.username == '':
         return render(request, 'HOME_PAGE/index.html')
     else:
+        print(request.user.username)
         return HttpResponseRedirect('/dashboard')
