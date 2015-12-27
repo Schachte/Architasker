@@ -323,7 +323,7 @@ def create_event(request):
             start_time = request.POST.get('start'),
             end_time = request.POST.get('end'),
             special_event_id = request.POST.get('id'),
-            color = request.POST.get('color')
+            color = '#34495e'
         )
 
         if (request.POST.get('weekday') == "Mon" ):
@@ -402,9 +402,16 @@ def get_calendar_data(request):
 
     #Authentication bool to verify Oauth steps have been completed
     user_is_authenticated = False
-    print(request.user.username)
+    user_login_count = True
     #Send request to pull data from the calendar API
     current_user = User.objects.get(username=request.user.username)
+    extended_user = UserExtended.objects.get(authenticated_user=current_user)
+
+    if (extended_user.user_login_count > 0):
+        user_login_count = True
+    else:
+        user_login_count = False
+
     storage = Storage(CredentialsModel, 'id', current_user, 'credential')
     credential = storage.get()
     if not credential is None:
@@ -426,7 +433,8 @@ def get_calendar_data(request):
         'event_length' : event_length,
         'current_user' : request.user.username,
         'first_name' : request.user.first_name,
-        'last_name' : request.user.last_name
+        'last_name' : request.user.last_name,
+        'user_login_count' : user_login_count
     }
 
     return render(request, 'DASHBOARD_PAGE/index.html', context)

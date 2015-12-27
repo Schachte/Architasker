@@ -40,6 +40,9 @@ def login_process(request):
         if user is not None:
             if user.is_active:
                 login(request, user)
+                UE_model = UserExtended.objects.get(authenticated_user=user)
+                UE_model.user_login_count += 1
+                UE_model.save()
             return HttpResponseRedirect('/dashboard')
 
         else:

@@ -343,7 +343,7 @@
 <body onload="init();">
 
 <div class="wrapper">
-    <div class="sidebar" data-color="orange" data-image="{% static 'img/DASHBOARD_IMAGES/sidebar-4.jpg' %}">
+    <div class="sidebar" data-color="azure" data-image="{% static 'img/DASHBOARD_IMAGES/sidebar-4.jpg' %}">
 
 
     	<div class="sidebar-wrapper">
@@ -517,21 +517,21 @@
 <!-- Light Bootstrap Table DEMO methods, don't include it in your project! -->
 <script src="{% static 'js/DASHBOARD_JAVASCRIPT/demo.js' %}"></script>
 
-	<!-- <script type="text/javascript">
+	<script type="text/javascript">
+			{% if user_login_count == False %}
     	$(document).ready(function(){
 
-
-
         	$.notify({
-            	icon: 'pe-7s-gift',
+            	icon: 'pe-7s-bell',
             	message: "Welcome to Architasker! Get started by setting up your account so we can begin adding tasks."
 
             },{
                 type: 'info',
-                timer: 10
+                timer: -1
             });
 
     	});
-	</script> -->
+		{% endif %}
+	</script>
 
 </html>
