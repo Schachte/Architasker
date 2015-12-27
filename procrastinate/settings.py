@@ -39,7 +39,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'procrastinate',
-    'app_calendar'
+    'app_calendar',
     'app_account_management'
 )
 
