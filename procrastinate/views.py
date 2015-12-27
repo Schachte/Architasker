@@ -29,8 +29,8 @@ import urlparse
 import urllib
 from app_account_management.models import UserExtended
 
-from procrastinate import settings
 
+from procrastinate import settings
 
 def home(request):
     return render(request, 'home.html')
