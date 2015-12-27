@@ -11,6 +11,24 @@ from django.core.urlresolvers import reverse
 from django.shortcuts import redirect, render
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseRedirect
 
+from oauth2client import xsrfutil
+from oauth2client.client import flow_from_clientsecrets
+from oauth2client.django_orm import Storage
+from procrastinate import settings
+from apiclient import discovery
+from django.core.cache import cache
+from django.utils.cache import get_cache_key
+import time
+from app_store_new_events.models import UserEvent as SNE
+from app_account_management.models import UserExtended as UE
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import redirect
+from django.contrib.sessions.models import Session
+from django.contrib.auth.backends import ModelBackend
+import urlparse
+import urllib
+from app_account_management.models import UserExtended
+
 from procrastinate import settings
 
 
