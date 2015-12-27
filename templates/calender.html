@@ -69,7 +69,7 @@
 					text: scheduler.getEvent(event_id).text,
 					id: scheduler.getEvent(event_id).id,
 					weekday: weekDay(scheduler.getEvent(event_id).start_date), //what if the event was a multi-day event?!?!
-					color: '#34495E'
+					color: '#34495e'
 
 				},
 			});
@@ -313,10 +313,10 @@
 		      </div>
 		   </div>
 
-				<form action="/sync" method="get">
-					{% csrf_token %}
-				<input type="submit" value="Sync Google Calendar" class="btn waves-effect waves-light pink darken-1">
-				</form>
+		<form action="/sync" method="get">
+			{% csrf_token %}
+		<input type="submit" value="Sync Google Calendar" class="btn waves-effect waves-light pink darken-1">
+		</form>
 
 		<form action="/logout" method="GET">
 			{% csrf_token %}

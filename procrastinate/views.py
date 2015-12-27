@@ -116,7 +116,7 @@ def auth_return(request):
     user = authenticate(username=user_variable_data)
     login(request, user)
 
-    return HttpResponseRedirect("/get_cal")
+    return HttpResponseRedirect("/dashboard")
 
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -125,6 +125,7 @@ Custom function to parse out the user events and store them on-click
 #Current bug that the timed events are being ignored within the system
 def pull_user_event_data(request):
     user_is_authenticated = False
+    
 
     #Send request to pull data from the calendar API
     current_user = User.objects.get(id=request.user.id)
@@ -305,9 +306,7 @@ def pull_user_event_data(request):
         extension_model.google_auth = True
         extension_model.save()
 
-        print(extension_model)
-
-        return HttpResponseRedirect('/get_cal')
+    return HttpResponseRedirect('/dashboard')
 
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -425,10 +424,12 @@ def get_calendar_data(request):
         'sat' : SNE.objects.filter(current_day = 'Saturday'),
         'sun' : SNE.objects.filter(current_day = 'Sunday'),
         'event_length' : event_length,
-        'current_user' : request.user.username
+        'current_user' : request.user.username,
+        'first_name' : request.user.first_name,
+        'last_name' : request.user.last_name
     }
 
-    return render(request, 'calender.html', context)
+    return render(request, 'DASHBOARD_PAGE/index.html', context)
 
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
