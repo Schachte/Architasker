@@ -125,7 +125,7 @@ Custom function to parse out the user events and store them on-click
 #Current bug that the timed events are being ignored within the system
 def pull_user_event_data(request):
     user_is_authenticated = False
-    
+
 
     #Send request to pull data from the calendar API
     current_user = User.objects.get(id=request.user.id)
@@ -445,4 +445,7 @@ def unauthorize_account(request):
         return render(request, 'user_calendar.html')
 
 def home(request):
-    return render(request, 'HOME_PAGE/index.html')
+    if not request.user:
+        return render(request, 'HOME_PAGE/index.html')
+    else:
+        return HttpResponseRedirect('/dashboard')
