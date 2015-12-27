@@ -29,24 +29,26 @@ from .views import *
 from jet import *
 
 urlpatterns = [
+
+
     url(r'^$', home, name="home"),                                              #Index loader
     url(r'^/$', home, name="home"),
     url(r'^jet/', include('jet.urls', 'jet')),
     url(r'^jet/dashboard/', include('jet.dashboard.urls', 'jet-dashboard')),  # Django JET dashboard URLS
     url(r'^admin/', include(admin.site.urls)),                                  #Admin login page
-    url(r'^oauth/', index, name="oauthview"),                                   #Ability validate Oauth steps
-    url(r'^oauth2callback', auth_return, name="auth_return"),                   #Ability validate Oauth steps
-    url(r'^unauthorize', unauthorize_account, name="unauthorize_account"),      #Ability to remove OAUTH token from DB for the current authenticated user
-    url(r'^sync', pull_user_event_data, name="pull_user_event_data"),           #Grab all the data from Google
-    url(r'^create_event/', create_event, name="create_event"),                  #Create event task AJAX URl
-    url(r'^delete_event/', delete_event, name="delete_event"),                  #Delete event task AJAX URl
-    url(r'^update_event/', update_event, name="update_event"),                  #Update event task AJAX URl
+    url(r'^oauth/', 'app_calendar.views.index', name="oauthview"),                                   #Ability validate Oauth steps
+    url(r'^oauth2callback', 'app_calendar.views.auth_return', name="auth_return"),                   #Ability validate Oauth steps
+    url(r'^unauthorize', 'app_calendar.views.unauthorize_account', name="unauthorize_account"),      #Ability to remove OAUTH token from DB for the current authenticated user
+    url(r'^sync', 'app_calendar.views.pull_user_event_data', name="pull_user_event_data"),           #Grab all the data from Google
+    url(r'^create_event/', 'app_calendar.views.create_event', name="create_event"),                  #Create event task AJAX URl
+    url(r'^delete_event/', 'app_calendar.views.delete_event', name="delete_event"),                  #Delete event task AJAX URl
+    url(r'^update_event/', 'app_calendar.views.update_event', name="update_event"),                  #Update event task AJAX URl
     url(r'^login', login_render, name="login_render"),                          #Login template render page
     url(r'^register$', register_view, name="register_view"),
     url(r'^registermein', processor_register, name="processor_register"),
     url(r'^logmein', processor_login, name="processor_login"),                  #Background process to process the server request to authenticate user
     url(r'^logout', logout_process, name="logout_process"),                      #Logout the requested user session
-    url(r'^dashboard', get_calendar_data, name="get_calendar_data")
+    url(r'^dashboard', 'app_calendar.views.get_calendar_data', name="get_calendar_data")
 
 ]
 
