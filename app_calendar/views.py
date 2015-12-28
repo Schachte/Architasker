@@ -106,10 +106,8 @@ def auth_return(request):
 
     #Get that user from the database in the form of a user object
     current_user = User.objects.get(username=user_variable_data)
-    print("current user is %s"%(current_user))
 
     credential = FLOW.step2_exchange(request.REQUEST)
-
 
     storage = Storage(CredentialsModel, 'id', current_user, 'credential')
     storage.put(credential)
@@ -373,7 +371,6 @@ def create_event(request):
             temp_model.current_day = "Sunday"
 
         temp_model.save()
-        print("done")
         return HttpResponse("none")
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -430,8 +427,10 @@ def get_calendar_data(request):
     current_user_extended   = UserExtended.objects.get(authenticated_user=current_user)
     current_user_time_zone  = current_user_extended.time_zone
 
-    my_date                 = datetime.datetime.now(pytz.timezone(current_user_time_zone))
-    user_day_of_week        = my_date.day
+    if (not current_user_time_zone == 'None'):
+        print(current_user_time_zone)
+        my_date                 = datetime.datetime.now(pytz.timezone(current_user_time_zone))
+        user_day_of_week        = my_date.day
 
 
     #Authentication bool to verify Oauth steps have been completed
@@ -485,8 +484,10 @@ def get_calendar_data(request):
         'user_login_count' : user_login_count,
         'user_initial_setup' : user_initial_setup,
         'google_auth_complete' : google_auth_complete,
-        'user_day_of_week' : user_day_of_week
     }
+
+    if (not current_user_time_zone == 'None'):
+        context['user_day_of_week'] = user_day_of_week
 
     return render(request, 'DASHBOARD_PAGE/index.html', context)
 
