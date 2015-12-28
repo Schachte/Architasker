@@ -48,7 +48,9 @@ urlpatterns = [
     url(r'^registermein', processor_register, name="processor_register"),
     url(r'^logmein', processor_login, name="processor_login"),                  #Background process to process the server request to authenticate user
     url(r'^logout', logout_process, name="logout_process"),                      #Logout the requested user session
-    url(r'^dashboard', 'app_calendar.views.get_calendar_data', name="get_calendar_data")
+    url(r'^dashboard', 'app_calendar.views.get_calendar_data', name="get_calendar_data"),
+    url(r'^settings', 'app_dashboard.views.settings_loader', name="settings_loader"),
+    url(r'^settingsave', 'app_dashboard.views.processor_settings', name="processor_settings")
 
 ]
 

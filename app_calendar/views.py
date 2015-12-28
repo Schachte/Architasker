@@ -138,11 +138,23 @@ def pull_user_event_data(request):
 
 
         #Need to fix the timing issues. Do not use UTC NOW, use 12AM or something
-        now = datetime.datetime.utcnow()
-        now = now - datetime.timedelta(now.weekday() - 1)
-        then = datetime.timedelta(days=5) #Indexed at 0
-        then = now + then
-
+        #now = datetime.datetime.utcnow()
+        #now = now - datetime.timedelta(now.weekday())
+        #then = datetime.timedelta(days=5) #Indexed at 0
+        #then = now + then
+        
+        #Days left in the current week (to get the date for Sunday)
+        delta_for_EOW = 6 - datetime.datetime.today().weekday()
+        print(delta_for_EOW)
+        #Get the date for the end of the current week
+        current_EOW = datetime.datetime.now() + datetime.timedelta(days=delta_for_EOW)
+        print(datetime.datetime.now())
+        print(datetime.datetime.today())
+        print(datetime.datetime.utcnow())
+        print(datetime.timedelta(days=delta_for_EOW))
+        now = request.user.date_joined #Date user joined the site
+        then = current_EOW #End of week for the current week
+        
         #Oauth handling var
         page_token = None
 
@@ -162,6 +174,8 @@ def pull_user_event_data(request):
         now = str(now[0:10]) + 'T00:00:01Z'
         then = str(then[0:10]) + 'T23:59:59Z'
 
+        print(now)
+        print(then)
         #Get the events off the primary calendar, this should be changed eventually so the user can select the calendar they please to use
         eventsResult = service.events().list(
 
@@ -196,6 +210,7 @@ def pull_user_event_data(request):
 
         #We need to start parsing and storing the data into the database with the most recent copy of google events
         for event in events:
+            print (event)
             try:
                 string_converted_date = convert(event['start'])
                 string_converted_end = convert(event['end'])
