@@ -58,19 +58,23 @@ def get_setup_module_post_data(request):
     if request.method == "POST":
         if 'wakeup' in request.POST:
             if not request.POST.get('wakeup') == 'Wake Up Time':
-                print(request.POST.get('wakeup'))
+                pass
+                # print(request.POST.get('wakeup'))
             else:
                 return HttpResponse("Invalid wakeup time")
 
         if 'bedtime' in request.POST:
             if not request.POST.get('bedtime') == 'Sleepy Time':
-                print(request.POST.get('bedtime'))
+                pass
+                # print(request.POST.get('bedtime'))
             else:
                 return HttpResponse("Invalid bed time")
 
         current_user = User.objects.get(username = request.user.username)
         current_user_extension = UserExtended.objects.get(authenticated_user=current_user)
         current_user_extension.initial_setup_complete = True
+        current_user_extension.wakeup_time = request.POST.get('wakeup')
+        current_user_extension.sleepy_time = request.POST.get('bedtime')
         current_user_extension.save()
 
         return HttpResponseRedirect("/setup_redirector")
