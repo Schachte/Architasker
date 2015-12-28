@@ -60,14 +60,13 @@
 
 		scheduler.config.default_date = "%j %M %Y";
 
-<<<<<<< HEAD
 		scheduler.config.xml_date="%Y-%m-%d %H:%i";
 		scheduler.config.default_date = "%j %M %Y";
-=======
+
 		var formatDateFunc = scheduler.date.date_to_str("%Y-%m-%dT%H:%i:%s");
 
 		var weekDay = scheduler.date.date_to_str("%D")
->>>>>>> f9e423d45052561507d922a37bf750ce131adfed
+
 
 		// I think this is where the bug is where the data posting to the view is causing the error for the start and end times
 		var updateDayStatus = function(event_id, ev) {
