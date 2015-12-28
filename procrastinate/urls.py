@@ -14,8 +14,6 @@ Including another URLconf
     2. Add a URL to urlpatterns:  url(r'^blog/', include(blog_urls))
 """
 
-
-
 '''
 Load the necessary functions from the APP views files.
 '''
@@ -25,12 +23,11 @@ from app_account_management.views import login_process as processor_login
 from app_account_management.views import login_view as login_render
 from app_account_management.views import *
 from app_dashboard.views import *
+from app_account_setup.views import *
 from .views import *
 from jet import *
 
 urlpatterns = [
-
-
     url(r'^$', home, name="home"),                                              #Index loader
     url(r'^/$', home, name="home"),
     url(r'^jet/', include('jet.urls', 'jet')),
@@ -48,9 +45,10 @@ urlpatterns = [
     url(r'^registermein', processor_register, name="processor_register"),
     url(r'^logmein', processor_login, name="processor_login"),                  #Background process to process the server request to authenticate user
     url(r'^logout', logout_process, name="logout_process"),                      #Logout the requested user session
-    url(r'^dashboard', 'app_calendar.views.get_calendar_data', name="get_calendar_data")
-
+    url(r'^dashboard', 'app_calendar.views.get_calendar_data', name="get_calendar_data"),
+    url(r'^setup$', screen_setup_module, name='screen_setup_module'),
+    url(r'^setup_processor$', get_setup_module_post_data, name='get_setup_module_post_data'), #Process the POST data that is submitted by the fomr for the user
+    url(r'^setup_redirector$', setup_redirector, name='setup_redirector')
 ]
 
 admin.site.site_header = 'Architasker'
-admin.site.login_header = "Architasker"
