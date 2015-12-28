@@ -442,6 +442,8 @@
         </nav>
 
 
+				{% if user_initial_setup == True %}
+
 				<center><h5 class="title">{{first_name | title}} {{last_name | title}}'s Calendar</h5></center>
 
 				<div id="scheduler_here" class="dhx_cal_container card col-md-12" style='width:100%; height:70%'>
@@ -460,13 +462,12 @@
 					 </div>
 				</div>
 
-				{% if user_is_authenticated == True %}
-				<form action="/sync" method="get">
-					{% csrf_token %}
-				<input type="submit" value="Sync Google Calendar" class="btn waves-effect waves-light pink darken-1">
-				</form>
-				{% elif user_is_authenticated == False %}
-				<a href="/oauth">Want to sync with Google? Click Here</a>
+
+				{% else %}
+
+
+				<iframe id="encoder_iframe" height=75% width="100%" src="{% url 'screen_setup_module' %}"></iframe>
+
 				{% endif %}
 
 
@@ -518,7 +519,7 @@
 <script src="{% static 'js/DASHBOARD_JAVASCRIPT/demo.js' %}"></script>
 
 	<script type="text/javascript">
-			{% if user_login_count == False %}
+			{% if google_auth_complete == False %}
     	$(document).ready(function(){
 
         	$.notify({

@@ -6,8 +6,9 @@ from procrastinate.models import *
 # Create your models here.
 
 class UserExtended(models.Model):
-	authenticated_user = models.ForeignKey(User, unique=False, null=False, default=None)
 	# dob = models.DateField(default=None, null=True)
+	authenticated_user = models.ForeignKey(User, unique=False, null=False, default=None)
 	time_zone = models.CharField(max_length=255, default='None')
 	google_auth = models.BooleanField(default=False, unique=False)
 	user_login_count = models.IntegerField(default=0)
+	initial_setup_complete = models.BooleanField(default=False, unique=False)
