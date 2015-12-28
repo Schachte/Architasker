@@ -1,0 +1,46 @@
+{% load staticfiles %}
+{% load static %}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+
+    <!-- Include Favicon -->
+    <link rel="shortcut icon" href="{% static 'img/favicon.ico' %}" type="image/x-icon">
+    <link rel="icon" href="{% static 'img/favicon.ico' %}" type="image/x-icon">
+
+  {% block head_extension %}
+
+  {% endblock %}
+
+
+
+<style>
+
+  {% block inline_CSS %}
+
+  {% endblock %}
+
+</style>
+
+
+
+</head>
+
+  <body>
+
+    {% block form_insertion %}
+
+    {% endblock %}
+
+  </body>
+
+
+  <script>
+    {% block inline_JS %}
+
+    {% endblock %}
+  </script>
+
+</html>
