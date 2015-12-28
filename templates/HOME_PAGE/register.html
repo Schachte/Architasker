@@ -1,0 +1,57 @@
+{% extends 'HOME_PAGE/base.html' %}
+{% load static %}
+{% load staticfiles %}
+
+
+{% block head_extras %}
+<link href="{% static 'login_css/style.css' %}" rel="stylesheet">
+{% endblock %}
+
+
+
+{% block body_block %}
+
+<body>
+	<div class="container">
+		<div class="top">
+			<h1 id="title" class="hidden"><span id="logo">Architasker</h1>
+		</div>
+		<div class="login-box animated fadeInUp">
+			<div class="box-header">
+				<h2>Create Your Free Account Today</h2>
+			</div>
+      <form action="/registermein" method="POST">
+        {% csrf_token %}
+          <label for="first_name">First Name</label>
+          <br/>
+          <input type="text" id="first_name"  name="first_name">
+          <br/>
+          <label for="last_name">Last Name</label>
+          <br/>
+          <input type="text" id="last_name"  name="last_name">
+          <br/>
+    			<label for="username">Username</label>
+    			<br/>
+    			<input type="text" id="username"  name="user_name">
+    			<br/>
+          <label for="email">Email</label>
+    			<br/>
+    			<input type="text" id="email"  name="user_email">
+    			<br/>
+    			<label for="password">Password</label>
+    			<br/>
+    			<input type="password" id="password" name="pass_word">
+    			<br/>
+          <label for="password-verify">Password (Again)</label>
+    			<br/>
+    			<input type="password" id="password2"  name="pass_word2">
+    			<br/>
+    			<button type="submit">Register</button>
+      </form>
+			<br/>
+			<!-- <a href="#"><p class="small">Forgot your password?</p></a> -->
+		</div>
+	</div><br><br><br><br>
+</body>
+
+{% endblock %}

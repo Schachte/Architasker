@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
+#from SECURE_FILES import SECURITY_KEY_IMPORT
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -29,6 +30,8 @@ DEBUG = True
 ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
 INSTALLED_APPS = (
+    'jet.dashboard',
+    'jet',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -36,7 +39,10 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'procrastinate',
-    'store_new_events'
+    'app_calendar',
+    'app_account_management',
+    'app_dashboard',
+    'app_account_setup'
 )
 
 MIDDLEWARE_CLASSES = (
@@ -71,6 +77,53 @@ TEMPLATES = [
 WSGI_APPLICATION = 'procrastinate.wsgi.application'
 
 
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+    'procrastinate.auth_backend.PasswordlessAuthBackend',
+)
+
+
+JET_THEMES = [
+    {
+        'theme': 'default', # theme folder name
+        'color': '#47bac1', # color of the theme's button in user menu
+        'title': 'Default' # theme title
+    },
+    {
+        'theme': 'violet',
+        'color': '#a464c4',
+        'title': 'Violet'
+    },
+    {
+        'theme': 'green',
+        'color': '#44b78b',
+        'title': 'Green'
+    },
+    {
+        'theme': 'light-green',
+        'color': '#2faa60',
+        'title': 'Light Green'
+    },
+    {
+        'theme': 'light-violet',
+        'color': '#a464c4',
+        'title': 'Light Violet'
+    },
+    {
+        'theme': 'light-blue',
+        'color': '#5EADDE',
+        'title': 'Light Blue'
+    },
+    {
+        'theme': 'light-gray',
+        'color': '#222',
+        'title': 'Light Gray'
+    }
+]
+
+JET_DEFAULT_THEME = 'light-gray'
+
+
 # Database
 # https://docs.djangoproject.com/en/1.8/ref/settings/#databases
 
@@ -102,12 +155,12 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "our_static"),
-    #os.path.join(BASE_DIR, "static_in_env"),
-    # '/var/www/static/',
-]
+      os.path.join(BASE_DIR, "our_static"),
+      #os.path.join(BASE_DIR, "static_in_env"),
+      # '/var/www/static/',
+  ]
 
-STATIC_ROOT = os.path.join(BASE_DIR, "project_static", "static_root")
+#STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, "project_static", "media_root")
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")

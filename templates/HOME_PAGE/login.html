@@ -1,0 +1,40 @@
+{% extends 'HOME_PAGE/base.html' %}
+{% load static %}
+{% load staticfiles %}
+
+
+{% block head_extras %}
+<link href="{% static 'login_css/style.css' %}" rel="stylesheet">
+{% endblock %}
+
+
+{% block body_block %}
+
+<body>
+	<div class="container">
+		<div class="top">
+			<h1 id="title" class="hidden"><span id="logo">Architasker</h1>
+		</div>
+		<div class="login-box animated fadeInUp">
+			<div class="box-header">
+				<h2>Log In</h2>
+			</div>
+      <form action="logmein" method="POST">
+        {% csrf_token %}
+    			<label for="username">Username</label>
+    			<br/>
+    			<input type="text" id="username"  name="user_name">
+    			<br/>
+    			<label for="password">Password</label>
+    			<br/>
+    			<input type="password" id="password" name="pass_word">
+    			<br/>
+    			<button type="submit">Sign In</button>
+      </form>
+			<br/>
+			<!-- <a href="#"><p class="small">Forgot your password?</p></a> -->
+		</div>
+	</div>
+</body>
+
+{% endblock %}

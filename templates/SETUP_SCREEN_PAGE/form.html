@@ -1,0 +1,929 @@
+{% extends "SETUP_SCREEN_PAGE/base.html" %}
+{% load static %}
+{% load staticfiles %}
+{% block head_extension %}
+
+<!-- jQuery -->
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+<!-- jQuery easing plugin -->
+<script src="http://thecodeplayer.com/uploads/js/jquery.easing.min.js" type="text/javascript"></script>
+
+<script src="{% static 'js/SETUP_PAGE_JAVASCRIPT/jquery-clockpicker.min.js' %}"></script>
+<link href="{% static 'css/SETUP_PAGE_CSS/jquery-clockpicker.min.css' %}" rel="stylesheet" type="text/css">
+
+<link href="http://www.jqueryscript.net/css/jquerysctipttop.css" rel="stylesheet" type="text/css">
+
+<base target="_parent" />
+<!-- <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css"> -->
+
+{% endblock %}
+
+{% block inline_JS %}
+
+var sendTimeZone = function(user_tz) {
+    $('.ajaxProgress').show();
+    $.ajax({
+        type: "POST",
+        url: "persist_timezone_ajax/",
+        dataType: "json",
+        data: {
+            csrfmiddlewaretoken: '{{ csrf_token }}',
+            user_tz: user_tz
+        },
+    });
+};
+
+
+
+$('li').click(function(){
+    var selected_zone = $(this).text();
+    sendTimeZone(selected_zone);
+});
+
+
+$(document).ready(function(){
+  $(".dropdownbox").click(function(){
+    $(".menu").toggleClass("showMenu");
+      $(".menu > li").click(function(){
+        $(".dropdownbox > p").text($(this).text());
+        $(".menu").removeClass("showMenu");
+      });
+  });
+});
+
+
+
+//jQuery time
+var current_fs, next_fs, previous_fs; //fieldsets
+var left, opacity, scale; //fieldset properties which we will animate
+var animating; //flag to prevent quick multi-click glitches
+
+$(".next").click(function(){
+	if(animating) return false;
+	animating = true;
+
+	current_fs = $(this).parent();
+	next_fs = $(this).parent().next();
+
+	//activate next step on progressbar using the index of next_fs
+	$("#progressbar li").eq($("fieldset").index(next_fs)).addClass("active");
+
+	//show the next fieldset
+	next_fs.show();
+	//hide the current fieldset with style
+	current_fs.animate({opacity: 0}, {
+		step: function(now, mx) {
+			//as the opacity of current_fs reduces to 0 - stored in "now"
+			//1. scale current_fs down to 80%
+			scale = 1 - (1 - now) * 0.2;
+			//2. bring next_fs from the right(50%)
+			left = (now * 50)+"%";
+			//3. increase opacity of next_fs to 1 as it moves in
+			opacity = 1 - now;
+			current_fs.css({'transform': 'scale('+scale+')'});
+			next_fs.css({'left': left, 'opacity': opacity});
+		},
+		duration: 800,
+		complete: function(){
+			current_fs.hide();
+			animating = false;
+		},
+		//this comes from the custom easing plugin
+		easing: 'easeInOutBack'
+	});
+});
+
+$(".previous").click(function(){
+	if(animating) return false;
+	animating = true;
+
+	current_fs = $(this).parent();
+	previous_fs = $(this).parent().prev();
+
+	//de-activate current step on progressbar
+	$("#progressbar li").eq($("fieldset").index(current_fs)).removeClass("active");
+
+	//show the previous fieldset
+	previous_fs.show();
+	//hide the current fieldset with style
+	current_fs.animate({opacity: 0}, {
+		step: function(now, mx) {
+			//as the opacity of current_fs reduces to 0 - stored in "now"
+			//1. scale previous_fs from 80% to 100%
+			scale = 0.8 + (1 - now) * 0.2;
+			//2. take current_fs to the right(50%) - from 0%
+			left = ((1-now) * 50)+"%";
+			//3. increase opacity of previous_fs to 1 as it moves in
+			opacity = 1 - now;
+			current_fs.css({'left': left});
+			previous_fs.css({'transform': 'scale('+scale+')', 'opacity': opacity});
+		},
+		duration: 800,
+		complete: function(){
+			current_fs.hide();
+			animating = false;
+		},
+		//this comes from the custom easing plugin
+		easing: 'easeInOutBack'
+	});
+});
+
+
+
+
+
+var input = $('#input-a');
+input.clockpicker({
+    autoclose: true
+});
+var input = $('#input-b');
+input.clockpicker({
+    autoclose: true
+});
+
+
+
+
+
+{% endblock %}
+
+{% block inline_CSS %}
+/*custom font*/
+@import url(http://fonts.googleapis.com/css?family=Montserrat);
+
+/*basic reset*/
+* {margin: 0; padding: 0;}
+
+html {
+	height: 100%;
+	/*Image only BG fallback*/
+	background: url('http://thecodeplayer.com/uploads/media/gs.png');
+	/*background = gradient + image pattern combo*/
+	background:
+		linear-gradient(rgba(196, 102, 0, 0.2), rgba(155, 89, 182, 0.2)),
+		url('http://thecodeplayer.com/uploads/media/gs.png');
+}
+
+body {
+	font-family: montserrat, arial, verdana;
+}
+/*form styles*/
+#msform {
+	width: 400px;
+	margin: 50px auto;
+	text-align: center;
+	position: relative;
+}
+#msform fieldset {
+	background: white;
+	border: 0 none;
+	border-radius: 3px;
+	box-shadow: 0 0 15px 1px rgba(0, 0, 0, 0.4);
+	padding: 20px 30px;
+
+	box-sizing: border-box;
+	width: 80%;
+	margin: 0 10%;
+
+	/*stacking fieldsets above each other*/
+	position: absolute;
+}
+/*Hide all except first fieldset*/
+#msform fieldset:not(:first-of-type) {
+	display: none;
+}
+/*inputs*/
+#msform input, #msform textarea {
+	padding: 15px;
+	border: 1px solid #ccc;
+	border-radius: 3px;
+	margin-bottom: 10px;
+	width: 100%;
+	box-sizing: border-box;
+	font-family: montserrat;
+	color: #2C3E50;
+	font-size: 13px;
+}
+/*buttons*/
+#msform .action-button {
+	width: 100px;
+	background: #489fb5;
+	font-weight: bold;
+	color: white;
+	border: 0 none;
+	border-radius: 1px;
+	cursor: pointer;
+	padding: 10px 5px;
+	margin: 10px 5px;
+}
+#msform .action-button:hover, #msform .action-button:focus {
+	box-shadow: 0 0 0 2px white, 0 0 0 3px #489fb5;
+}
+/*headings*/
+.fs-title {
+	font-size: 15px;
+	text-transform: uppercase;
+	color: #2C3E50;
+	margin-bottom: 10px;
+}
+.fs-subtitle {
+	font-weight: normal;
+	font-size: 13px;
+	color: #666;
+	margin-bottom: 20px;
+}
+/*progressbar*/
+#progressbar {
+	margin-bottom: 30px;
+	overflow: hidden;
+	/*CSS counters to number the steps*/
+	counter-reset: step;
+}
+#progressbar li {
+	list-style-type: none;
+	color: white;
+	text-transform: uppercase;
+	font-size: 9px;
+	width: 33.33%;
+	float: left;
+	position: relative;
+}
+#progressbar li:before {
+	content: counter(step);
+	counter-increment: step;
+	width: 20px;
+	line-height: 20px;
+	display: block;
+	font-size: 10px;
+	color: #333;
+	background: white;
+	border-radius: 3px;
+	margin: 0 auto 5px auto;
+}
+/*progressbar connectors*/
+#progressbar li:after {
+	content: '';
+	width: 100%;
+	height: 2px;
+	background: white;
+	position: absolute;
+	left: -50%;
+	top: 9px;
+	z-index: -1; /*put it behind the numbers*/
+}
+#progressbar li:first-child:after {
+	/*connector not needed before the first step*/
+	content: none;
+}
+/*marking active/completed steps green*/
+/*The number of the step and the connector before it = green*/
+#progressbar li.active:before,  #progressbar li.active:after{
+	background: #489fb5;
+	color: white;
+}
+
+@import url(http://fonts.googleapis.com/css?family=Quicksand:300,400);
+
+*, *:before, *:after {
+    padding: 0;
+    margin: 0;
+    border: none;
+    outline: none;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box
+    }
+
+
+p.heading {
+  line-height: 1.2;
+  font-size: 2em;
+  text-align: center;
+}
+
+.wrapper {
+  margin: 30px auto;
+  max-width: 600px;
+	font-size: 11px;
+	margin-bottom: 0px;
+}
+.dropdownbox {
+  margin: 0 auto;
+  width: 200px;
+  margin-top: 40px;
+  background: rgb(192, 206, 206);
+  color: rgb(254,238,223);
+  cursor: crosshair;
+	font-size: 11px;
+	border-radius: 10px;
+	color: grey;
+}
+
+.dropdownbox > p {
+  padding: 5px 10px;
+  font-size: 1.25em;
+  line-height: 1.4em;
+  user-select: none;
+  -moz-user-select:none;
+  /* Safari */
+  -khtml-user-select: none;
+}
+
+
+
+ul.menu {
+  position: relative;
+  margin: 0 auto;
+  overflow: auto;
+  height: 0;
+  margin-top: 10px;
+     -webkit-transition: all 0.3s ease-in;
+   -moz-transition: all 0.3s ease-in;
+     -o-transition: all 0.3s ease-in;
+        transition: all 0.3s ease-in;
+  /*-moz-transform:scale(0); */
+  background: rgb(192, 206, 206);
+  color: rgb(254,238,223);
+  cursor: pointer;
+  user-select: none;
+  -moz-user-select:none;
+  /* Safari */
+  -khtml-user-select: none;
+}
+
+ul.menu li {
+  padding: 2px 10px;
+    font-size: 1em;
+  line-height: 1.4em;
+       -webkit-transition: all 0.3s ease-in;
+   -moz-transition: all 0.3s ease-in;
+     -o-transition: all 0.3s ease-in;
+        transition: all 0.3s ease-in;
+  border-bottom: 1px dotted rgb(254,238,223);
+	color: grey;
+}
+ul.menu li:hover {
+  padding-left: 20px;
+  color: rgb(192, 206, 206);
+  background: rgb(254,238,223);
+}
+
+.menu.showMenu {
+  /*-moz-transform:scale(1);*/
+  height: 100%;
+	width: 250px;
+}
+
+  @import url(http://netdna.bootstrapcdn.com/font-awesome/2.0/css/font-awesome.css);
+
+    a.button{
+        background: #ECECEC;
+        border-radius: 15px;
+        padding: 10px 20px;
+        display: block;
+        font-family: arial;
+        font-weight: bold;
+        color:#7f7f7f;
+        text-decoration: none;
+        text-shadow:0px 1px 0px #fff;
+        border:1px solid #a7a7a7;
+        width: 250px;
+        margin:0px auto;
+        box-shadow: 0px 2px 1px white inset, 0px -2px 8px white, 0px 2px 5px rgba(0, 0, 0, 0.1), 0px 8px 10px rgba(0, 0, 0, 0.1);
+        -webkit-transition:box-shadow 0.5s;
+				font-size: .8em;
+    }
+    a.button i{
+        float: right;
+        margin-top: 2px;
+    }
+    a.button:hover{
+        box-shadow: 0px 2px 1px white inset, 0px -2px 20px white, 0px 2px 5px rgba(0, 0, 0, 0.1), 0px 8px 10px rgba(0, 0, 0, 0.1);
+    }
+    a.button:active{
+        box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.5) inset, 0px -2px 20px white, 0px 1px 5px rgba(0, 0, 0, 0.1), 0px 2px 10px rgba(0, 0, 0, 0.1);
+        background:-webkit-linear-gradient(top, #d1d1d1 0%,#ECECEC 100%);
+    }
+
+
+{% endblock %}
+
+{% block form_insertion %}
+
+<!-- multistep form -->
+<!-- SEND THIS DATA OVER TO THE DJANGO VIEW TO PROCESS THE INFORMATION FOR THE REQUESTED USER -->
+<form id="msform" action="/setup_processor" method="POST">
+	{% csrf_token %}
+
+  <!-- progressbar -->
+  <ul id="progressbar">
+    <li class="active">The Basics</li>
+    <li>Google &amp; Notification</li>
+    <li>Wake Up &amp; Bed Time</li>
+  </ul>
+  <!-- fieldsets -->
+  <fieldset>
+    <h2 class="fs-title">Architasker Basics</h2>
+    <h3 class="fs-subtitle">Let's get you setup.</h3>
+		<div class="row">
+		<div class="col-lg-4">
+  	</div></div>
+
+		<div class="wrapper">
+			<div class="dropdownbox">
+				<p>{{time_zone_select_text}}</p>
+			</div>
+			<ul class="menu">
+                <li>America/Puerto_Rico</li>
+                <li>America/New_York</li>
+                <li>America/Chicago</li>
+                <li>America/Denver</li>
+                <li>America/Phoenix</li>
+                <li>America/Los_Angeles</li>
+                <li>America/Anchorage</li>
+                <li>Pacific/Honolulu</li>
+                <li>America/Adak</li>
+                <li>America/Anchorage</li>
+                <li>America/Anguilla</li>
+                <li>America/Antigua</li>
+                <li>America/Araguaina</li>
+                <li>America/Argentina/Buenos_Aires</li>
+                <li>America/Argentina/Catamarca</li>
+                <li>America/Argentina/ComodRivadavia</li>
+                <li>America/Argentina/Cordoba</li>
+                <li>America/Argentina/Jujuy</li>
+                <li>America/Argentina/La_Rioja</li>
+                <li>America/Argentina/Mendoza</li>
+                <li>America/Argentina/Rio_Gallegos</li>
+                <li>America/Argentina/Salta</li>
+                <li>America/Argentina/San_Juan</li>
+                <li>America/Argentina/San_Luis</li>
+                <li>America/Argentina/Tucuman</li>
+                <li>America/Argentina/Ushuaia</li>
+                <li>America/Aruba</li>
+                <li>America/Asuncion</li>
+                <li>America/Atikokan</li>
+                <li>America/Atka</li>
+                <li>America/Bahia</li>
+                <li>America/Barbados</li>
+                <li>America/Belem</li>
+                <li>America/Belize</li>
+                <li>America/Blanc-Sablon</li>
+                <li>America/Boa_Vista</li>
+                <li>America/Bogota</li>
+                <li>America/Boise</li>
+                <li>America/Buenos_Aires</li>
+                <li>America/Cambridge_Bay</li>
+                <li>America/Campo_Grande</li>
+                <li>America/Cancun</li>
+                <li>America/Caracas</li>
+                <li>America/Catamarca</li>
+                <li>America/Cayenne</li>
+                <li>America/Cayman</li>
+                <li>America/Chicago</li>
+                <li>America/Chihuahua</li>
+                <li>America/Coral_Harbour</li>
+                <li>America/Cordoba</li>
+                <li>America/Costa_Rica</li>
+                <li>America/Cuiaba</li>
+                <li>America/Curacao</li>
+                <li>America/Danmarkshavn</li>
+                <li>America/Dawson</li>
+                <li>America/Dawson_Creek</li>
+                <li>America/Denver</li>
+                <li>America/Detroit</li>
+                <li>America/Dominica</li>
+                <li>America/Edmonton</li>
+                <li>America/Eirunepe</li>
+                <li>America/El_Salvador</li>
+                <li>America/Ensenada</li>
+                <li>America/Fortaleza</li>
+                <li>America/Fort_Wayne</li>
+                <li>America/Glace_Bay</li>
+                <li>America/Godthab</li>
+                <li>America/Goose_Bay</li>
+                <li>America/Grand_Turk</li>
+                <li>America/Grenada</li>
+                <li>America/Guadeloupe</li>
+                <li>America/Guatemala</li>
+                <li>America/Guayaquil</li>
+                <li>America/Guyana</li>
+                <li>America/Halifax</li>
+                <li>America/Havana</li>
+                <li>America/Hermosillo</li>
+                <li>America/Indiana/Indianapolis</li>
+                <li>America/Indiana/Knox</li>
+                <li>America/Indiana/Marengo</li>
+                <li>America/Indiana/Petersburg</li>
+                <li>America/Indiana/Tell_City</li>
+                <li>America/Indiana/Vevay</li>
+                <li>America/Indiana/Vincennes</li>
+                <li>America/Indiana/Winamac</li>
+                <li>America/Indianapolis</li>
+                <li>America/Inuvik</li>
+                <li>America/Iqaluit</li>
+                <li>America/Jamaica</li>
+                <li>America/Jujuy</li>
+                <li>America/Juneau</li>
+                <li>America/Kentucky/Louisville</li>
+                <li>America/Kentucky/Monticello</li>
+                <li>America/Knox_IN</li>
+                <li>America/La_Paz</li>
+                <li>America/Lima</li>
+                <li>America/Los_Angeles</li>
+                <li>America/Louisville</li>
+                <li>America/Maceio</li>
+                <li>America/Managua</li>
+                <li>America/Manaus</li>
+                <li>America/Marigot</li>
+                <li>America/Martinique</li>
+                <li>America/Matamoros</li>
+                <li>America/Mazatlan</li>
+                <li>America/Mendoza</li>
+                <li>America/Menominee</li>
+                <li>America/Merida</li>
+                <li>America/Mexico_City</li>
+                <li>America/Miquelon</li>
+                <li>America/Moncton</li>
+                <li>America/Monterrey</li>
+                <li>America/Montevideo</li>
+                <li>America/Montreal</li>
+                <li>America/Montserrat</li>
+                <li>America/Nassau</li>
+                <li>America/New_York</li>
+                <li>America/Nipigon</li>
+                <li>America/Nome</li>
+                <li>America/Noronha</li>
+                <li>America/North_Dakota/Center</li>
+                <li>America/North_Dakota/New_Salem</li>
+                <li>America/Ojinaga</li>
+                <li>America/Panama</li>
+                <li>America/Pangnirtung</li>
+                <li>America/Paramaribo</li>
+                <li>America/Phoenix</li>
+                <li>America/Port-au-Prince</li>
+                <li>America/Porto_Acre</li>
+                <li>America/Port_of_Spain</li>
+                <li>America/Porto_Velho</li>
+                <li>America/Puerto_Rico</li>
+                <li>America/Rainy_River</li>
+                <li>America/Rankin_Inlet</li>
+                <li>America/Recife</li>
+                <li>America/Regina</li>
+                <li>America/Resolute</li>
+                <li>America/Rio_Branco</li>
+                <li>America/Rosario</li>
+                <li>America/Santa_Isabel</li>
+                <li>America/Santarem</li>
+                <li>America/Santiago</li>
+                <li>America/Santo_Domingo</li>
+                <li>America/Sao_Paulo</li>
+                <li>America/Scoresbysund</li>
+                <li>America/Shiprock</li>
+                <li>America/St_Barthelemy</li>
+                <li>America/St_Johns</li>
+                <li>America/St_Kitts</li>
+                <li>America/St_Lucia</li>
+                <li>America/St_Thomas</li>
+                <li>America/St_Vincent</li>
+                <li>America/Swift_Current</li>
+                <li>America/Tegucigalpa</li>
+                <li>America/Thule</li>
+                <li>America/Thunder_Bay</li>
+                <li>America/Tijuana</li>
+                <li>America/Toronto</li>
+                <li>America/Tortola</li>
+                <li>America/Vancouver</li>
+                <li>America/Virgin</li>
+                <li>America/Whitehorse</li>
+                <li>America/Winnipeg</li>
+                <li>America/Yakutat</li>
+                <li>America/Yellowknife</li>
+                <li>Europe/Amsterdam</li>
+                <li>Europe/Andorra</li>
+                <li>Europe/Athens</li>
+                <li>Europe/Belfast</li>
+                <li>Europe/Belgrade</li>
+                <li>Europe/Berlin</li>
+                <li>Europe/Bratislava</li>
+                <li>Europe/Brussels</li>
+                <li>Europe/Bucharest</li>
+                <li>Europe/Budapest</li>
+                <li>Europe/Chisinau</li>
+                <li>Europe/Copenhagen</li>
+                <li>Europe/Dublin</li>
+                <li>Europe/Gibraltar</li>
+                <li>Europe/Guernsey</li>
+                <li>Europe/Helsinki</li>
+                <li>Europe/Isle_of_Man</li>
+                <li>Europe/Istanbul</li>
+                <li>Europe/Jersey</li>
+                <li>Europe/Kaliningrad</li>
+                <li>Europe/Kiev</li>
+                <li>Europe/Lisbon</li>
+                <li>Europe/Ljubljana</li>
+                <li>Europe/London</li>
+                <li>Europe/Luxembourg</li>
+                <li>Europe/Madrid</li>
+                <li>Europe/Malta</li>
+                <li>Europe/Mariehamn</li>
+                <li>Europe/Minsk</li>
+                <li>Europe/Monaco</li>
+                <li>Europe/Moscow</li>
+                <li>Europe/Nicosia</li>
+                <li>Europe/Oslo</li>
+                <li>Europe/Paris</li>
+                <li>Europe/Podgorica</li>
+                <li>Europe/Prague</li>
+                <li>Europe/Riga</li>
+                <li>Europe/Rome</li>
+                <li>Europe/Samara</li>
+                <li>Europe/San_Marino</li>
+                <li>Europe/Sarajevo</li>
+                <li>Europe/Simferopol</li>
+                <li>Europe/Skopje</li>
+                <li>Europe/Sofia</li>
+                <li>Europe/Stockholm</li>
+                <li>Europe/Tallinn</li>
+                <li>Europe/Tirane</li>
+                <li>Europe/Tiraspol</li>
+                <li>Europe/Uzhgorod</li>
+                <li>Europe/Vaduz</li>
+                <li>Europe/Vatican</li>
+                <li>Europe/Vienna</li>
+                <li>Europe/Vilnius</li>
+                <li>Europe/Volgograd</li>
+                <li>Europe/Warsaw</li>
+                <li>Europe/Zagreb</li>
+                <li>Europe/Zaporozhye</li>
+                <li>Europe/Zurich</li>
+                <li>Asia/Aden</li>
+                <li>Asia/Almaty</li>
+                <li>Asia/Amman</li>
+                <li>Asia/Anadyr</li>
+                <li>Asia/Aqtau</li>
+                <li>Asia/Aqtobe</li>
+                <li>Asia/Ashgabat</li>
+                <li>Asia/Ashkhabad</li>
+                <li>Asia/Baghdad</li>
+                <li>Asia/Bahrain</li>
+                <li>Asia/Baku</li>
+                <li>Asia/Bangkok</li>
+                <li>Asia/Beirut</li>
+                <li>Asia/Bishkek</li>
+                <li>Asia/Brunei</li>
+                <li>Asia/Calcutta</li>
+                <li>Asia/Choibalsan</li>
+                <li>Asia/Chongqing</li>
+                <li>Asia/Chungking</li>
+                <li>Asia/Colombo</li>
+                <li>Asia/Dacca</li>
+                <li>Asia/Damascus</li>
+                <li>Asia/Dhaka</li>
+                <li>Asia/Dili</li>
+                <li>Asia/Dubai</li>
+                <li>Asia/Dushanbe</li>
+                <li>Asia/Gaza</li>
+                <li>Asia/Harbin</li>
+                <li>Asia/Ho_Chi_Minh</li>
+                <li>Asia/Hong_Kong</li>
+                <li>Asia/Hovd</li>
+                <li>Asia/Irkutsk</li>
+                <li>Asia/Istanbul</li>
+                <li>Asia/Jakarta</li>
+                <li>Asia/Jayapura</li>
+                <li>Asia/Jerusalem</li>
+                <li>Asia/Kabul</li>
+                <li>Asia/Kamchatka</li>
+                <li>Asia/Karachi</li>
+                <li>Asia/Kashgar</li>
+                <li>Asia/Kathmandu</li>
+                <li>Asia/Katmandu</li>
+                <li>Asia/Kolkata</li>
+                <li>Asia/Krasnoyarsk</li>
+                <li>Asia/Kuala_Lumpur</li>
+                <li>Asia/Kuching</li>
+                <li>Asia/Kuwait</li>
+                <li>Asia/Macao</li>
+                <li>Asia/Macau</li>
+                <li>Asia/Magadan</li>
+                <li>Asia/Makassar</li>
+                <li>Asia/Manila</li>
+                <li>Asia/Muscat</li>
+                <li>Asia/Nicosia</li>
+                <li>Asia/Novokuznetsk</li>
+                <li>Asia/Novosibirsk</li>
+                <li>Asia/Omsk</li>
+                <li>Asia/Oral</li>
+                <li>Asia/Phnom_Penh</li>
+                <li>Asia/Pontianak</li>
+                <li>Asia/Pyongyang</li>
+                <li>Asia/Qatar</li>
+                <li>Asia/Qyzylorda</li>
+                <li>Asia/Rangoon</li>
+                <li>Asia/Riyadh</li>
+                <li>Asia/Saigon</li>
+                <li>Asia/Sakhalin</li>
+                <li>Asia/Samarkand</li>
+                <li>Asia/Seoul</li>
+                <li>Asia/Shanghai</li>
+                <li>Asia/Singapore</li>
+                <li>Asia/Taipei</li>
+                <li>Asia/Tashkent</li>
+                <li>Asia/Tbilisi</li>
+                <li>Asia/Tehran</li>
+                <li>Asia/Tel_Aviv</li>
+                <li>Asia/Thimbu</li>
+                <li>Asia/Thimphu</li>
+                <li>Asia/Tokyo</li>
+                <li>Asia/Ujung_Pandang</li>
+                <li>Asia/Ulaanbaatar</li>
+                <li>Asia/Ulan_Bator</li>
+                <li>Asia/Urumqi</li>
+                <li>Asia/Vientiane</li>
+                <li>Asia/Vladivostok</li>
+                <li>Asia/Yakutsk</li>
+                <li>Asia/Yekaterinburg</li>
+                <li>Asia/Yerevan</li>
+                <li>Africa/Abidjan</li>
+                <li>Africa/Accra</li>
+                <li>Africa/Addis_Ababa</li>
+                <li>Africa/Algiers</li>
+                <li>Africa/Asmara</li>
+                <li>Africa/Asmera</li>
+                <li>Africa/Bamako</li>
+                <li>Africa/Bangui</li>
+                <li>Africa/Banjul</li>
+                <li>Africa/Bissau</li>
+                <li>Africa/Blantyre</li>
+                <li>Africa/Brazzaville</li>
+                <li>Africa/Bujumbura</li>
+                <li>Africa/Cairo</li>
+                <li>Africa/Casablanca</li>
+                <li>Africa/Ceuta</li>
+                <li>Africa/Conakry</li>
+                <li>Africa/Dakar</li>
+                <li>Africa/Dar_es_Salaam</li>
+                <li>Africa/Djibouti</li>
+                <li>Africa/Douala</li>
+                <li>Africa/El_Aaiun</li>
+                <li>Africa/Freetown</li>
+                <li>Africa/Gaborone</li>
+                <li>Africa/Harare</li>
+                <li>Africa/Johannesburg</li>
+                <li>Africa/Kampala</li>
+                <li>Africa/Khartoum</li>
+                <li>Africa/Kigali</li>
+                <li>Africa/Kinshasa</li>
+                <li>Africa/Lagos</li>
+                <li>Africa/Libreville</li>
+                <li>Africa/Lome</li>
+                <li>Africa/Luanda</li>
+                <li>Africa/Lubumbashi</li>
+                <li>Africa/Lusaka</li>
+                <li>Africa/Malabo</li>
+                <li>Africa/Maputo</li>
+                <li>Africa/Maseru</li>
+                <li>Africa/Mbabane</li>
+                <li>Africa/Mogadishu</li>
+                <li>Africa/Monrovia</li>
+                <li>Africa/Nairobi</li>
+                <li>Africa/Ndjamena</li>
+                <li>Africa/Niamey</li>
+                <li>Africa/Nouakchott</li>
+                <li>Africa/Ouagadougou</li>
+                <li>Africa/Porto-Novo</li>
+                <li>Africa/Sao_Tome</li>
+                <li>Africa/Timbuktu</li>
+                <li>Africa/Tripoli</li>
+                <li>Africa/Tunis</li>
+                <li>Africa/Windhoek</li>
+                <li>Australia/ACT</li>
+                <li>Australia/Adelaide</li>
+                <li>Australia/Brisbane</li>
+                <li>Australia/Broken_Hill</li>
+                <li>Australia/Canberra</li>
+                <li>Australia/Currie</li>
+                <li>Australia/Darwin</li>
+                <li>Australia/Eucla</li>
+                <li>Australia/Hobart</li>
+                <li>Australia/LHI</li>
+                <li>Australia/Lindeman</li>
+                <li>Australia/Lord_Howe</li>
+                <li>Australia/Melbourne</li>
+                <li>Australia/North</li>
+                <li>Australia/NSW</li>
+                <li>Australia/Perth</li>
+                <li>Australia/Queensland</li>
+                <li>Australia/South</li>
+                <li>Australia/Sydney</li>
+                <li>Australia/Tasmania</li>
+                <li>Australia/Victoria</li>
+                <li>Australia/West</li>
+                <li>Australia/Yancowinna</li>
+                <li>Indian/Antananarivo</li>
+                <li>Indian/Chagos</li>
+                <li>Indian/Christmas</li>
+                <li>Indian/Cocos</li>
+                <li>Indian/Comoro</li>
+                <li>Indian/Kerguelen</li>
+                <li>Indian/Mahe</li>
+                <li>Indian/Maldives</li>
+                <li>Indian/Mauritius</li>
+                <li>Indian/Mayotte</li>
+                <li>Indian/Reunion</li>
+                <li>Atlantic/Azores</li>
+                <li>Atlantic/Bermuda</li>
+                <li>Atlantic/Canary</li>
+                <li>Atlantic/Cape_Verde</li>
+                <li>Atlantic/Faeroe</li>
+                <li>Atlantic/Faroe</li>
+                <li>Atlantic/Jan_Mayen</li>
+                <li>Atlantic/Madeira</li>
+                <li>Atlantic/Reykjavik</li>
+                <li>Atlantic/South_Georgia</li>
+                <li>Atlantic/Stanley</li>
+                <li>Atlantic/St_Helena</li>
+                <li>Pacific/Apia</li>
+                <li>Pacific/Auckland</li>
+                <li>Pacific/Chatham</li>
+                <li>Pacific/Easter</li>
+                <li>Pacific/Efate</li>
+                <li>Pacific/Enderbury</li>
+                <li>Pacific/Fakaofo</li>
+                <li>Pacific/Fiji</li>
+                <li>Pacific/Funafuti</li>
+                <li>Pacific/Galapagos</li>
+                <li>Pacific/Gambier</li>
+                <li>Pacific/Guadalcanal</li>
+                <li>Pacific/Guam</li>
+                <li>Pacific/Honolulu</li>
+                <li>Pacific/Johnston</li>
+                <li>Pacific/Kiritimati</li>
+                <li>Pacific/Kosrae</li>
+                <li>Pacific/Kwajalein</li>
+                <li>Pacific/Majuro</li>
+                <li>Pacific/Marquesas</li>
+                <li>Pacific/Midway</li>
+                <li>Pacific/Nauru</li>
+                <li>Pacific/Niue</li>
+                <li>Pacific/Norfolk</li>
+                <li>Pacific/Noumea</li>
+                <li>Pacific/Pago_Pago</li>
+                <li>Pacific/Palau</li>
+                <li>Pacific/Pitcairn</li>
+                <li>Pacific/Ponape</li>
+                <li>Pacific/Port_Moresby</li>
+                <li>Pacific/Rarotonga</li>
+                <li>Pacific/Saipan</li>
+                <li>Pacific/Samoa</li>
+                <li>Pacific/Tahiti</li>
+                <li>Pacific/Tarawa</li>
+                <li>Pacific/Tongatapu</li>
+                <li>Pacific/Truk</li>
+                <li>Pacific/Wake</li>
+                <li>Pacific/Wallis</li>
+                <li>Pacific/Yap</li>
+                <li>Antarctica/Casey</li>
+                <li>Antarctica/Davis</li>
+                <li>Antarctica/DumontDUrville</li>
+                <li>Antarctica/Macquarie</li>
+                <li>Antarctica/Mawson</li>
+                <li>Antarctica/McMurdo</li>
+                <li>Antarctica/Palmer</li>
+                <li>Antarctica/Rothera</li>
+                <li>Antarctica/South_Pole</li>
+                <li>Antarctica/Syowa</li>
+                <li>Antarctica/Vostok</li>
+                <li>Arctic/Longyearbyen</li>
+
+
+			</ul>
+		</div>
+    <input type="button" name="next" class="next action-button" value="Next" />
+  </fieldset>
+  <fieldset>
+    <h2 class="fs-title">Google and Notifications</h2>
+    <h3 class="fs-subtitle">This is optional.</h3>
+
+    {% if google_is_auth == False %}
+		<a href="/oauth" class="button">Click To Import Google Calendar<i class="icon-chevron-right"></i></a>
+    {% else %}
+        <p>Google Account Integrated Already!</p>
+    {% endif %}
+
+    <input type="button" name="previous" class="previous action-button" value="Previous" />
+    <input type="button" name="next" class="next action-button" value="Next" />
+  </fieldset>
+  <fieldset>
+    <h2 class="fs-title">Wake Up Time &amp; Bed Time</h2>
+    <h3 class="fs-subtitle">Let's get a default time range for you.</h3>
+		<input id="input-a" value="Wake Up Time" data-default="20:48" name="wakeup">
+		<input id="input-b" value="Sleepy Time" data-default="20:48" name="bedtime">
+    <input type="button" name="previous" class="previous action-button" value="Previous" />
+    <input type="submit" name="submit" class="submit action-button" value="Submit" />
+  </fieldset>
+</form>
+
+
+
+{% endblock %}
