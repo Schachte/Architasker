@@ -27,7 +27,6 @@ def screen_setup_module(request):
     else:
         time_zone_select_text = current_user_extension.time_zone
 
-
     context = {
 
         'google_is_auth' : google_is_auth,
