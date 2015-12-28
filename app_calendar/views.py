@@ -9,6 +9,9 @@ import logging
 import collections
 import time
 import urllib
+import pytz
+
+from pytz import timezone
 from apiclient import discovery
 from oauth2client import client
 from oauth2client import tools
@@ -399,6 +402,11 @@ Function to actually pull the data from the authenticated OAUTH user
 @login_required(login_url='/login')
 def get_calendar_data(request):
 
+    #FIX THIS FOR DYNAMIC CALENDAR
+    my_date = datetime.datetime.now(pytz.timezone('America/Phoenix'))
+    user_day_of_week = my_date.day
+
+
     #Authentication bool to verify Oauth steps have been completed
     user_is_authenticated = False
     user_login_count = True
@@ -449,7 +457,8 @@ def get_calendar_data(request):
         'last_name' : request.user.last_name,
         'user_login_count' : user_login_count,
         'user_initial_setup' : user_initial_setup,
-        'google_auth_complete' : google_auth_complete
+        'google_auth_complete' : google_auth_complete,
+        'user_day_of_week' : user_day_of_week
     }
 
     return render(request, 'DASHBOARD_PAGE/index.html', context)

@@ -36,9 +36,6 @@
     <link href="{% static 'css/DASHBOARD_CSS/pe-icon-7-stroke.css' %}" rel="stylesheet" />
 
 
-
-
-
 		<script type="text/javascript" charset="utf-8">
 
 			function init() {
@@ -157,9 +154,7 @@
 				var calendar_month = d.getMonth();
 
 				//Get the current day for the calendar to load into the default value for the calendar
-				var calendar_day = d.getDate();
-
-				// document.write({{ mon.0 }});
+				var calendar_day = {{user_day_of_week}};
 
 
 				scheduler.attachEvent("onBeforeDrag", readonly_check);
