@@ -97,11 +97,53 @@
 							text: scheduler.getEvent(event_id).text,
 							id: scheduler.getEvent(event_id).id,
 							weekday: weekDay(scheduler.getEvent(event_id).start_date), //what if the event was a multi-day event?!?!
-							color: '#34495e'
+							color: scheduler.getEvent(event_id).color
 
 						},
 					});
 				};
+
+
+                var update_event = function(id, ev, color) {
+
+
+                    if(typeof color === 'undefined'){
+                        $('.ajaxProgress').show();
+        					$.ajax({
+        						type: "POST",
+        						url: "update_event/",
+        						dataType: "json",
+        						data: {
+        							csrfmiddlewaretoken: '{{ csrf_token }}',
+        							start: formatDateFunc(scheduler.getEvent(id).start_date),
+        							end: formatDateFunc(scheduler.getEvent(id).end_date),
+        							text: ev.text,
+        							id: id
+        						},
+        					});
+        		    		return true;
+                    }
+
+                    else {
+
+                    $('.ajaxProgress').show();
+    					$.ajax({
+    						type: "POST",
+    						url: "update_event/",
+    						dataType: "json",
+    						data: {
+    							csrfmiddlewaretoken: '{{ csrf_token }}',
+    							start: formatDateFunc(scheduler.getEvent(id).start_date),
+    							end: formatDateFunc(scheduler.getEvent(id).end_date),
+    							text: ev.text,
+    							id: id,
+                                color: color
+    						},
+    					});
+    		    		return true;
+                    };
+                };
+
 
 				var deleteEvent = function(event_id, e) {
 					$('.ajaxProgress').show();
@@ -117,6 +159,100 @@
 					return true;
 				};
 
+
+                //
+                // '1': '#AEA8D3', '2': '#87D37C', '3': '#BE90D4',
+                // '4': '#E26A6A', '5': '#F9BF3B', '6': '#EB974E', '7':
+                // '#19B5FE', '8': '#D2D7D3', '9': '#4B77BE', '10': '#26A65B',
+                // '11': '#D24D57'
+
+
+                scheduler.config.icons_select = ['icon_details', 'icon_delete', 'i1', 'i2', 'i3', 'i4', 'i5', 'i6', 'i7', 'i8', 'i9', 'i10', 'i11'];
+
+        		scheduler.locale.labels.i1 = "i_1";
+        		scheduler.locale.labels.i2 = "i_2";
+        		scheduler.locale.labels.i3 = "i_3";
+        		scheduler.locale.labels.i4 = "i_4";
+                scheduler.locale.labels.i5 = "i_5";
+                scheduler.locale.labels.i6 = "i_6";
+                scheduler.locale.labels.i7 = "i_7";
+                scheduler.locale.labels.i8 = "i_8";
+                scheduler.locale.labels.i9 = "i_9";
+                scheduler.locale.labels.i10 = "i_10";
+                scheduler.locale.labels.i11 = "i_11";
+
+                scheduler._click.buttons.i1 = function(id){
+        			scheduler.getEvent(id).color = "#AEA8D3";
+        			scheduler.updateEvent(id);
+        			update_event(id, scheduler.getEvent(id), "#AEA8D3");
+        			return "";
+        		};
+
+                scheduler._click.buttons.i2 = function(id){
+        			scheduler.getEvent(id).color = "#87D37C";
+        			scheduler.updateEvent(id);
+        			update_event(id, scheduler.getEvent(id), "#87D37C");
+        			return "";
+        		};
+                scheduler._click.buttons.i3 = function(id){
+        			scheduler.getEvent(id).color = "#BE90D4";
+        			scheduler.updateEvent(id);
+        			update_event(id, scheduler.getEvent(id), "#BE90D4");
+        			return "";
+        		};
+
+                scheduler._click.buttons.i4 = function(id){
+        			scheduler.getEvent(id).color = "#E26A6A";
+        			scheduler.updateEvent(id);
+        			update_event(id, scheduler.getEvent(id), "#E26A6A");
+        			return "";
+        		};
+                scheduler._click.buttons.i5 = function(id){
+        			scheduler.getEvent(id).color = "#F9BF3B";
+        			scheduler.updateEvent(id);
+        			update_event(id, scheduler.getEvent(id), "#F9BF3B");
+        			return "";
+        		};
+
+                scheduler._click.buttons.i6 = function(id){
+        			scheduler.getEvent(id).color = "#EB974E";
+        			scheduler.updateEvent(id);
+        			update_event(id, scheduler.getEvent(id), "#EB974E");
+        			return "";
+        		};
+                scheduler._click.buttons.i7 = function(id){
+        			scheduler.getEvent(id).color = "#19B5FE";
+        			scheduler.updateEvent(id);
+        			update_event(id, scheduler.getEvent(id), "#19B5FE");
+        			return "";
+        		};
+
+                scheduler._click.buttons.i8 = function(id){
+        			scheduler.getEvent(id).color = "#D2D7D3";
+        			scheduler.updateEvent(id);
+        			update_event(id, scheduler.getEvent(id), "#D2D7D3");
+        			return "";
+        		};
+                scheduler._click.buttons.i9 = function(id){
+        			scheduler.getEvent(id).color = "#4B77BE";
+        			scheduler.updateEvent(id);
+        			update_event(id, scheduler.getEvent(id), "#4B77BE");
+        			return "";
+        		};
+
+                scheduler._click.buttons.i10 = function(id){
+        			scheduler.getEvent(id).color = "#26A65B";
+        			scheduler.updateEvent(id);
+        			update_event(id, scheduler.getEvent(id), "#26A65B");
+        			return "";
+        		};
+                scheduler._click.buttons.i11 = function(id){
+        			scheduler.getEvent(id).color = "#D24D57";
+        			scheduler.updateEvent(id);
+        			update_event(id, scheduler.getEvent(id), "#D24D57");
+        			return "";
+        		};
+
 				scheduler.attachEvent("onEventDeleted", deleteEvent);
 				scheduler.attachEvent("onClick", readonly_check);
 				scheduler.attachEvent("onDblClick", readonly_check);
@@ -126,23 +262,7 @@
 				// JS event for the onEventAdded function to do an AJAX call to the database for syncing the new event data
 				scheduler.attachEvent("onEventAdded", updateDayStatus);
 
-				scheduler.attachEvent("onEventChanged",function(id,ev){
-		    	$('.ajaxProgress').show();
-					$.ajax({
-						type: "POST",
-						url: "update_event/",
-						dataType: "json",
-						data: {
-							csrfmiddlewaretoken: '{{ csrf_token }}',
-							start: formatDateFunc(scheduler.getEvent(id).start_date),
-							end: formatDateFunc(scheduler.getEvent(id).end_date),
-							text: ev.text,
-							id: id
-
-						},
-					});
-		    		return true;
-				});
+				scheduler.attachEvent("onEventChanged", update_event);
 
 				// Create a new date for gatehring the default times that load into the calendar
 				var d = new Date();

@@ -1,0 +1,10 @@
+{% load staticfiles %}
+{% load static %}
+
+
+div.dhx_menu_icon.icon_paint {
+  background-image: url("imgs/icon_paint.png");
+ background-repeat: no-repeat;
+ margin-top: 1px;
+ margin: auto;
+}

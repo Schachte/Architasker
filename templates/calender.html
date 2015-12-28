@@ -10,6 +10,14 @@
 {% include 'css.html' %}
 {% include 'javascript.html' %}
 
+<link rel="stylesheet" href="http://kendo.cdn.telerik.com/2015.3.1111/styles/kendo.common.min.css"/>
+<link rel="stylesheet" href="http://kendo.cdn.telerik.com/2015.3.1111/styles/kendo.rtl.min.css"/>
+<link rel="stylesheet" href="http://kendo.cdn.telerik.com/2015.3.1111/styles/kendo.silver.min.css"/>
+<link rel="stylesheet" href="http://kendo.cdn.telerik.com/2015.3.1111/styles/kendo.mobile.all.min.css"/>
+
+<script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+<script src="http://kendo.cdn.telerik.com/2015.3.1111/js/kendo.all.min.js"></script>
+
 <script type="text/javascript" charset="utf-8">
 
 	function init() {
@@ -52,9 +60,13 @@
 
 		scheduler.config.default_date = "%j %M %Y";
 
+		scheduler.config.xml_date="%Y-%m-%d %H:%i";
+		scheduler.config.default_date = "%j %M %Y";
+
 		var formatDateFunc = scheduler.date.date_to_str("%Y-%m-%dT%H:%i:%s");
 
 		var weekDay = scheduler.date.date_to_str("%D")
+
 
 		// I think this is where the bug is where the data posting to the view is causing the error for the start and end times
 		var updateDayStatus = function(event_id, ev) {
@@ -70,6 +82,12 @@
 					end: formatDateFunc(scheduler.getEvent(event_id).end_date),
 					text: scheduler.getEvent(event_id).text,
 					id: scheduler.getEvent(event_id).id,
+<<<<<<< HEAD
+					color: scheduler.getEvent(event_id).color
+				},
+			});
+
+=======
 					weekday: weekDay(scheduler.getEvent(event_id).start_date), //what if the event was a multi-day event?!?!
 					color: '#34495e'
 
@@ -89,6 +107,7 @@
 				},
 			});
 			return true;
+>>>>>>> f9e423d45052561507d922a37bf750ce131adfed
 		};
 
 		scheduler.attachEvent("onEventDeleted", deleteEvent);
@@ -99,6 +118,47 @@
 
 		// JS event for the onEventAdded function to do an AJAX call to the database for syncing the new event data
 		scheduler.attachEvent("onEventAdded", updateDayStatus);
+<<<<<<< HEAD
+		scheduler.attachEvent("onEventChanged", updateDayStatus);
+
+		//The icons are defined custom in the custom_icons.css file in the static dir for CSS
+		scheduler.config.icons_select = ['icon_details', 'icon_delete', 'icon_blue', 'icon_green', 'icon_yellow', 'icon_orange'];
+
+		scheduler.locale.labels.icon_blue = "Blue";
+		scheduler.locale.labels.icon_green = "Green";
+		scheduler.locale.labels.icon_yellow = "Yellow";
+		scheduler.locale.labels.icon_orange = "Orange";
+
+		scheduler.init('scheduler_here',new Date(year,0,month),"week");
+
+		scheduler._click.buttons.blue = function(id){
+			scheduler.getEvent(id).color = "#2196F3";
+			scheduler.updateEvent(id);
+			updateDayStatus(id);
+			return "";
+		};
+
+		scheduler._click.buttons.green = function(id){
+			scheduler.getEvent(id).color = "#8BC34A";
+			scheduler.updateEvent(id);
+			updateDayStatus(id);
+			return "";
+		};
+
+		scheduler._click.buttons.yellow = function(id){
+			scheduler.getEvent(id).color = "#FFC107";
+			scheduler.updateEvent(id);
+			updateDayStatus(id);
+			return "";
+		};
+
+		scheduler._click.buttons.orange = function(id){
+			scheduler.getEvent(id).color = "#FF9800";
+			scheduler.updateEvent(id);
+			updateDayStatus(id);
+			return "";
+		};
+=======
 
 		scheduler.attachEvent("onEventChanged",function(id,ev){
     	$('.ajaxProgress').show();
@@ -137,16 +197,24 @@
 
 		// scheduler.config.readonly = true;
 		scheduler.init('scheduler_here',new Date(calendar_year,calendar_month,calendar_day),"week");
+>>>>>>> f9e423d45052561507d922a37bf750ce131adfed
 
 		scheduler.parse( [
 				{% for monday_tasks in mon %}
 				{% if monday_tasks.authenticated_user.username == current_user %}
 					{
 						text: '{{ monday_tasks.task_name }}',
+<<<<<<< HEAD
+						start_date: '2015-12-14',
+						end_date: '2015-12-14',
+						color: 'red',
+						readonly: 'True'
+=======
 						id: '{{ monday_tasks.special_event_id }}',
 						start_date: '{{ monday_tasks.start_time }}'.substring(0, 10)+" "+'{{ monday_tasks.start_time }}'.substring(11, 16),
 						end_date: '{{ monday_tasks.end_time }}'.substring(0, 10)+" "+'{{ monday_tasks.end_time }}'.substring(11, 16),
 						color: '{{ monday_tasks.color }}'
+>>>>>>> f9e423d45052561507d922a37bf750ce131adfed
 					},
 				{% endif %}
 				{% endfor %}
@@ -172,6 +240,15 @@
 					},
 					{% endif %}
 				{% endfor %}
+<<<<<<< HEAD
+				// {% for thursday_tasks in thurs %}
+				// 	{
+				// 		text: '{{ thursday_tasks.task_name }}',
+				// 		start_date: '2015-12-17',
+				// 		end_date: '2015-12-17'
+				// 	},
+				// {% endfor %}
+=======
 				{% for thursday_tasks in thurs %}
 				{% if thursday_tasks.authenticated_user.username == current_user %}
 					{
@@ -183,6 +260,7 @@
 					},
 					{% endif %}
 				{% endfor %}
+>>>>>>> f9e423d45052561507d922a37bf750ce131adfed
 				{% for friday_tasks in fri %}
 				{% if friday_tasks.authenticated_user.username == current_user %}
 					{
@@ -218,6 +296,41 @@
 				{% endfor %}
 		], "json");
 
+<<<<<<< HEAD
+
+
+		{% for thursday_tasks in thurs %}
+			// scheduler.addEvent("2015-12-17","2015-12-17","{{ thursday_tasks.task_name }}");
+			//
+
+			var eventId = scheduler.addEvent({
+								    start_date: "17-12-2015",
+								    end_date:   "17-12-2015",
+								    text:   "{{ thursday_tasks.task_name }}"
+								});
+			// alert(eventId)
+			// scheduler.getEvent(event_id).id
+
+			var eventObj = scheduler.getEvent(eventId);
+			// document.write(eventObj)
+			scheduler.getEvent(eventObj).readonly = true;
+		{% endfor %}
+
+
+	}
+
+	function show_minical(){
+		if (scheduler.isCalendarVisible())
+			scheduler.destroyCalendar();
+		else
+			scheduler.renderCalendar({
+				position:"dhx_minical_icon",
+				date:scheduler._date,
+				navigation:true,
+				handler:function(date,calendar){
+					scheduler.setCurrentView(date);
+					scheduler.destroyCalendar()
+=======
 		//Array to store all the currently gathered google events for the user on the calendar
 
 
@@ -267,6 +380,7 @@
 			for (i = 0; i < google_ids.length; i++) {
 				if (google_ids[i] == id) {
 					found_google_task = true;
+>>>>>>> f9e423d45052561507d922a37bf750ce131adfed
 				}
 			}
 			if (found_google_task) {
@@ -332,6 +446,10 @@
 			<a href="/oauth">Click Here to authenticate via OAUTH</a>
 
 		{% endif %}
+<<<<<<< HEAD
+		<!-- <input name="eventColor" type="color" onchange="getColorVal(eventColor.value)"/> -->
+=======
+>>>>>>> f9e423d45052561507d922a37bf750ce131adfed
 
 </body>
 </html>

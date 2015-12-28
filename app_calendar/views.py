@@ -371,7 +371,7 @@ def create_event(request):
             temp_model.current_day = "Sunday"
 
         temp_model.save()
-        return HttpResponse("none")
+    return HttpResponse("none")
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 Function to delete event from database
@@ -393,22 +393,25 @@ Function to update event in database
 def update_event(request):
 
     if request.method == 'POST':
-
         data_dict = convert(request.POST)
         EVENT_ID = data_dict['id']
         TASK_NAME = data_dict['text']
         TASK_NAME = str(TASK_NAME)
-
+        if 'color' in request.POST:
+            COLOR_NAME = str(data_dict['color'])
         if SNE.objects.filter(special_event_id=EVENT_ID).exists():
 
             event_task = SNE.objects.filter(
-                    special_event_id=EVENT_ID).update(
-                    task_name=data_dict['text'],
-                    start_time = data_dict['start'],
-                    end_time = data_dict['end'])
+            special_event_id=EVENT_ID).update(
+                task_name=data_dict['text'],
+                start_time = data_dict['start'],
+                end_time = data_dict['end']
+                )
 
-            # event_task.save()
-            print("updated")
+            if 'color' in request.POST:
+                event_task = SNE.objects.filter(
+                special_event_id=EVENT_ID).update(color=COLOR_NAME)
+
             return HttpResponse("true")
         else:
             print("false")
