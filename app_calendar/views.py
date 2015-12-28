@@ -70,24 +70,22 @@ Main function dealing with auth verification
 '''''''''''''''''''''''''''''''''''''''''''''''''''
 
 def index(request):
-  current_user = User.objects.get(username=request.user.username)
-  storage = Storage(CredentialsModel, 'id', current_user, 'credential')
-  credential = storage.get()
-  if credential is None or credential.invalid == True:
-    FLOW.params['state'] = xsrfutil.generate_token(settings.SECRET_KEY,
-                                                   request.user.id)
+    current_user = User.objects.get(username=request.user.username)
+    storage = Storage(CredentialsModel, 'id', current_user, 'credential')
+    credential = storage.get()
+    if credential is None or credential.invalid == True:
+        FLOW.params['state'] = xsrfutil.generate_token(settings.SECRET_KEY, request.user.id)
+        logged_in_username = request.user.username
+        user_data = {'var_test' : logged_in_username}
+        pass_param = urllib.urlencode(user_data)
+        FLOW.params['state']=pass_param
+        authorize_url = FLOW.step1_get_authorize_url()
+        pass_param = urllib.urlencode(user_data)
+        state = pass_param
+        return redirect(authorize_url, request)
+    else:
+        return HttpResponse("Already authorized")
 
-
-    logged_in_username = request.user.username
-    user_data = {'var_test' : logged_in_username}
-    pass_param = urllib.urlencode(user_data)
-    FLOW.params['state']=pass_param
-    authorize_url = FLOW.step1_get_authorize_url()
-    # authorize_url = authorize_url + '&state=' +  pass_param
-    print(authorize_url)
-    pass_param = urllib.urlencode(user_data)
-    state = pass_param
-    return redirect(authorize_url, request)
 
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -114,6 +112,10 @@ def auth_return(request):
 
     user = authenticate(username=user_variable_data)
     login(request, user)
+
+    user_extension_model = UserExtended.objects.get(authenticated_user=current_user)
+    user_extension_model.google_auth = True
+    user_extension_model.save()
 
     return HttpResponseRedirect("/dashboard")
 
@@ -422,6 +424,9 @@ def get_calendar_data(request):
     #Authentication bool to verify Oauth steps have been completed
     user_is_authenticated = False
     user_login_count = True
+    user_initial_setup = False
+    google_auth_complete = False
+
     #Send request to pull data from the calendar API
     current_user = User.objects.get(username=request.user.username)
     extended_user = UserExtended.objects.get(authenticated_user=current_user)
@@ -430,6 +435,17 @@ def get_calendar_data(request):
         user_login_count = True
     else:
         user_login_count = False
+
+    if (extended_user.initial_setup_complete == False):
+        user_initial_setup = False
+    else:
+        user_initial_setup = True
+
+    if (extended_user.google_auth == False):
+        google_auth_complete = False
+    else:
+        google_auth_complete = True
+
 
     storage = Storage(CredentialsModel, 'id', current_user, 'credential')
     credential = storage.get()
@@ -453,7 +469,9 @@ def get_calendar_data(request):
         'current_user' : request.user.username,
         'first_name' : request.user.first_name,
         'last_name' : request.user.last_name,
-        'user_login_count' : user_login_count
+        'user_login_count' : user_login_count,
+        'user_initial_setup' : user_initial_setup,
+        'google_auth_complete' : google_auth_complete
     }
 
     return render(request, 'DASHBOARD_PAGE/index.html', context)

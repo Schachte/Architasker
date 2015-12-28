@@ -475,3 +475,4 @@ class UserExtended(models.Model):
 	time_zone = models.CharField(max_length=255, choices=TIME_ZONE_CHOICES, default='None')
 	google_auth = models.BooleanField(default=False, unique=False)
 	user_login_count = models.IntegerField(default=0)
+	initial_setup_complete = models.BooleanField(default=False, unique=False)

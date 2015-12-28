@@ -1866,7 +1866,7 @@ div.dhx_menu_icon {
 }
 .dhx_now .dhx_month_head,
 .dhx_now .dhx_month_body {
-  background-color: #FFF3A1;
+  background-color: #2d9bbd;
   font-weight: normal;
 }
 .dhx_cal_event_clear {
@@ -2270,7 +2270,7 @@ input.dhx_repeat_date {
   background-color: #f0ede7;
 }
 .dhx_wa_ev_body.dhx_cal_event_selected {
-  background-color: #fff3a1;
+  background-color: #2d9bbd;
   color: #362d26;
 }
 .dhx_wa_dnd {

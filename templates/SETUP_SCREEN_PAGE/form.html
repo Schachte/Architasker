@@ -1,0 +1,672 @@
+{% extends "SETUP_SCREEN_PAGE/base.html" %}
+{% load static %}
+{% load staticfiles %}
+{% block head_extension %}
+
+<!-- jQuery -->
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+<!-- jQuery easing plugin -->
+<script src="http://thecodeplayer.com/uploads/js/jquery.easing.min.js" type="text/javascript"></script>
+
+<script src="{% static 'js/SETUP_PAGE_JAVASCRIPT/jquery-clockpicker.min.js' %}"></script>
+<link href="{% static 'css/SETUP_PAGE_CSS/jquery-clockpicker.min.css' %}" rel="stylesheet" type="text/css">
+
+<link href="http://www.jqueryscript.net/css/jquerysctipttop.css" rel="stylesheet" type="text/css">
+
+<base target="_parent" />
+<!-- <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css"> -->
+
+{% endblock %}
+
+{% block inline_JS %}
+
+
+
+
+$(document).ready(function(){
+  $(".dropdownbox").click(function(){
+    $(".menu").toggleClass("showMenu");
+      $(".menu > li").click(function(){
+        $(".dropdownbox > p").text($(this).text());
+        $(".menu").removeClass("showMenu");
+      });
+  });
+});
+
+
+
+//jQuery time
+var current_fs, next_fs, previous_fs; //fieldsets
+var left, opacity, scale; //fieldset properties which we will animate
+var animating; //flag to prevent quick multi-click glitches
+
+$(".next").click(function(){
+	if(animating) return false;
+	animating = true;
+
+	current_fs = $(this).parent();
+	next_fs = $(this).parent().next();
+
+	//activate next step on progressbar using the index of next_fs
+	$("#progressbar li").eq($("fieldset").index(next_fs)).addClass("active");
+
+	//show the next fieldset
+	next_fs.show();
+	//hide the current fieldset with style
+	current_fs.animate({opacity: 0}, {
+		step: function(now, mx) {
+			//as the opacity of current_fs reduces to 0 - stored in "now"
+			//1. scale current_fs down to 80%
+			scale = 1 - (1 - now) * 0.2;
+			//2. bring next_fs from the right(50%)
+			left = (now * 50)+"%";
+			//3. increase opacity of next_fs to 1 as it moves in
+			opacity = 1 - now;
+			current_fs.css({'transform': 'scale('+scale+')'});
+			next_fs.css({'left': left, 'opacity': opacity});
+		},
+		duration: 800,
+		complete: function(){
+			current_fs.hide();
+			animating = false;
+		},
+		//this comes from the custom easing plugin
+		easing: 'easeInOutBack'
+	});
+});
+
+$(".previous").click(function(){
+	if(animating) return false;
+	animating = true;
+
+	current_fs = $(this).parent();
+	previous_fs = $(this).parent().prev();
+
+	//de-activate current step on progressbar
+	$("#progressbar li").eq($("fieldset").index(current_fs)).removeClass("active");
+
+	//show the previous fieldset
+	previous_fs.show();
+	//hide the current fieldset with style
+	current_fs.animate({opacity: 0}, {
+		step: function(now, mx) {
+			//as the opacity of current_fs reduces to 0 - stored in "now"
+			//1. scale previous_fs from 80% to 100%
+			scale = 0.8 + (1 - now) * 0.2;
+			//2. take current_fs to the right(50%) - from 0%
+			left = ((1-now) * 50)+"%";
+			//3. increase opacity of previous_fs to 1 as it moves in
+			opacity = 1 - now;
+			current_fs.css({'left': left});
+			previous_fs.css({'transform': 'scale('+scale+')', 'opacity': opacity});
+		},
+		duration: 800,
+		complete: function(){
+			current_fs.hide();
+			animating = false;
+		},
+		//this comes from the custom easing plugin
+		easing: 'easeInOutBack'
+	});
+});
+
+
+
+
+
+var input = $('#input-a');
+input.clockpicker({
+    autoclose: true
+});
+var input = $('#input-b');
+input.clockpicker({
+    autoclose: true
+});
+
+
+
+
+
+{% endblock %}
+
+{% block inline_CSS %}
+/*custom font*/
+@import url(http://fonts.googleapis.com/css?family=Montserrat);
+
+/*basic reset*/
+* {margin: 0; padding: 0;}
+
+html {
+	height: 100%;
+	/*Image only BG fallback*/
+	background: url('http://thecodeplayer.com/uploads/media/gs.png');
+	/*background = gradient + image pattern combo*/
+	background:
+		linear-gradient(rgba(196, 102, 0, 0.2), rgba(155, 89, 182, 0.2)),
+		url('http://thecodeplayer.com/uploads/media/gs.png');
+}
+
+body {
+	font-family: montserrat, arial, verdana;
+}
+/*form styles*/
+#msform {
+	width: 400px;
+	margin: 50px auto;
+	text-align: center;
+	position: relative;
+}
+#msform fieldset {
+	background: white;
+	border: 0 none;
+	border-radius: 3px;
+	box-shadow: 0 0 15px 1px rgba(0, 0, 0, 0.4);
+	padding: 20px 30px;
+
+	box-sizing: border-box;
+	width: 80%;
+	margin: 0 10%;
+
+	/*stacking fieldsets above each other*/
+	position: absolute;
+}
+/*Hide all except first fieldset*/
+#msform fieldset:not(:first-of-type) {
+	display: none;
+}
+/*inputs*/
+#msform input, #msform textarea {
+	padding: 15px;
+	border: 1px solid #ccc;
+	border-radius: 3px;
+	margin-bottom: 10px;
+	width: 100%;
+	box-sizing: border-box;
+	font-family: montserrat;
+	color: #2C3E50;
+	font-size: 13px;
+}
+/*buttons*/
+#msform .action-button {
+	width: 100px;
+	background: #489fb5;
+	font-weight: bold;
+	color: white;
+	border: 0 none;
+	border-radius: 1px;
+	cursor: pointer;
+	padding: 10px 5px;
+	margin: 10px 5px;
+}
+#msform .action-button:hover, #msform .action-button:focus {
+	box-shadow: 0 0 0 2px white, 0 0 0 3px #489fb5;
+}
+/*headings*/
+.fs-title {
+	font-size: 15px;
+	text-transform: uppercase;
+	color: #2C3E50;
+	margin-bottom: 10px;
+}
+.fs-subtitle {
+	font-weight: normal;
+	font-size: 13px;
+	color: #666;
+	margin-bottom: 20px;
+}
+/*progressbar*/
+#progressbar {
+	margin-bottom: 30px;
+	overflow: hidden;
+	/*CSS counters to number the steps*/
+	counter-reset: step;
+}
+#progressbar li {
+	list-style-type: none;
+	color: white;
+	text-transform: uppercase;
+	font-size: 9px;
+	width: 33.33%;
+	float: left;
+	position: relative;
+}
+#progressbar li:before {
+	content: counter(step);
+	counter-increment: step;
+	width: 20px;
+	line-height: 20px;
+	display: block;
+	font-size: 10px;
+	color: #333;
+	background: white;
+	border-radius: 3px;
+	margin: 0 auto 5px auto;
+}
+/*progressbar connectors*/
+#progressbar li:after {
+	content: '';
+	width: 100%;
+	height: 2px;
+	background: white;
+	position: absolute;
+	left: -50%;
+	top: 9px;
+	z-index: -1; /*put it behind the numbers*/
+}
+#progressbar li:first-child:after {
+	/*connector not needed before the first step*/
+	content: none;
+}
+/*marking active/completed steps green*/
+/*The number of the step and the connector before it = green*/
+#progressbar li.active:before,  #progressbar li.active:after{
+	background: #489fb5;
+	color: white;
+}
+
+@import url(http://fonts.googleapis.com/css?family=Quicksand:300,400);
+
+*, *:before, *:after {
+    padding: 0;
+    margin: 0;
+    border: none;
+    outline: none;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box
+    }
+
+
+p.heading {
+  line-height: 1.2;
+  font-size: 2em;
+  text-align: center;
+}
+
+.wrapper {
+  margin: 30px auto;
+  max-width: 600px;
+	font-size: 11px;
+	margin-bottom: 0px;
+}
+.dropdownbox {
+  margin: 0 auto;
+  width: 200px;
+  margin-top: 40px;
+  background: rgb(192, 206, 206);
+  color: rgb(254,238,223);
+  cursor: crosshair;
+	font-size: 11px;
+	border-radius: 10px;
+	color: grey;
+}
+
+.dropdownbox > p {
+  padding: 5px 10px;
+  font-size: 1.25em;
+  line-height: 1.4em;
+  user-select: none;
+  -moz-user-select:none;
+  /* Safari */
+  -khtml-user-select: none;
+}
+
+
+
+ul.menu {
+  position: relative;
+  margin: 0 auto;
+  overflow: auto;
+  height: 0;
+  margin-top: 10px;
+     -webkit-transition: all 0.3s ease-in;
+   -moz-transition: all 0.3s ease-in;
+     -o-transition: all 0.3s ease-in;
+        transition: all 0.3s ease-in;
+  /*-moz-transform:scale(0); */
+  background: rgb(192, 206, 206);
+  color: rgb(254,238,223);
+  cursor: pointer;
+  user-select: none;
+  -moz-user-select:none;
+  /* Safari */
+  -khtml-user-select: none;
+}
+
+ul.menu li {
+  padding: 2px 10px;
+    font-size: 1em;
+  line-height: 1.4em;
+       -webkit-transition: all 0.3s ease-in;
+   -moz-transition: all 0.3s ease-in;
+     -o-transition: all 0.3s ease-in;
+        transition: all 0.3s ease-in;
+  border-bottom: 1px dotted rgb(254,238,223);
+	color: grey;
+}
+ul.menu li:hover {
+  padding-left: 20px;
+  color: rgb(192, 206, 206);
+  background: rgb(254,238,223);
+}
+
+.menu.showMenu {
+  /*-moz-transform:scale(1);*/
+  height: 100%;
+	width: 250px;
+}
+
+  @import url(http://netdna.bootstrapcdn.com/font-awesome/2.0/css/font-awesome.css);
+
+    a.button{
+        background: #ECECEC;
+        border-radius: 15px;
+        padding: 10px 20px;
+        display: block;
+        font-family: arial;
+        font-weight: bold;
+        color:#7f7f7f;
+        text-decoration: none;
+        text-shadow:0px 1px 0px #fff;
+        border:1px solid #a7a7a7;
+        width: 250px;
+        margin:0px auto;
+        box-shadow: 0px 2px 1px white inset, 0px -2px 8px white, 0px 2px 5px rgba(0, 0, 0, 0.1), 0px 8px 10px rgba(0, 0, 0, 0.1);
+        -webkit-transition:box-shadow 0.5s;
+				font-size: .8em;
+    }
+    a.button i{
+        float: right;
+        margin-top: 2px;
+    }
+    a.button:hover{
+        box-shadow: 0px 2px 1px white inset, 0px -2px 20px white, 0px 2px 5px rgba(0, 0, 0, 0.1), 0px 8px 10px rgba(0, 0, 0, 0.1);
+    }
+    a.button:active{
+        box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.5) inset, 0px -2px 20px white, 0px 1px 5px rgba(0, 0, 0, 0.1), 0px 2px 10px rgba(0, 0, 0, 0.1);
+        background:-webkit-linear-gradient(top, #d1d1d1 0%,#ECECEC 100%);
+    }
+
+
+{% endblock %}
+
+{% block form_insertion %}
+
+<!-- multistep form -->
+<!-- SEND THIS DATA OVER TO THE DJANGO VIEW TO PROCESS THE INFORMATION FOR THE REQUESTED USER -->
+<form id="msform" action="/setup_processor" method="POST">
+	{% csrf_token %}
+
+  <!-- progressbar -->
+  <ul id="progressbar">
+    <li class="active">The Basics</li>
+    <li>Google &amp; Notification</li>
+    <li>Wake Up &amp; Bed Time</li>
+  </ul>
+  <!-- fieldsets -->
+  <fieldset>
+    <h2 class="fs-title">Architasker Basics</h2>
+    <h3 class="fs-subtitle">Let's get you setup.</h3>
+		<div class="row">
+		<div class="col-lg-4">
+  	</div></div>
+
+		<div class="wrapper">
+			<div class="dropdownbox">
+				<p>Select Your Timezone</p>
+			</div>
+			<ul class="menu">
+				<li>Pacific/Midway (GMT-11:00)MidwayIsland
+				</li>
+				<li>US/Samoa (GMT-11:00)Samoa
+				</li>
+				<li>US/Hawaii (GMT-10:00)Hawaii
+				</li>
+				<li>US/Alaska (GMT-09:00)Alaska
+				</li>
+				<li>US/Pacific (GMT-08:00)PacificTime (US&amp;Canada)
+				</li>
+				<li>America/Tijuana (GMT-08:00)Tijuana
+				</li>
+				<li>US/Arizona (GMT-07:00)Arizona
+				</li>
+				<li>US/Mountain (GMT-07:00)MountainTime (US&amp;Canada)
+				</li>
+				<li>America/Chihuahua (GMT-07:00)Chihuahua
+				</li>
+				<li>America/Mazatlan (GMT-07:00)Mazatlan
+				</li>
+				<li>America/Mexico_City (GMT-06:00)MexicoCity
+				</li>
+				<li>America/Monterrey (GMT-06:00)Monterrey
+				</li>
+				<li>Canada/Saskatchewan (GMT-06:00)Saskatchewan
+				</li>
+				<li>US/Central (GMT-06:00)CentralTime (US&amp;Canada)
+				</li>
+				<li>US/Eastern (GMT-05:00)EasternTime (US&amp;Canada)
+				</li>
+				<li>US/East-Indiana (GMT-05:00)Indiana (East)
+				</li>
+				<li>America/Bogota (GMT-05:00)Bogota
+				</li>
+				<li>America/Lima (GMT-05:00)Lima
+				</li>
+				<li>America/Caracas (GMT-04:30)Caracas
+				</li>
+				<li>Canada/Atlantic (GMT-04:00)AtlanticTime (Canada)
+				</li>
+				<li>America/La_Paz (GMT-04:00)LaPaz
+				</li>
+				<li>America/Santiago (GMT-04:00)Santiago
+				</li>
+				<li>Canada/Newfoundland (GMT-03:30)Newfoundland
+				</li>
+				<li>America/Buenos_Aires (GMT-03:00)BuenosAires
+				</li>
+				<li>Greenland (GMT-03:00)Greenland
+				</li>
+				<li>Atlantic/Stanley (GMT-02:00)Stanley
+				</li>
+				<li>Atlantic/Azores (GMT-01:00)Azores
+				</li>
+				<li>Atlantic/Cape_Verde (GMT-01:00)CapeVerdeIs.
+				</li>
+				<li>Africa/Casablanca (GMT)Casablanca
+				</li>
+				<li>Europe/Dublin (GMT)Dublin
+				</li>
+				<li>Europe/Lisbon (GMT)Lisbon
+				</li>
+				<li>Europe/London (GMT)London
+				</li>
+				<li>Africa/Monrovia (GMT)Monrovia
+				</li>
+				<li>Europe/Amsterdam (GMT+01:00)Amsterdam
+				</li>
+				<li>Europe/Belgrade (GMT+01:00)Belgrade
+				</li>
+				<li>Europe/Berlin (GMT+01:00)Berlin
+				</li>
+				<li>Europe/Bratislava (GMT+01:00)Bratislava
+				</li>
+				<li>Europe/Brussels (GMT+01:00)Brussels
+				</li>
+				<li>Europe/Budapest (GMT+01:00)Budapest
+				</li>
+				<li>Europe/Copenhagen (GMT+01:00)Copenhagen
+				</li>
+				<li>Europe/Ljubljana (GMT+01:00)Ljubljana
+				</li>
+				<li>Europe/Madrid (GMT+01:00)Madrid
+				</li>
+				<li>Europe/Paris (GMT+01:00)Paris
+				</li>
+				<li>Europe/Prague (GMT+01:00)Prague
+				</li>
+				<li>Europe/Rome (GMT+01:00)Rome
+				</li>
+				<li>Europe/Sarajevo (GMT+01:00)Sarajevo
+				</li>
+				<li>Europe/Skopje (GMT+01:00)Skopje
+				</li>
+				<li>Europe/Stockholm (GMT+01:00)Stockholm
+				</li>
+				<li>Europe/Vienna (GMT+01:00)Vienna
+				</li>
+				<li>Europe/Warsaw (GMT+01:00)Warsaw
+				</li>
+				<li>Europe/Zagreb (GMT+01:00)Zagreb
+				</li>
+				<li>Europe/Athens (GMT+02:00)Athens
+				</li>
+				<li>Europe/Bucharest (GMT+02:00)Bucharest
+				</li>
+				<li>Africa/Cairo (GMT+02:00)Cairo
+				</li>
+				<li>Africa/Harare (GMT+02:00)Harare
+				</li>
+				<li>Europe/Helsinki (GMT+02:00)Helsinki
+				</li>
+				<li>Europe/Istanbul (GMT+02:00)Istanbul
+				</li>
+				<li>Asia/Jerusalem (GMT+02:00)Jerusalem
+				</li>
+				<li>Europe/Kiev (GMT+02:00)Kyiv
+				</li>
+				<li>Europe/Minsk (GMT+02:00)Minsk
+				</li>
+				<li>Europe/Riga (GMT+02:00)Riga
+				</li>
+				<li>Europe/Sofia (GMT+02:00)Sofia
+				</li>
+				<li>Europe/Tallinn (GMT+02:00)Tallinn
+				</li>
+				<li>Europe/Vilnius (GMT+02:00)Vilnius
+				</li>
+				<li>Asia/Baghdad (GMT+03:00)Baghdad
+				</li>
+				<li>Asia/Kuwait (GMT+03:00)Kuwait
+				</li>
+				<li>Africa/Nairobi (GMT+03:00)Nairobi
+				</li>
+				<li>Asia/Riyadh (GMT+03:00)Riyadh
+				</li>
+				<li>Europe/Moscow (GMT+03:00)Moscow
+				</li>
+				<li>Asia/Tehran (GMT+03:30)Tehran
+				</li>
+				<li>Asia/Baku (GMT+04:00)Baku
+				</li>
+				<li>Europe/Volgograd (GMT+04:00)Volgograd
+				</li>
+				<li>Asia/Muscat (GMT+04:00)Muscat
+				</li>
+				<li>Asia/Tbilisi (GMT+04:00)Tbilisi
+				</li>
+				<li>Asia/Yerevan (GMT+04:00)Yerevan
+				</li>
+				<li>Asia/Kabul (GMT+04:30)Kabul
+				</li>
+				<li>Asia/Karachi (GMT+05:00)Karachi
+				</li>
+				<li>Asia/Tashkent (GMT+05:00)Tashkent
+				</li>
+				<li>Asia/Kolkata (GMT+05:30)Kolkata
+				</li>
+				<li>Asia/Kathmandu (GMT+05:45)Kathmandu
+				</li>
+				<li>Asia/Yekaterinburg (GMT+06:00)Ekaterinburg
+				</li>
+				<li>Asia/Almaty (GMT+06:00)Almaty
+				</li>
+				<li>Asia/Dhaka (GMT+06:00)Dhaka
+				</li>
+				<li>Asia/Novosibirsk (GMT+07:00)Novosibirsk
+				</li>
+				<li>Asia/Bangkok (GMT+07:00)Bangkok
+				</li>
+				<li>Asia/Jakarta (GMT+07:00)Jakarta
+				</li>
+				<li>Asia/Krasnoyarsk (GMT+08:00)Krasnoyarsk
+				</li>
+				<li>Asia/Chongqing (GMT+08:00)Chongqing
+				</li>
+				<li>Asia/Hong_Kong (GMT+08:00)HongKong
+				</li>
+				<li>Asia/Kuala_Lumpur (GMT+08:00)KualaLumpur
+				</li>
+				<li>Australia/Perth (GMT+08:00)Perth
+				</li>
+				<li>Asia/Singapore (GMT+08:00)Singapore
+				</li>
+				<li>Asia/Taipei (GMT+08:00)Taipei
+				</li>
+				<li>Asia/Ulaanbaatar (GMT+08:00)UlaanBataar
+				</li>
+				<li>Asia/Urumqi (GMT+08:00)Urumqi
+				</li>
+				<li>Asia/Irkutsk (GMT+09:00)Irkutsk
+				</li>
+				<li>Asia/Seoul (GMT+09:00)Seoul
+				</li>
+				<li>Asia/Tokyo (GMT+09:00)Tokyo
+				</li>
+				<li>Australia/Adelaide (GMT+09:30)Adelaide
+				</li>
+				<li>Australia/Darwin (GMT+09:30)Darwin
+				</li>
+				<li>Asia/Yakutsk (GMT+10:00)Yakutsk
+				</li>
+				<li>Australia/Brisbane (GMT+10:00)Brisbane
+				</li>
+				<li>Australia/Canberra (GMT+10:00)Canberra
+				</li>
+				<li>Pacific/Guam (GMT+10:00)Guam
+				</li>
+				<li>Australia/Hobart (GMT+10:00)Hobart
+				</li>
+				<li>Australia/Melbourne (GMT+10:00)Melbourne
+				</li>
+				<li>Pacific/Port_Moresby (GMT+10:00)PortMoresby
+				</li>
+				<li>Australia/Sydney (GMT+10:00)Sydney
+				</li>
+				<li>Asia/Vladivostok (GMT+11:00)Vladivostok
+				</li>
+				<li>Asia/Magadan (GMT+12:00)Magadan
+				</li>
+				<li>Pacific/Auckland (GMT+12:00)Auckland
+				</li>
+				<li>Pacific/Fiji (GMT+12:00)Fiji
+				</li>
+
+			</ul>
+		</div>
+    <input type="button" name="next" class="next action-button" value="Next" />
+  </fieldset>
+  <fieldset>
+    <h2 class="fs-title">Google and Notifications</h2>
+    <h3 class="fs-subtitle">This is optional.</h3>
+
+    {% if google_is_auth == False %}
+		<a href="/oauth" class="button">Click To Import Google Calendar<i class="icon-chevron-right"></i></a>
+    {% else %}
+        <p>Google Account Integrated Already!</p>
+    {% endif %}
+
+    <input type="button" name="previous" class="previous action-button" value="Previous" />
+    <input type="button" name="next" class="next action-button" value="Next" />
+  </fieldset>
+  <fieldset>
+    <h2 class="fs-title">Wake Up Time &amp; Bed Time</h2>
+    <h3 class="fs-subtitle">Let's get a default time range for you.</h3>
+		<input id="input-a" value="Wake Up Time" data-default="20:48" name="wakeup">
+		<input id="input-b" value="Sleepy Time" data-default="20:48" name="bedtime">
+    <input type="button" name="previous" class="previous action-button" value="Previous" />
+    <input type="submit" name="submit" class="submit action-button" value="Submit" />
+  </fieldset>
+</form>
+
+
+
+{% endblock %}
