@@ -425,9 +425,13 @@ Function to actually pull the data from the authenticated OAUTH user
 @login_required(login_url='/login')
 def get_calendar_data(request):
 
-    #FIX THIS FOR DYNAMIC CALENDAR
-    my_date = datetime.datetime.now(pytz.timezone('America/Phoenix'))
-    user_day_of_week = my_date.day
+
+    current_user            = User.objects.get(username=request.user.username)
+    current_user_extended   = UserExtended.objects.get(authenticated_user=current_user)
+    current_user_time_zone  = current_user_extended.time_zone
+
+    my_date                 = datetime.datetime.now(pytz.timezone(current_user_time_zone))
+    user_day_of_week        = my_date.day
 
 
     #Authentication bool to verify Oauth steps have been completed
