@@ -159,7 +159,6 @@ def pull_user_event_data(request):
         now = current_BOW
         then = current_EOW #End of week for the current week
 
->>
         #Oauth handling var
         page_token = None
 
