@@ -11,7 +11,9 @@ import time
 import urllib
 import pytz
 
+
 from pytz import timezone
+
 from apiclient import discovery
 from oauth2client import client
 from oauth2client import tools
@@ -31,6 +33,7 @@ from django.core.urlresolvers import reverse
 from django.shortcuts import redirect, render
 from django.core.cache import cache
 from django.utils.cache import get_cache_key
+from django.utils import timezone
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseRedirect
 from django.contrib.auth.decorators import login_required
@@ -131,8 +134,10 @@ def pull_user_event_data(request):
 
     #Send request to pull data from the calendar API
     current_user = User.objects.get(id=request.user.id)
+    current_user_ext = UserExtended.objects.get(authenticated_user=current_user)
     storage = Storage(CredentialsModel, 'id', current_user, 'credential')
     credential = storage.get()
+
     if not credential is None:
 
         '''Dealing with OAUTH verification'''
@@ -143,10 +148,30 @@ def pull_user_event_data(request):
 
 
         #Need to fix the timing issues. Do not use UTC NOW, use 12AM or something
-        now = datetime.datetime.utcnow()
-        now = now - datetime.timedelta(now.weekday() - 1)
-        then = datetime.timedelta(days=5) #Indexed at 0
-        then = now + then
+        #now = datetime.datetime.utcnow()
+        #now = now - datetime.timedelta(now.weekday())
+        #then = datetime.timedelta(days=5) #Indexed at 0
+        #then = now + then
+        #temp_model = UserExtended.objects.create(
+        #    authenticated_user = current_user,
+        #    time_zone = 'America/Phoenix',
+        #    google_auth = False,
+        #    user_login_count = 1
+        #)
+        #Days left in the current week (to get the date for Sunday)
+        now_utc = datetime.datetime.utcnow()
+        local_tz = pytz.timezone(current_user_ext.time_zone)
+        now_utc = pytz.utc.localize(now_utc)
+        local_time = now_utc.astimezone(local_tz)
+        delta_for_BOW = 0 + local_time.weekday()
+        delta_for_EOW = 6 - local_time.weekday()
+
+        #Get the date for the end of the current week
+        current_EOW = local_time + datetime.timedelta(days=delta_for_EOW)
+        current_BOW = local_time - datetime.timedelta(days=delta_for_BOW)
+
+        now = current_BOW
+        then = current_EOW #End of week for the current week
 
         #Oauth handling var
         page_token = None
@@ -167,6 +192,9 @@ def pull_user_event_data(request):
         now = str(now[0:10]) + 'T00:00:01Z'
         then = str(then[0:10]) + 'T23:59:59Z'
 
+        print(now)
+        print(then)
+
         #Get the events off the primary calendar, this should be changed eventually so the user can select the calendar they please to use
         eventsResult = service.events().list(
 
@@ -175,16 +203,11 @@ def pull_user_event_data(request):
 
         events = eventsResult.get('items', [])
 
-        #subtracting one day from the now time
-        new_now_day = int(now[8:10])
-        new_now_day = new_now_day - 1
-
         #Get all the google events from the database when attempting the current sync
         google_tasks = SNE.objects.filter(is_google_task = True)
 
         #generating start and end of time range for the week
         start_range = datetime.datetime.strptime(now[0:10], '%Y-%m-%d')
-        start_range = start_range.replace(day = new_now_day)
         end_range = datetime.datetime.strptime(then[0:10], '%Y-%m-%d')
 
         #deleting tasks only for the current week
@@ -402,9 +425,13 @@ Function to actually pull the data from the authenticated OAUTH user
 @login_required(login_url='/login')
 def get_calendar_data(request):
 
-    #FIX THIS FOR DYNAMIC CALENDAR
-    my_date = datetime.datetime.now(pytz.timezone('America/Phoenix'))
-    user_day_of_week = my_date.day
+
+    current_user            = User.objects.get(username=request.user.username)
+    current_user_extended   = UserExtended.objects.get(authenticated_user=current_user)
+    current_user_time_zone  = current_user_extended.time_zone
+
+    my_date                 = datetime.datetime.now(pytz.timezone(current_user_time_zone))
+    user_day_of_week        = my_date.day
 
 
     #Authentication bool to verify Oauth steps have been completed
