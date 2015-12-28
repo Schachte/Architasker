@@ -545,9 +545,11 @@
 
     	<div class="sidebar-wrapper">
             <div class="logo">
-                <a href="http://www.creative-tim.com" class="simple-text">
+                <a href="/dashboard" class="simple-text">
                     Architasker
+                    <h6>Welcome back, {{first_name}} {{last_name}}!</h6>
                 </a>
+
             </div>
 
             <ul class="nav">
@@ -727,7 +729,7 @@
 <script src="{% static 'js/DASHBOARD_JAVASCRIPT/demo.js' %}"></script>
 
 	<script type="text/javascript">
-			{% if google_auth_complete == False %}
+			{% if user_initial_setup == False %}
     	$(document).ready(function(){
 
         	$.notify({
