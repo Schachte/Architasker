@@ -15,6 +15,6 @@ def processor_settings(request):
         current_user_ext = UserExtended.objects.get(authenticated_user=current_user)
         if current_user.is_active:
             print("user is active")
-        return HttpResponseRedirect("/settings/")
+        return HttpResponseRedirect("/settings")
     else:
         return HttpResponse("Not a POST submission")
