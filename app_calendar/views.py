@@ -209,6 +209,42 @@ def pull_user_event_data(request):
         start_range = datetime.datetime.strptime(now[0:10], '%Y-%m-%d')
         end_range = datetime.datetime.strptime(then[0:10], '%Y-%m-%d')
 
+
+        #Item that we will append if the boolean val is flipped
+        current_month_needs_to_be_replaced  = False
+
+        current_month_day_to_replace_start  = None
+        current_year_to_replace_start       = None
+        current_month_to_replace_start      = None
+
+        #This is the dictionary that will house a relation between the date (month day) along with the day of the week for the current week we live in
+        day_date_data_start = {}
+
+        #This is a simple array to loop through to make indexed associations
+        week_days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+
+        #shitty counter var to increment on each loop pass
+        week_day_iterator = 0
+
+        #Loop through each of the dates inside of the range of the start and end date range
+        for single_date in (start_range + datetime.timedelta(n) for n in range(7)):
+
+            #Current day of the month will represent a string for the looping var
+            current_day_of_month = str(single_date)
+
+            #Get just the actual day inside of the date
+            print(current_day_of_month[0:10].replace('-', ''))
+
+            #Append it to the dictionary
+            day_date_data_start[week_days[week_day_iterator]] = current_day_of_month[0:10].replace('-', '')
+
+            #increment the counter
+            week_day_iterator+=1
+
+        '''
+        ACCOUNT FOR THE END RANGES NOW
+        '''
+
         #deleting tasks only for the current week
         if google_tasks is not None:
             for task in google_tasks:
@@ -223,6 +259,7 @@ def pull_user_event_data(request):
 
         #We need to start parsing and storing the data into the database with the most recent copy of google events
         for event in events:
+            current_month_needs_to_be_replaced = False
 
             #Lets check recurrence
             event = convert(event)
@@ -235,15 +272,18 @@ def pull_user_event_data(request):
 
                     #If there is a BYDAY repetition, then regex parse the data to get the days
                     if ("BYDAY=" in each_item):
+                        current_month_needs_to_be_replaced = True
                         print("BY DAILY EXISTS FOR " + event['summary'])
-                        
+
                         '''REGEX START'''
+
                         match_pattern   = r'(BYDAY=([\w,]+))'
                         match_string    = str(each_item)
                         match = re.search(match_pattern, match_string)
 
                         #This piece gets rid of the BYDAY= part
                         days = match.group(0)[6:]
+
                         '''REGEX END'''
 
                         #Convert the regex data into a list seaparted by commas
@@ -251,10 +291,12 @@ def pull_user_event_data(request):
 
                         #Go in and find/parse all the day abbreviations from Google into day names into array information
                         days_list_conversion = []
+
                         for each_day in days:
 
                             #Some days prepend with integer, so here I am stripping out the integer
                             each_day = ''.join([i for i in each_day if not i.isdigit()])
+
                             if each_day == 'SU':
                                 days_list_conversion.append('Sunday')
                             elif each_day == 'MO':
@@ -270,21 +312,27 @@ def pull_user_event_data(request):
                             elif each_day == 'SA':
                                 days_list_conversion.append('Saturday')
 
+                        current_month_day_to_replace_start    = day_date_data_start[days_list_conversion[0]][6:]
+                        current_year_to_replace_start         = day_date_data_start[days_list_conversion[0]][0:4]
+                        current_month_to_replace_start        = day_date_data_start[days_list_conversion[0]][4:6]
+                        print("month is " + str(current_month_to_replace_start))
+
                         #Debug prints
-                        print('This event occurs on the following days: '),
                         for each_day in days_list_conversion:
                             print(each_day + ', '),
 
                     #If this is a monthly recurring event without the BYDAY= distingusher then grab the day it repeats on in the month
                     elif ("FREQ=MONTHLY" in each_item):
-                        print("BY MONTHLY EXISTS FOR " + event['summary'])
+                        print("BY MONTH EXISTS")
+                        current_month_needs_to_be_replaced = True
 
                         #If it occurs monthly and no day is present, get the day of the monthy recurrence item
                         date_object = str(parse(event['start']['dateTime']))
 
-                        #Debug prints
-                        print("This event occurs on the " + str(date_object[9:11]))
-
+                        current_month_day_to_replace_start = str(date_object[8:10])
+                        current_year_to_replace_start = str(date_object[0:4])
+                        current_month_to_replace_start = str(date_object[5:7])
+                        print("month is " + str(current_month_to_replace_start))
 
             try:
                 string_converted_date = convert(event['start'])
@@ -300,12 +348,19 @@ def pull_user_event_data(request):
                         dt = datetime.datetime.strptime(current, '%Y-%m-%dT' + times)
                         current = current[0:19]
 
+                        if (current_month_needs_to_be_replaced == True):
+                            current = str(current_year_to_replace_start) + '-' + str(current_month_to_replace_start) + '-' + str(current_month_day_to_replace_start) + current[10:]
+
                     elif 'date' in string_converted_date.keys():
                         current = str(string_converted_date['date'])
                         dt = datetime.datetime.strptime(current, '%Y-%m-%d')
+                        print('Day for the end date day is ' + str(dt.weekday()))
+
                         #appends T00:00:00Z to the end of the start date
                         #This is how dhtmlxscheduler defines an all day event
                         current = current[0:10] + 'T00:00:00Z'
+                        if (current_month_needs_to_be_replaced == True):
+                            current = str(current_year_to_replace_start) + '-' + str(current_month_to_replace_start) + '-' + str(current_month_day_to_replace_start) + 'T00:00:00Z'
 
                     if 'dateTime' in string_converted_end.keys():
                         end_time = str(string_converted_end['dateTime'])
@@ -318,7 +373,20 @@ def pull_user_event_data(request):
 
                     current_user = User.objects.get(username=request.user.username)
 
+                    print('Event is ' + event['summary'])
+                    print('Start time is ' + str(current))
+
+                    tester = str(current)[8:10]
+                    tester = int(tester)
+                    tester +=1
+
+                    if (current_month_needs_to_be_replaced):
+                        end_time = end_time[0:8] + str(tester) + end_time[10:]
+
+                    print('End time is ' + str(end_time))
+
                     not_exists = False
+
                     if not SNE.objects.filter(special_event_id=str(event['id'])).exists():
                         not_exists = True
 
@@ -332,17 +400,15 @@ def pull_user_event_data(request):
                             special_event_id = str(event['id'])
                         )
 
-
                     HEX_ASSOCIATION = {
                         '1': '#AEA8D3', '2': '#87D37C', '3': '#BE90D4', '4': '#E26A6A', '5': '#F9BF3B', '6': '#EB974E', '7': '#19B5FE', '8': '#D2D7D3', '9': '#4B77BE', '10': '#26A65B',
                         '11': '#D24D57'
                     }
 
-                    if 'colorId' in event:
+                    if 'colorId' in event and not_exists:
                         temp_model.color = HEX_ASSOCIATION[event['colorId']]
                     else:
                         temp_model.color = HEX_ASSOCIATION['1']
-
 
                     #Parsing out the different events to store into day arrays for the week
                     if (dt.weekday() == 0 ):
@@ -386,7 +452,13 @@ def pull_user_event_data(request):
                         if not_exists:
                             temp_model.current_day = "Sunday"
                             temp_model.save()
+
+                    else:
+                        temp_model.current_day = "Monday"
+                        temp_model.save()
+
             except:
+                print("NOT SAVED")
                 pass
 
         extension_model = UserExtended.objects.get(authenticated_user=request.user)
