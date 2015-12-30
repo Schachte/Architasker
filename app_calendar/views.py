@@ -334,7 +334,10 @@ def pull_user_event_data(request):
                         current_month_needs_to_be_replaced = True
 
                         #If it occurs monthly and no day is present, get the day of the monthy recurrence item
-                        date_object = str(parse(event['start']['dateTime']))
+                        if 'dateTime' in event['start']:
+                            date_object = str(parse(event['start']['dateTime']))
+                        else:
+                            date_object = str(parse(event['start']['date']))
 
                         for key, value in day_date_data_start.iteritems():
                             if (str(value[6:]) == str(date_object[8:10])):
@@ -535,6 +538,7 @@ def pull_user_event_data(request):
                         else:
                             temp_model.current_day = "Monday"
                             temp_model.save()
+                    multiple_recurrences_in_a_week = False
 
                     # except:
                     #     print("NOT SAVED")
@@ -610,7 +614,7 @@ def pull_user_event_data(request):
 
                             #Convert the string version of the date into a dateTime object to do timeDelta calculations on
                             current_date_conversion = parse(current)
-                            #datetime.timedelta(days=10)
+
                             end_time = current_date_conversion + datetime.timedelta(days=time_delta)
                             end_time = str(end_time)
                             end_time = end_time.replace(' ', 'T')
