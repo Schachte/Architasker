@@ -389,7 +389,6 @@ def pull_user_event_data(request):
                             '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
                             Begin calculating the time delta for the beginning and ending times of the event
                             '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-
                             ending_date = int(event['end']['date'][8:10])
                             starting_date = int(event['start']['date'][8:10])
 
@@ -594,6 +593,7 @@ def pull_user_event_data(request):
                     if 'dateTime' in string_converted_end.keys():
                         end_time = str(string_converted_end['dateTime'])
                         end_time = end_time[0:19]
+                        end_time_holder = end_time[10:]
 
                         if (current_month_needs_to_be_replaced == True):
                             current = str(string_converted_date['dateTime'])
@@ -612,6 +612,10 @@ def pull_user_event_data(request):
                             current_date_conversion = parse(current)
                             #datetime.timedelta(days=10)
                             end_time = current_date_conversion + datetime.timedelta(days=time_delta)
+                            end_time = str(end_time)
+                            end_time = end_time.replace(' ', 'T')
+                            end_time = end_time[0:10] + end_time_holder
+                            end_time = parse(end_time)
 
                     elif 'date' in string_converted_end.keys():
                         end_time = str(string_converted_end['date'])
