@@ -10,10 +10,11 @@ import collections
 import time
 import urllib
 import pytz
+import re
 
 
 from pytz import timezone
-
+from dateutil.parser import parse
 from apiclient import discovery
 from oauth2client import client
 from oauth2client import tools
@@ -207,7 +208,68 @@ def pull_user_event_data(request):
 
         #We need to start parsing and storing the data into the database with the most recent copy of google events
         for event in events:
-            print (event)
+
+            #Lets check recurrence
+            event = convert(event)
+
+            #Check if the current event we are dealing with is a recurring event
+            if 'recurrence' in event:
+
+                #Get the data inside the recurrence array in the event dictionary
+                for each_item in event['recurrence']:
+
+                    #If there is a BYDAY repetition, then regex parse the data to get the days
+                    if ("BYDAY=" in each_item):
+                        print("BY DAILY EXISTS FOR " + event['summary'])
+                        
+                        '''REGEX START'''
+                        match_pattern   = r'(BYDAY=([\w,]+))'
+                        match_string    = str(each_item)
+                        match = re.search(match_pattern, match_string)
+
+                        #This piece gets rid of the BYDAY= part
+                        days = match.group(0)[6:]
+                        '''REGEX END'''
+
+                        #Convert the regex data into a list seaparted by commas
+                        days = days.split(',')
+
+                        #Go in and find/parse all the day abbreviations from Google into day names into array information
+                        days_list_conversion = []
+                        for each_day in days:
+
+                            #Some days prepend with integer, so here I am stripping out the integer
+                            each_day = ''.join([i for i in each_day if not i.isdigit()])
+                            if each_day == 'SU':
+                                days_list_conversion.append('Sunday')
+                            elif each_day == 'MO':
+                                days_list_conversion.append('Monday')
+                            elif each_day == 'TU':
+                                days_list_conversion.append('Tuesday')
+                            elif each_day == 'WE':
+                                days_list_conversion.append('Wednesday')
+                            elif each_day == 'TH':
+                                days_list_conversion.append('Thursday')
+                            elif each_day == 'FR':
+                                days_list_conversion.append('Friday')
+                            elif each_day == 'SA':
+                                days_list_conversion.append('Saturday')
+
+                        #Debug prints
+                        print('This event occurs on the following days: '),
+                        for each_day in days_list_conversion:
+                            print(each_day + ', '),
+
+                    #If this is a monthly recurring event without the BYDAY= distingusher then grab the day it repeats on in the month
+                    elif ("FREQ=MONTHLY" in each_item):
+                        print("BY MONTHLY EXISTS FOR " + event['summary'])
+
+                        #If it occurs monthly and no day is present, get the day of the monthy recurrence item
+                        date_object = str(parse(event['start']['dateTime']))
+
+                        #Debug prints
+                        print("This event occurs on the " + str(date_object[9:11]))
+
             try:
                 string_converted_date = convert(event['start'])
                 string_converted_end = convert(event['end'])
