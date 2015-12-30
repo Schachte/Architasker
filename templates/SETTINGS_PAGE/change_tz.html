@@ -146,13 +146,18 @@
 
         <center><div class="card">
             <div class="box-header">
-                <h1>Change Settings</h1>
+                <h1>Change Timezone</h1>
             </div>
+                <button onclick="location.href='/settings'" class="btn green">Back</button>
                 <div>
-                    <button onclick="location.href = 'settings/change-name'" class="btn blue">Change Name</button>
-                    <button onclick="location.href = 'settings/change-password'" class="btn red">Change Password</button>
-                    <button onclick="location.href = 'settings/change-email'" class="btn green">Change Email</button>
-                    <button onclick="location.href = 'settings/change-tz'" class="btn purple">Change Time Zone</button>
+                    <form action="settingsavetz" method="POST">
+                        {% csrf_token %}
+                        <label for="tz">Time Zone</label>
+                        <br/>
+                        <input type="text" id="tz"  name="tz">
+                        <br/>
+                        <button type="submit" class="btn blue">Save</button>
+                    </form>
                 </div>
             <br/>
         </div></center>
