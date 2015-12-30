@@ -563,6 +563,9 @@ def pull_user_event_data(request):
                     # except:
                     #     print("NOT SAVED")
                     #     pass
+                current_month_day_to_replace_start_array = []
+                current_year_to_replace_start_array = []
+                current_month_to_replace_start_array = []
             else:
                 if 'date' in string_converted_date.keys() or 'dateTime' in  string_converted_date.keys():
 
@@ -747,9 +750,9 @@ def pull_user_event_data(request):
                         temp_model.save()
 
 
-                    current_month_day_to_replace_start_array = []
-                    current_year_to_replace_start_array = []
-                    current_month_to_replace_start_array = []
+                current_month_day_to_replace_start_array = []
+                current_year_to_replace_start_array = []
+                current_month_to_replace_start_array = []
                 # except:
                 #     print("NOT SAVED")
                 #     pass
