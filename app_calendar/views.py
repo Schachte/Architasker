@@ -264,6 +264,7 @@ def pull_user_event_data(request):
 
             #Check if the current event we are dealing with is a recurring event
             if 'recurrence' in event:
+                print(event['recurrence'])
 
                 #Get the data inside the recurrence array in the event dictionary
                 for each_item in event['recurrence']:
@@ -274,9 +275,12 @@ def pull_user_event_data(request):
 
                         '''REGEX START'''
 
-                        match_pattern   = r'(BYDAY=([\w,]+))'
+                        match_pattern   = r'(BYDAY=([\w,-]+))'
                         match_string    = str(each_item)
                         match = re.search(match_pattern, match_string)
+
+                        print("EACH ITEM IS " + each_item)
+                        print("match is " + str(match))
 
                         #This piece gets rid of the BYDAY= part
                         days = match.group(0)[6:]
@@ -297,6 +301,8 @@ def pull_user_event_data(request):
 
                             #Some days prepend with integer, so here I am stripping out the integer
                             each_day = ''.join([i for i in each_day if not i.isdigit()])
+                            if '-' in each_day:
+                                each_day = each_day.replace('-', '')
 
                             if each_day == 'SU':
                                 days_list_conversion.append('Sunday')
