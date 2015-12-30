@@ -289,6 +289,8 @@ def pull_user_event_data(request):
 
                         #Convert the regex data into a list seaparted by commas
                         days = days.split(',')
+                        print(days),
+                        print(' are the days')
 
                         #Go in and find/parse all the day abbreviations from Google into day names into array information
                         days_list_conversion = []
@@ -296,8 +298,12 @@ def pull_user_event_data(request):
                         '''
                         Ok, so here by day exists, so we need to use hte two dates to find the time delta for the dates of the month
                         '''
-
+                        print("length of days is %d for %s"%(len(days), event['summary']))
+                        counter = 0
                         for each_day in days:
+
+                            if (counter > len(days)):
+                                break
 
                             #Some days prepend with integer, so here I am stripping out the integer
                             each_day = ''.join([i for i in each_day if not i.isdigit()])
@@ -318,13 +324,17 @@ def pull_user_event_data(request):
                                 days_list_conversion.append('Friday')
                             elif each_day == 'SA':
                                 days_list_conversion.append('Saturday')
+                            counter+=1
 
                         #LETS DO SOME LOGIC TO CHECK IF THERE ARE MULTIPLE RECURRENCES INSIDE OF A SINGLE WEEK
                         if (len(days_list_conversion) > 1):
                             multiple_recurrences_in_a_week = True
 
                             days_counter = 0
+                            print("length of days_list_conversion is %s"%(len(days_list_conversion)))
+                            print(days_list_conversion)
                             for days in days_list_conversion:
+                                print(day_date_data_start[days_list_conversion[days_counter]][6:])
                                 current_month_day_to_replace_start_array.append(day_date_data_start[days_list_conversion[days_counter]][6:])
                                 current_year_to_replace_start_array.append(day_date_data_start[days_list_conversion[days_counter]][0:4])
                                 current_month_to_replace_start_array.append(day_date_data_start[days_list_conversion[days_counter]][4:6])
@@ -365,6 +375,7 @@ def pull_user_event_data(request):
             if multiple_recurrences_in_a_week:
 
                 recurrence_data_length = len(current_month_day_to_replace_start_array)
+                print("recurrence length is %d" %(recurrence_data_length))
 
                 for recurrence_data in range(0, recurrence_data_length):
 
@@ -545,6 +556,9 @@ def pull_user_event_data(request):
                             temp_model.current_day = "Monday"
                             temp_model.save()
                     multiple_recurrences_in_a_week = False
+                    # current_month_day_to_replace_start_array = []
+                    # current_year_to_replace_start_array = []
+                    # current_month_to_replace_start_array = []
 
                     # except:
                     #     print("NOT SAVED")
@@ -732,6 +746,10 @@ def pull_user_event_data(request):
                         temp_model.current_day = "Monday"
                         temp_model.save()
 
+
+                    current_month_day_to_replace_start_array = []
+                    current_year_to_replace_start_array = []
+                    current_month_to_replace_start_array = []
                 # except:
                 #     print("NOT SAVED")
                 #     pass
