@@ -311,6 +311,19 @@
 
 			}
 
+			$(function() {
+			    $( "#datepicker" ).datepicker({
+			      showOn: "button",
+			      buttonImage: "{% static 'datepicker/images/calendar.gif' %}",
+			      buttonImageOnly: true,
+			      buttonText: "Select date",
+			      minDate: 0
+
+			    });
+			});
+
+			
+
 		</script>
 
 
@@ -328,15 +341,23 @@
 			.pushdown {
 				margin-top: 100px;
 			}
+
+			/*CSS for collapsing form*/
+			#demoTask{
+				padding-top: 10px;
+			}
+
 		</style>
 
-
-
-
-
-
-
-
+		<!-- CSS for percent slider -->
+		<style>
+			#input-select,
+			#input-number {
+				padding: 7px;
+				margin: 15px 5px 5px;
+				width: 70px;
+			}
+		</style>
 
 
 </head>
@@ -460,17 +481,114 @@
 					 </div>
 				</div>
 
+				<div class="container col-lg-12">
 				{% if user_is_authenticated == True %}
 				<form action="/sync" method="get">
 					{% csrf_token %}
-				<input type="submit" value="Sync Google Calendar" class="btn waves-effect waves-light pink darken-1">
+				<input type="submit" value="Sync Google Calendar" class="btn waves-effect waves-light pink darken-1" style="float: right;">
 				</form>
 				{% elif user_is_authenticated == False %}
 				<a href="/oauth">Want to sync with Google? Click Here</a>
 				{% endif %}
 
+				
+				    <a href="#footerID"><button type="button" class="btn btn-success" data-toggle="collapse" data-target="#demoTask">
+				      <span class="glyphicon glyphicon-collapse-down"></span> Add Task
+				    </button></a>
+				  <div id="demoTask" class="collapse">
+				  	<section id="advanced-form">
+					    <form id="example-advanced-form" action="#">
+						    <h3>Task</h3>
+						    <section>
+						        <legend>Task Information</legend>
+						 
+						        <label for="taskName-2">Task name *</label>
+						        <input id="taskName-2" name="taskName" type="text" class="required">
+						        <label for="datepicker">Due Date *</label>
+						        <!-- <input id="dueDate-2" name="dueDate" type="text" class="required"> -->
+						        <input type="text" id="datepicker" name="dueDate" class="required">
+						    </section>
+						 
+						    <h3>Details</h3>
+						    <section>
+						    	<legend>Estimated Time &amp; Priority</legend>
+						    	<div>
+							    	<label for="percent-2">% to complete by end of the week*</label>
+							        <!-- <input id="percent-2" name="percent" type="text" class="required"> -->
+							        <div>
+								        <input type="number" min="0" max="100" step="1" id="input-number" style='display:inline-block;'>
+										<div id="html5" style='width:35%; display:inline-block;'></div>
+									</div>
+								</div>
 
-        <footer class="footer">
+								<div style='padding-top: 20px'>
+							        <label for="time-2">Estimated time (hours) to complete  <div id="valueOfSlider" style='display:inline-block;'></div> of task*</label>
+							        <input id="time-2" name="time" type="text" class="required">
+							    </div>
+
+							    <div style='padding-top: 20px'>
+									<label for="radiosSlider">Priority *</label>
+	      							<div id="radiosSlider"  style='width:350%'>
+									    <input id="value1" name="values" type="radio">
+									    <label for="value1">1</label>
+
+									    <input id="value2" name="values" type="radio">
+									    <label for="value2">2</label>
+
+									    <input id="value3" name="values" type="radio">
+									    <label for="value3">3</label>
+
+									    <input id="value4" name="values" type="radio">
+									    <label for="value4">4</label>
+
+									    <input id="value5" name="values" type="radio" checked>
+									    <label for="value5">5</label>
+
+									    <input id="value6" name="values" type="radio">
+									    <label for="value6">6</label>
+
+									    <input id="value7" name="values" type="radio">
+									    <label for="value7">7</label>
+
+									    <input id="value8" name="values" type="radio">
+									    <label for="value8">8</label>
+
+									    <input id="value9" name="values" type="radio">
+									    <label for="value9">9</label>
+
+									    <input id="value10" name="values" type="radio">
+									    <label for="value10">10</label>
+									</div>
+								</div>
+								
+						    </section>
+						 
+						    <h3>Extras</h3>
+						    <section>
+						        <legend>Extra Integrations</legend>
+						 
+						        <input id="pomodoro-2" name="pomodoro" type="checkbox" class="required"> <label for="pomodoro-2">Pomodoro Timer</label>
+						    </section>
+						</form>
+				   	</section>
+				  </div>
+				</div>
+
+				<script>
+				$(document).ready(function(){
+				  $("#demoTask").on("hide.bs.collapse", function(){
+				    $(".btn").html('<span class="glyphicon glyphicon-collapse-down"></span> Add Task');
+				  });
+				  $("#demoTask").on("show.bs.collapse", function(){
+				    $(".btn").html('<span class="glyphicon glyphicon-collapse-up"></span> Close');
+				  });
+				});
+
+				
+				</script>
+
+
+        <footer id="footerID" class="footer">
             <div class="container-fluid">
                 <nav class="pull-left">
                     <ul>
@@ -495,11 +613,104 @@
     </div>
 </div>
 
+<script>
+        var form = $("#example-advanced-form").show();
 
+        form.steps({
+            headerTag: "h3",
+            bodyTag: "section",
+            transitionEffect: "slideLeft",
+            onStepChanging: function (event, currentIndex, newIndex)
+            {
+                // Allways allow previous action even if the current form is not valid!
+                if (currentIndex > newIndex)
+                {
+                    return true;
+                }
+                // Forbid next action on "Warning" step if the user is to young
+                if (newIndex === 3 && Number($("#age-2").val()) < 18)
+                {
+                    return false;
+                }
+                // Needed in some cases if the user went back (clean up)
+                if (currentIndex < newIndex)
+                {
+                    // To remove error styles
+                    form.find(".body:eq(" + newIndex + ") label.error").remove();
+                    form.find(".body:eq(" + newIndex + ") .error").removeClass("error");
+                }
+                form.validate().settings.ignore = ":disabled,:hidden";
+                return form.valid();
+            },
+            onStepChanged: function (event, currentIndex, priorIndex)
+            {
+                // Used to skip the "Warning" step if the user is old enough.
+                if (currentIndex === 2 && Number($("#age-2").val()) >= 18)
+                {
+                    form.steps("next");
+                }
+                // Used to skip the "Warning" step if the user is old enough and wants to the previous step.
+                if (currentIndex === 2 && priorIndex === 3)
+                {
+                    form.steps("previous");
+                }
+            },
+            onFinishing: function (event, currentIndex)
+            {
+                form.validate().settings.ignore = ":disabled";
+                return form.valid();
+            },
+            onFinished: function (event, currentIndex)
+            {
+                alert("Submitted!");
+            }
+        }).validate({
+            errorPlacement: function errorPlacement(error, element) { element.before(error); },
+            rules: {
+                confirm: {
+                    equalTo: "#password-2"
+                }
+            }
+        });
+
+        $(document).ready( function(){
+        	$("#radiosSlider").radiosToSlider();
+    	});
+    </script>
+
+    <!-- Javascript for percent slider -->
+    <script>
+		var html5Slider = document.getElementById('html5');
+
+		noUiSlider.create(html5Slider, {
+			start: 50,
+			connect: "lower",
+			step: 1,
+			range: {
+				'min': 0,
+				'max': 100
+			}
+		});
+
+		var inputNumber = document.getElementById('input-number');
+		var valueOfSlider = document.getElementById('valueOfSlider');
+
+		html5Slider.noUiSlider.on('update', function( values, handle ) {
+
+			var value = values[handle];
+			inputNumber.value = Math.round(value);
+			valueOfSlider.innerHTML = Math.round(value) + "%";
+		});
+
+
+		inputNumber.addEventListener('change', function(){
+			html5Slider.noUiSlider.set([this.value]);
+		});
+	</script>
 </body>
 
 <!--   Core JS Files   -->
-<script src="{% static 'js/DASHBOARD_JAVASCRIPT/jquery-1.10.2.js'%}" type="text/javascript"></script>
+<!-- <script src="{% static 'js/DASHBOARD_JAVASCRIPT/jquery-1.10.2.js'%}" type="text/javascript"></script> -->
 <script src="{% static 'js/DASHBOARD_JAVASCRIPT/bootstrap.min.js' %}" type="text/javascript"></script>
 
 <!--  Checkbox, Radio & Switch Plugins -->
