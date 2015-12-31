@@ -685,7 +685,7 @@ def pull_user_event_data(request):
                             end_time = str(end_time),
                             special_event_id = str(event['id'])
                         )
-                        temp_model.save()
+                        # temp_model.save()
 
                     HEX_ASSOCIATION = {
                         '1': '#AEA8D3', '2': '#87D37C', '3': '#BE90D4', '4': '#E26A6A', '5': '#F9BF3B', '6': '#EB974E', '7': '#19B5FE', '8': '#D2D7D3', '9': '#4B77BE', '10': '#26A65B',
