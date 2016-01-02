@@ -288,6 +288,7 @@
 
 				scheduler.attachEvent("onBeforeDrag", readonly_check);
 
+				scheduler.config.hour_date = "%g:%i%a"; 
 				// scheduler.config.readonly = true;
 				scheduler.init('scheduler_here',new Date(calendar_year,calendar_month,calendar_day),"week");
 
