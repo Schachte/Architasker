@@ -20,6 +20,8 @@
     <meta name="viewport" content="width=device-width" />
 
 
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet" integrity="sha256-7s5uDGW3AHqw6xtJmNNtr+OBRJUlgkNJEo78P4b0yRw= sha512-nNo+yCHEyn0smMxSswnf/OnX6/KwJuZTlNZBjauKhTK0c+zT+q5JOCx0UFhXQ6rJR9jg6Es8gPuD2uZcYDLqSw==" crossorigin="anonymous">
+
     <!-- Bootstrap core CSS     -->
     <link href="{% static 'css/DASHBOARD_CSS/bootstrap.min.css' %}" rel="stylesheet" />
 
@@ -43,6 +45,14 @@
 		<script type="text/javascript" charset="utf-8">
 
 			function init() {
+
+                var open_modal_google = function(id, event_color, start, end) {
+                    $("#modal_title").html("Google Event Name: <font color=\"" + event_color +"\"><b>" + scheduler.getEvent(id).text + "</b></font>");
+                    $("#start_time").html("Start Time: <b>" + start + "</b>");
+                    $("#end_time").html("End Time: <b>" + end + "</b>");
+                    $('#mymodal').modal('show');
+                }
+
 				google_ids = [];
 
 				var currently_selected_id = "";
@@ -166,12 +176,6 @@
 				};
 
 
-                //
-                // '1': '#AEA8D3', '2': '#87D37C', '3': '#BE90D4',
-                // '4': '#E26A6A', '5': '#F9BF3B', '6': '#EB974E', '7':
-                // '#19B5FE', '8': '#D2D7D3', '9': '#4B77BE', '10': '#26A65B',
-                // '11': '#D24D57'
-
 
                 scheduler.config.icons_select = ['icon_details', 'icon_delete', 'i1', 'i2', 'i3', 'i4', 'i5', 'i6', 'i7', 'i8', 'i9', 'i10', 'i11'];
 
@@ -264,7 +268,6 @@
 				scheduler.attachEvent("onDblClick", readonly_check);
 
 
-
 				// JS event for the onEventAdded function to do an AJAX call to the database for syncing the new event data
 				scheduler.attachEvent("onEventAdded", updateDayStatus);
 
@@ -285,6 +288,7 @@
 
 				scheduler.attachEvent("onBeforeDrag", readonly_check);
 
+				scheduler.config.hour_date = "%g:%i%a"; 
 				// scheduler.config.readonly = true;
 				scheduler.init('scheduler_here',new Date(calendar_year,calendar_month,calendar_day),"week");
 
@@ -370,7 +374,6 @@
 
 				//Array to store all the currently gathered google events for the user on the calendar
 
-
 				//Storing all the google events to enable ability to make read-only
 				{% for monday_tasks in mon %}
 						{% if monday_tasks.is_google_task %}
@@ -408,7 +411,6 @@
 					{% endif %}
 				{% endfor %}
 
-
 				//Function to deal with making google tasks read only
 				function readonly_check(id) {
 
@@ -423,12 +425,31 @@
 						var readOnly = scheduler.getEvent(id).readonly;
 						scheduler.config.drag_move = true;
 						scheduler.config.drag_resize = readOnly;
+                        open_modal_google(scheduler.getEvent(id).id, scheduler.getEvent(id).color, formatDateFunc(scheduler.getEvent(id).start_date), formatDateFunc(scheduler.getEvent(id).end_date));
 						return false;
 					}
 					else {
 						return true;
 					}
 				}
+
+                // The goal is to open a modal window for the google events
+                function modal_check_for_google(id) {
+
+                    for (i = 0; i < google_ids.length; i++) {
+						if (google_ids[i] == id) {
+							found_google_task = true;
+						}
+					}
+					if (found_google_task) {
+
+                        open_modal_google(scheduler.getEvent(id).id, scheduler.getEvent(id).color);
+						return false;
+					}
+
+                }
+
+
 
 			}
 
@@ -573,6 +594,9 @@
     	</div>
     </div>
 
+
+
+
     <div class="main-panel">
         <nav class="navbar navbar-default navbar-fixed">
             <div class="container-fluid">
@@ -709,9 +733,28 @@
 
     </div>
 </div>
+<div class="modal fade" id = "mymodal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+        <h4 class="modal-title" id="modal_title">Google Event Name: </h4>
+      </div>
+      <div class="modal-body">
+         <p id="start_time"></p>
+         <p id="end_time"></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
 
 
 </body>
+
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha256-KXn5puMvxCw+dAYznun+drMdG1IFl3agK0p/pqT9KAo= sha512-2e8qq0ETcfWRI4HJBzQiA3UoyFk6tbNyG+qSaIBZLyW9Xf3sWZHN/lxe9fTh1U45DpPf07yj94KsUHHWe4Yk1A==" crossorigin="anonymous"></script>
 
 <!--   Core JS Files   -->
 <script src="{% static 'js/DASHBOARD_JAVASCRIPT/jquery-1.10.2.js'%}" type="text/javascript"></script>
