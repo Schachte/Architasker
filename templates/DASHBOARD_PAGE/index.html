@@ -288,7 +288,7 @@
 
 				scheduler.attachEvent("onBeforeDrag", readonly_check);
 
-				scheduler.config.hour_date = "%g:%i%a"; 
+				scheduler.config.hour_date = "%g:%i%a";
 				// scheduler.config.readonly = true;
 				scheduler.init('scheduler_here',new Date(calendar_year,calendar_month,calendar_day),"week");
 
@@ -559,7 +559,19 @@
                 margin-right: 20px;
             }
 		</style>
+        <style>
 
+            .footer{
+                position: absolute;
+                left: 0;
+                bottom: 0;
+                height: 60px;
+                width: 100%;
+                overflow:hidden;
+            }
+
+
+        </style>
 
 </head>
 <body onload="init();">
