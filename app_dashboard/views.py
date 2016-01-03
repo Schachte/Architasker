@@ -32,8 +32,7 @@ def processor_settings_name(request):
                     current_user.last_name = request.POST.get('last_name')
                     current_user.save()
                     #print(current_user.last_name)
-            str = "hi"
-            return str
+            return HttpResponse("none")
     else:
         return HttpResponse("Not a POST submission")
 

@@ -500,11 +500,6 @@ def pull_user_event_data(request):
                         #Parsing out the different events to store into day arrays for the week
                         if (dt.weekday() == 0 ):
 
-            try:
-                string_converted_date = convert(event['start'])
-                string_converted_end = convert(event['end'])
-                string_colors = convert(event)
-
                             if not_exists:
                                 temp_model.current_day = "Monday"
                                 temp_model.save()
