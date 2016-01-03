@@ -8,24 +8,16 @@ from django.contrib.auth import authenticate, login, logout
 
 @login_required(login_url='/login')
 def settings_loader(request):
-	return render(request, 'SETTINGS_PAGE/index.html')
+    current_user = User.objects.get(username=request.user.username)
+    current_user_ext = UserExtended.objects.get(authenticated_user=current_user)
+    context = {
+
+        'time_zone' : current_user_ext.time_zone,
+    }
+
+    return render(request, 'SETTINGS_PAGE/index.html', context)
 
 @login_required(login_url='/login')
-def settings_name_loader(request):
-    return render(request, 'SETTINGS_PAGE/change_name.html')
-
-@login_required(login_url='/login')
-def settings_password_loader(request):
-    return render(request, 'SETTINGS_PAGE/change_password.html')
-
-@login_required(login_url='/login')
-def settings_email_loader(request):
-    return render(request, 'SETTINGS_PAGE/change_email.html')
-
-@login_required(login_url='/login')
-def settings_tz_loader(request):
-    return render(request, 'SETTINGS_PAGE/change_tz.html')
-
 def processor_settings_name(request):
     if request.method == "POST":
         current_user = User.objects.get(username=request.user.username)
@@ -40,10 +32,12 @@ def processor_settings_name(request):
                     current_user.last_name = request.POST.get('last_name')
                     current_user.save()
                     #print(current_user.last_name)
-        return HttpResponseRedirect("/settings")
+            str = "hi"
+            return str
     else:
         return HttpResponse("Not a POST submission")
 
+@login_required(login_url='/login')
 def processor_settings_email(request):
     if request.method == "POST":
         current_user = User.objects.get(username=request.user.username)
@@ -54,10 +48,11 @@ def processor_settings_email(request):
                     current_user.email = request.POST.get('email')
                     current_user.save()
                     #print(current_user.email)
-        return HttpResponseRedirect("/settings")
+            return HttpResponse("none")
     else:
         return HttpResponse("Not a POST submission")
 
+@login_required(login_url='/login')
 def processor_settings_tz(request):
     if request.method == "POST":
         current_user = User.objects.get(username=request.user.username)
@@ -69,10 +64,11 @@ def processor_settings_tz(request):
                     current_user_ext.time_zone = request.POST.get('tz')
                     current_user_ext.save()
                     print(current_user_ext.time_zone)
-        return HttpResponseRedirect("/settings")
+        return HttpResponse("none")
     else:
         return HttpResponse("Not a POST submission")
 
+@login_required(login_url='/login')
 def processor_settings_password(request):
     if request.method == "POST":
         current_user = User.objects.get(username=request.user.username)
@@ -102,6 +98,6 @@ def processor_settings_password(request):
                                         login(request, user)
                     else:
                         return HttpResponse("Old password does not match")
-        return HttpResponseRedirect("/settings")
+        return HttpResponse("none")
     else:
         return HttpResponse("Not a POST submission")

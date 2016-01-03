@@ -1,6 +1,7 @@
 db.sqlite3
 *.sqlite
 *.sqlite3
+procrastinate/*.pyc
 *.pyc
 client_secrets.json
 SECURE_FILES.py
