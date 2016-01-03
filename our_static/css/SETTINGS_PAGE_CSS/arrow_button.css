@@ -17,6 +17,32 @@ h1 {
     vertical-align: top;
 }
 
+.scrollable-menu {
+  height: auto;
+  max-height: 200px;
+  overflow-x: hidden;
+}
+
+#namesuccess{
+  color: #008000; 
+  display:none;
+}
+
+#passsuccess{
+  color: #008000; 
+  display:none;
+}
+
+#emailsuccess{
+  color: #008000; 
+  display:none;
+}
+
+#tzsuccess{
+  color: #008000; 
+  display:none;
+}
+
 /* css for the shiny buttons */
 
 .btn {

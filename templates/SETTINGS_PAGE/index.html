@@ -151,7 +151,8 @@
                     <div id='outer' class="content">
                         <div class="inner">
                             <button id='hideshowname' class="btn blue">Change Name</button>
-                            <div id='namestuff' style="display:none">
+                            <div id='namestuff' class="form-group" style="display:none">
+                                <div id="errormsgname"><p style="color: #c0392b"></p></div> 
                                 <form id="savename" action="settingsavename" method="POST">
                                     {% csrf_token %}
                                     <label for="firstname">First Name</label>
@@ -165,11 +166,12 @@
                                     <button type="submit" class="btn blue">Save</button>
                                 </form>
                             </div>
-                            <div id='namesuccess' style="color: #008000; display:none"><p>Name Changed Successfully!</p></div>
+                            <div id='namesuccess'><p>Name Changed Successfully!</p></div>
                         </div>
                         <div class="inner">
                             <button id='hideshowpass' class="btn red" >Change Password</button>
-                            <div id='passstuff' style="display:none">
+                            <div id='passstuff' class="form-group" style="display:none">
+                                <div id="errormsgpass"><p style="color: #c0392b"></p></div> 
                                 <form id="savepass" action="settingsavepassword" method="POST">
                                     {% csrf_token %}
                                     <label for="oldpass">Old Password</label>
@@ -187,11 +189,12 @@
                                     <button type="submit" class="btn blue">Save</button>
                                 </form>
                             </div>
-                            <div id='passsuccess' style="color: #008000; display:none"><p>Password Changed Successfully!</p></div>
+                            <div id='passsuccess'><p>Password Changed Successfully!</p></div>
                         </div>
                         <div class="inner">
                             <button id='hideshowemail' class="btn green">Change Email</button>
-                            <div id='emailstuff' style="display:none">
+                            <div id='emailstuff' class="form-group" style="display:none">
+                                <div id="errormsgemail"><p style="color: #c0392b"></p></div> 
                                 <button id='hideshowcurremail' class="btn orange small">Show Current Email</button>
                                 <div id='currentemail' style="display:none"><p>{{user.email}}</p></div>
                                 <form id="saveemail" action="settingsaveemail" method="POST">
@@ -203,11 +206,12 @@
                                     <button type="submit" class="btn blue">Save</button>
                                 </form>
                             </div>
-                            <div id='emailsuccess' style="color: #008000; display:none"><p>Email Changed Successfully!</p></div>
+                            <div id='emailsuccess'><p>Email Changed Successfully!</p></div>
                         </div>
                         <div class="inner">
                             <button id='hideshowtz' class="btn purple">Change Time Zone</button>
-                            <div id='tzstuff' style="display:none">
+                            <div id='tzstuff' class="form-group" style="display:none">
+                                <div id="errormsgtz"><p style="color: #c0392b"></p></div> 
                                 <button id='hideshowcurrtz' class="btn orange small">Show Current Time Zone</button>
                                 <div id='currenttz' style="display:none"><p>{{time_zone}}</p></div>
                                 <form id="savetz" action="settingsavetz" method="POST">
@@ -219,7 +223,7 @@
                                     <button type="submit" class="btn blue">Save</button>
                                 </form>
                             </div>
-                            <div id='tzsuccess' style="color: #008000; display:none"><p>Time Zone Changed Successfully!</p></div>
+                            <div id='tzsuccess'><p>Time Zone Changed Successfully!</p></div>
                         </div>
                     </div>
                 <br/>
@@ -324,37 +328,89 @@
         });
     </script>
 
+    <!--<script type="text/javascript" charset="utf-8">
+
+        var sendTimeZone = function(user_tz) {
+            $('.ajaxProgress').show();
+            $.ajax({
+                type: "POST",
+                url: "persist_timezone_ajax/",
+                dataType: "json",
+                data: {
+                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                    user_tz: user_tz
+                },
+            });
+        };
+
+        $('li').click(function(){
+            var selected_zone = $(this).text();
+            $('#tz').text(selected_zone);
+            sendTimeZone(selected_zone);
+        });
+
+        $(document).ready(function(){
+          $(".dropdownbox").click(function(){
+            $(".menu").toggleClass("showMenu");
+              $(".menu > li").click(function(){
+                $(".dropdownbox > p").text($(this).text());
+                $(".menu").removeClass("showMenu");
+              });
+          });
+        });
+
+    </script>-->
+
     <script type="text/javascript" charset="utf-8">
+
+        function isEmail(email) {
+            var regex = /^([a-zA-Z0-9_.+-])+\@(([a-zA-Z0-9-])+\.)+([a-zA-Z0-9]{2,4})+$/;
+            return regex.test(email);
+        }
 
         $("#savename").submit(function(event) {
 
             /* stop form from submitting normally */
             event.preventDefault();
 
-            /* get some values from elements on the page: */
-            var $form = $( this ),
-                url = $form.attr( 'action' );
+            if(($('#firstname').val()).localeCompare('') == 0){
+                $('#namestuff').addClass("has-error");
+                jQuery('#errormsgname').show();
+                $('#errormsgname p').text('You are missing a first name!');
+            }
+            else if(($('#lastname').val()).localeCompare('') == 0){
+                $('#namestuff').addClass("has-error");
+                jQuery('#errormsgname').show();
+                $('#errormsgname p').text('You are missing a last name!');
+            }
+            else{
+                /* get some values from elements on the page: */
+                var $form = $( this ),
+                    url = $form.attr( 'action' );
 
-            /* Send the data using post */
-            $.ajax({
-                type: "POST",
-                url: url,
-                datatype: "json",
-                data: {
-                    csrfmiddlewaretoken: '{{ csrf_token }}',
-                    first_name: $('#firstname').val(),
-                    last_name: $('#lastname').val(),
-                },
-                success: function(){
-                    jQuery('#namestuff').hide(500);
-                    jQuery('#namesuccess').show();
-                    setTimeout(function(){
-                        $("#namesuccess").fadeOut("slow", function () {
-                        });
+                /* Send the data using post */
+                $.ajax({
+                    type: "POST",
+                    url: url,
+                    datatype: "json",
+                    data: {
+                        csrfmiddlewaretoken: '{{ csrf_token }}',
+                        first_name: $('#firstname').val(),
+                        last_name: $('#lastname').val(),
+                    },
+                    success: function(){
+                        jQuery('#namestuff').hide(500);
+                        jQuery('#errormsgname').hide();
+                        $('#namestuff').removeClass("has-error");
+                        jQuery('#namesuccess').show();
+                        setTimeout(function(){
+                            $("#namesuccess").fadeOut("slow", function () {
+                            });
 
-                    }, 3000);
-                },
-            });
+                        }, 3000);
+                    },
+                });
+            }
         });
 
         $("#savepass").submit(function(event) {
@@ -394,30 +450,38 @@
             /* stop form from submitting normally */
             event.preventDefault();
 
-            /* get some values from elements on the page: */
-            var $form = $( this ),
-                url = $form.attr( 'action' );
+            if(isEmail($('#email').val())){
+                /* get some values from elements on the page: */
+                var $form = $( this ),
+                    url = $form.attr( 'action' );
 
-            /* Send the data using post */
-            $.ajax({
-                type: "POST",
-                url: url,
-                datatype: "json",
-                data: {
-                    csrfmiddlewaretoken: '{{ csrf_token }}',
-                    email: $('#email').val(),
-                },
-                success: function(){
-                    $('#currentemail').text($('#email').val());
-                    jQuery('#emailstuff').hide(500);
-                    jQuery('#emailsuccess').show();
-                    setTimeout(function(){
-                        $("#emailsuccess").fadeOut("slow", function () {
-                        });
+                /* Send the data using post */
+                $.ajax({
+                    type: "POST",
+                    url: url,
+                    datatype: "json",
+                    data: {
+                        csrfmiddlewaretoken: '{{ csrf_token }}',
+                        email: $('#email').val(),
+                    },
+                    success: function(){
+                        $('#currentemail').text($('#email').val());
+                        jQuery('#errormsgemail').hide();
+                        jQuery('#emailstuff').hide(500);
+                        jQuery('#emailsuccess').show();
+                        setTimeout(function(){
+                            $("#emailsuccess").fadeOut("slow", function () {
+                            });
 
-                    }, 3000);
-                },
-            });
+                        }, 3000);
+                    },
+                });
+            }
+            else{
+                $('#emailstuff').addClass("has-error");
+                jQuery('#errormsgemail').show();
+                $('#errormsgemail p').text('Must be a valid email address!');
+            }
         });
 
         $("#savetz").submit(function(event) {
