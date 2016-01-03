@@ -5,9 +5,15 @@
 
 {% block head_extras %}
 <link href="{% static 'login_css/style.css' %}" rel="stylesheet">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+
+<style>
+    #error_msg{
+        color: #c0392b;
+    }
+</style>
+
 {% endblock %}
-
-
 
 {% block body_block %}
 
@@ -20,7 +26,8 @@
 			<div class="box-header">
 				<h2>Create Your Free Account Today</h2>
 			</div>
-      <form action="/registermein" method="POST">
+            <h4 id="error_msg"></h4>
+      <div class="submit_me_sir">
         {% csrf_token %}
           <label for="first_name">First Name</label>
           <br/>
@@ -30,28 +37,75 @@
           <br/>
           <input type="text" id="last_name"  name="last_name">
           <br/>
-    			<label for="username">Username</label>
-    			<br/>
-    			<input type="text" id="username"  name="user_name">
-    			<br/>
-          <label for="email">Email</label>
-    			<br/>
-    			<input type="text" id="email"  name="user_email">
-    			<br/>
-    			<label for="password">Password</label>
-    			<br/>
-    			<input type="password" id="password" name="pass_word">
-    			<br/>
-          <label for="password-verify">Password (Again)</label>
-    			<br/>
-    			<input type="password" id="password2"  name="pass_word2">
-    			<br/>
-    			<button type="submit">Register</button>
-      </form>
+    		<label for="username">Username</label>
+    		<br/>
+    		<input type="text" id="username"  name="user_name">
+    		<br/>
+            <label for="email">Email</label>
+    		<br/>
+    		<input type="text" id="email"  name="user_email">
+    		<br/>
+    		<label for="password">Password</label>
+    		<br/>
+    		<input type="password" id="password" name="pass_word">
+    		<br/>
+            <label for="password-verify">Password (Again)</label>
+    		<br/>
+    		<input type="password" id="password2"  name="pass_word2">
+    		<br/>
+    		<button id="submitter">Register</button>
+      </div>
 			<br/>
 			<!-- <a href="#"><p class="small">Forgot your password?</p></a> -->
 		</div>
 	</div><br><br><br><br>
 </body>
+
+
+<script>
+
+$(document).ready(function() {
+    console.log("submitting");
+  $( "#submitter" ).click(function() {
+
+    var first_name = $('#first_name').val();
+    var last_name = $('#last_name').val();
+    var user_name = $('#username').val();
+    var user_email = $('#email').val();
+    var pass_word = $('#password').val();
+    var pass_word2 = $('#password2').val();
+
+    $('.ajaxProgress').show();
+    $.ajax({
+        type: "POST",
+        url: "registermein/",
+        dataType: "json",
+        data: {
+            csrfmiddlewaretoken: '{{ csrf_token }}',
+            first_name: first_name,
+            last_name: last_name,
+            user_name: user_name,
+            user_email: user_email,
+            pass_word: pass_word,
+            pass_word2: pass_word2
+        },
+
+        success: function(response){
+
+            var json_response = response;
+
+            if (json_response['return_error'] == 'successor'){
+                window.location="/dashboard";
+            }
+            else {
+                $('#error_msg').text(json_response['return_error']);
+            }
+        }
+    });
+
+  })
+})
+
+</script>
 
 {% endblock %}
