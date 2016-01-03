@@ -42,6 +42,19 @@
     <link href='http://fonts.googleapis.com/css?family=Roboto:400,700,300' rel='stylesheet' type='text/css'>
     <link href="{% static 'css/DASHBOARD_CSS/pe-icon-7-stroke.css' %}" rel="stylesheet" />
 
+    <style>
+
+        .footer{
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            height: 60px;
+            width: 100%;
+            overflow:hidden;
+        }
+
+    </style>
+
     </head>
 <body>
 
@@ -146,7 +159,7 @@
 
             <center><div class="card">
                 <div class="box-header">
-                    <h1>Change Settings</h1>
+                    <!-- <h1>Change Settings</h1> -->
                 </div>
                     <div id='outer' class="content">
                         <div class="inner">
@@ -229,7 +242,8 @@
                 <br/>
             </div></center>
 
-            <footer class="footer">
+
+            <div class="footer">
                 <div class="container-fluid">
                     <nav class="pull-left">
                         <ul>
@@ -295,34 +309,34 @@
 
     <script type="text/javascript">
         jQuery(document).ready(function(){
-            jQuery('#hideshowname').on('click', function(event) {        
+            jQuery('#hideshowname').on('click', function(event) {
                  jQuery('#namestuff').toggle(500);
                  jQuery('#passstuff').hide(500);
                  jQuery('#emailstuff').hide(500);
                  jQuery('#tzstuff').hide(500);
             });
-            jQuery('#hideshowpass').on('click', function(event) {        
+            jQuery('#hideshowpass').on('click', function(event) {
                  jQuery('#passstuff').toggle(500);
                  jQuery('#namestuff').hide(500);
                  jQuery('#emailstuff').hide(500);
                  jQuery('#tzstuff').hide(500);
             });
-            jQuery('#hideshowemail').on('click', function(event) {        
+            jQuery('#hideshowemail').on('click', function(event) {
                  jQuery('#emailstuff').toggle(500);
                  jQuery('#namestuff').hide(500);
                  jQuery('#passstuff').hide(500);
                  jQuery('#tzstuff').hide(500);
             });
-            jQuery('#hideshowcurremail').on('click', function(event) {        
+            jQuery('#hideshowcurremail').on('click', function(event) {
                  jQuery('#currentemail').toggle(500);
             });
-            jQuery('#hideshowtz').on('click', function(event) {        
+            jQuery('#hideshowtz').on('click', function(event) {
                  jQuery('#tzstuff').toggle(500);
                  jQuery('#namestuff').hide(500);
                  jQuery('#passstuff').hide(500);
                  jQuery('#emailstuff').hide(500);
             });
-            jQuery('#hideshowcurrtz').on('click', function(event) {        
+            jQuery('#hideshowcurrtz').on('click', function(event) {
                  jQuery('#currenttz').toggle(500);
             });
         });

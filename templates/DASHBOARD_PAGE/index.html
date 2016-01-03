@@ -44,6 +44,12 @@
 
 		<script type="text/javascript" charset="utf-8">
 
+
+            function stringEscape(s) {
+                return s ? s.replace(/\\/g,'\\\\').replace(/\n/g,'\\n').replace(/\t/g,'\\t').replace(/\v/g,'\\v').replace(/'/g,"\\'").replace(/"/g,'\\"').replace(/[\x00-\x1F\x80-\x9F]/g,hex) : s;
+                function hex(c) { var v = '0'+c.charCodeAt(0).toString(16); return '\\x'+v.substr(v.length-2); }
+            }
+
 			function init() {
 
                 var open_modal_google = function(id, event_color, start, end) {
@@ -99,6 +105,8 @@
 				// I think this is where the bug is where the data posting to the view is causing the error for the start and end times
 				var updateDayStatus = function(event_id, ev) {
 
+                    start = stringEscape(scheduler.getEvent(event_id).text);
+
 					$('.ajaxProgress').show();
 					$.ajax({
 						type: "POST",
@@ -108,7 +116,7 @@
 							csrfmiddlewaretoken: '{{ csrf_token }}',
 							start: formatDateFunc(scheduler.getEvent(event_id).start_date),
 							end: formatDateFunc(scheduler.getEvent(event_id).end_date),
-							text: scheduler.getEvent(event_id).text,
+							text: start,
 							id: scheduler.getEvent(event_id).id,
 							weekday: weekDay(scheduler.getEvent(event_id).start_date), //what if the event was a multi-day event?!?!
 							color: scheduler.getEvent(event_id).color
@@ -119,8 +127,7 @@
 
 
                 var update_event = function(id, ev, color) {
-
-
+                    event_text = stringEscape(ev.text);
                     if(typeof color === 'undefined'){
                         $('.ajaxProgress').show();
         					$.ajax({
@@ -131,12 +138,10 @@
         							csrfmiddlewaretoken: '{{ csrf_token }}',
         							start: formatDateFunc(scheduler.getEvent(id).start_date),
         							end: formatDateFunc(scheduler.getEvent(id).end_date),
-        							text: ev.text,
+        							text: event_text,
         							id: id
         						},
         					});
-
-
         		    		return true;
                     }
 
@@ -151,7 +156,7 @@
     							csrfmiddlewaretoken: '{{ csrf_token }}',
     							start: formatDateFunc(scheduler.getEvent(id).start_date),
     							end: formatDateFunc(scheduler.getEvent(id).end_date),
-    							text: ev.text,
+    							text: event_text,
     							id: id,
                                 color: color
     						},
@@ -174,8 +179,6 @@
 					});
 					return true;
 				};
-
-
 
                 scheduler.config.icons_select = ['icon_details', 'icon_delete', 'i1', 'i2', 'i3', 'i4', 'i5', 'i6', 'i7', 'i8', 'i9', 'i10', 'i11'];
 
@@ -288,7 +291,7 @@
 
 				scheduler.attachEvent("onBeforeDrag", readonly_check);
 
-				scheduler.config.hour_date = "%g:%i%a"; 
+				scheduler.config.hour_date = "%g:%i%a";
 				// scheduler.config.readonly = true;
 				scheduler.init('scheduler_here',new Date(calendar_year,calendar_month,calendar_day),"week");
 
@@ -446,11 +449,7 @@
                         open_modal_google(scheduler.getEvent(id).id, scheduler.getEvent(id).color);
 						return false;
 					}
-
                 }
-
-
-
 			}
 
 		</script>
@@ -470,9 +469,6 @@
 			.pushdown {
 				margin-top: 100px;
 			}
-
-
-
 
             @import url(http://fonts.googleapis.com/css?family=Open+Sans:400,700);
 
@@ -559,7 +555,19 @@
                 margin-right: 20px;
             }
 		</style>
+        <style>
 
+            .footer{
+                position: absolute;
+                left: 0;
+                bottom: 0;
+                height: 60px;
+                width: 100%;
+                overflow:hidden;
+            }
+
+
+        </style>
 
 </head>
 <body onload="init();">
@@ -593,9 +601,6 @@
             </ul>
     	</div>
     </div>
-
-
-
 
     <div class="main-panel">
         <nav class="navbar navbar-default navbar-fixed">
@@ -778,7 +783,6 @@
 	<script type="text/javascript">
 			{% if user_initial_setup == False %}
     	$(document).ready(function(){
-
         	$.notify({
             	icon: 'pe-7s-bell',
             	message: "Welcome to Architasker! Get started by setting up your account so we can begin adding tasks."
@@ -787,9 +791,30 @@
                 type: 'info',
                 timer: -1
             });
-
     	});
+
+        {% if google_auth_complete %}
+
+        setTimeout(function(){  }, 500);
+            //If the user has already authorize timezone and OAUTH2
+            $('#encoder_iframe').load(function(){
+
+                    //Grab the inner iFrame
+                    var iframe = $('#encoder_iframe').contents();
+
+                    //Click the initial next button
+                    iframe.find("#next").click();
+
+                    //Set timeout for load and then next again for the final set
+                    setTimeout(function(){ iframe.find("#next_again").click(); }, 1000);
+
+            });
+
+        {% endif %}
+
+
 		{% endif %}
+
 	</script>
 
 </html>

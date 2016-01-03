@@ -24,8 +24,10 @@ from app_account_management.views import login_view as login_render
 from app_account_management.views import *
 from app_dashboard.views import *
 from app_account_setup.views import *
+from app_calendar.views import *
 from .views import *
 from jet import *
+
 
 urlpatterns = [
     url(r'^$', home, name="home"),                                              #Index loader
@@ -56,6 +58,7 @@ urlpatterns = [
     url(r'^setup_redirector$', setup_redirector, name='setup_redirector'),
     url(r'^persist_timezone_ajax', ajax_user_timezone, name='ajax_user_timezone'),
     url(r'^clear_google_tasks', clear_google_tasks, name='clear_google_tasks')
+
 ]
 
 admin.site.site_header = 'Architasker'
