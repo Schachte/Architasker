@@ -43,6 +43,7 @@ urlpatterns = [
     url(r'^create_event/', 'app_calendar.views.create_event', name="create_event"),                  #Create event task AJAX URl
     url(r'^delete_event/', 'app_calendar.views.delete_event', name="delete_event"),                  #Delete event task AJAX URl
     url(r'^update_event/', 'app_calendar.views.update_event', name="update_event"),                  #Update event task AJAX URl
+    url(r'^create_task/', 'app_tasks.views.create_task', name="create_task"),
     url(r'^login', login_render, name="login_render"),                          #Login template render page
     url(r'^register$', register_view, name="register_view"),
     url(r'^registermein', processor_register, name="processor_register"),

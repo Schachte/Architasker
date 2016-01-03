@@ -130,7 +130,7 @@
 				scheduler.attachEvent("onEventAdded", updateDayStatus);
 
 				scheduler.attachEvent("onEventChanged",function(id,ev){
-		    	$('.ajaxProgress').show();
+		    		$('.ajaxProgress').show();
 					$.ajax({
 						type: "POST",
 						url: "update_event/",
@@ -492,7 +492,7 @@
 				{% endif %}
 
 				
-				    <a href="#footerID"><button type="button" class="btn btn-success" data-toggle="collapse" data-target="#demoTask">
+				    <!-- <a href="#footerID"><button type="button" class="btn btn-success" data-toggle="collapse" data-target="#demoTask">
 				      <span class="glyphicon glyphicon-collapse-down"></span> Add Task
 				    </button></a>
 				  <div id="demoTask" class="collapse">
@@ -505,7 +505,7 @@
 						        <label for="taskName-2">Task name *</label>
 						        <input id="taskName-2" name="taskName" type="text" class="required">
 						        <label for="datepicker">Due Date *</label>
-						        <!-- <input id="dueDate-2" name="dueDate" type="text" class="required"> -->
+						        
 						        <input type="text" id="datepicker" name="dueDate" class="required">
 						    </section>
 						 
@@ -514,7 +514,7 @@
 						    	<legend>Estimated Time &amp; Priority</legend>
 						    	<div>
 							    	<label for="percent-2">% to complete by end of the week*</label>
-							        <!-- <input id="percent-2" name="percent" type="text" class="required"> -->
+							        
 							        <div>
 								        <input type="number" min="0" max="100" step="1" id="input-number" style='display:inline-block;'>
 										<div id="html5" style='width:35%; display:inline-block;'></div>
@@ -572,6 +572,107 @@
 						</form>
 				   	</section>
 				  </div>
+				</div> -->
+
+				<div class="morph-button morph-button-modal morph-button-modal-1 morph-button-fixed">
+						<button type="button">Add Task</button>
+						<div class="morph-content">
+							<div>
+								<div class="content-style-form content-style-form-1">
+									<span class="icon icon-close"></span>
+									<section id="advanced-form">
+									    <form id="example-advanced-form" action="#">
+										    <h3>Task</h3>
+										    <section>
+										        <legend>Task Information</legend>
+										 
+										        <label for="taskName-2">Task name *</label>
+										        <input id="taskName-2" name="taskName" type="text" class="required">
+										        <label for="datepicker">Due Date *</label>
+										        <!-- <input id="dueDate-2" name="dueDate" type="text" class="required"> -->
+										        <input type="text" id="datepicker" name="dueDate" class="required">
+										    </section>
+										 
+										    <h3>Details</h3>
+										    <section>
+										    	<legend>Estimated Time &amp; Priority</legend>
+										    	<div>
+											    	<label for="percent-2">% to complete by end of the week*</label>
+											        <!-- <input id="percent-2" name="percent" type="text" class="required"> -->
+											        <div>
+												        <input type="number" min="0" max="100" step="1" id="input-number" style='display:inline-block;'>
+														<div id="html5" style='width:35%; display:inline-block;'></div>
+													</div>
+												</div>
+
+												<div style='padding-top: 20px'>
+											        <label for="time-2">Estimated time (hours) to complete  <div id="valueOfSlider" style='display:inline-block;'></div> of task*</label>
+											        <input id="time-2" name="time" type="text" class="required">
+											    </div>
+
+											    <input id="continuous-2" name="continuous" type="checkbox"> 
+										        <label for="continuous-2">No-break continuous task</label>
+
+											    <div style='padding-top: 20px'>
+													<label for="radiosSlider">Priority *</label>
+					      							<div id="radiosSlider"  style='width:350%'>
+													    <input id="value1" name="values" type="radio" value="1">
+													    <label for="value1">1</label>
+
+													    <input id="value2" name="values" type="radio" value="2">
+													    <label for="value2">2</label>
+
+													    <input id="value3" name="values" type="radio" value="3">
+													    <label for="value3">3</label>
+
+													    <input id="value4" name="values" type="radio" value="4">
+													    <label for="value4">4</label>
+
+													    <input id="value5" name="values" type="radio" value="5" checked>
+													    <label for="value5">5</label>
+
+													    <input id="value6" name="values" type="radio" value="6">
+													    <label for="value6">6</label>
+
+													    <input id="value7" name="values" type="radio" value="7">
+													    <label for="value7">7</label>
+
+													    <input id="value8" name="values" type="radio" value="8">
+													    <label for="value8">8</label>
+
+													    <input id="value9" name="values" type="radio" value="9">
+													    <label for="value9">9</label>
+
+													    <input id="value10" name="values" type="radio" value="10">
+													    <label for="value10">10</label>
+													</div>
+												</div>
+												
+										    </section>
+										 
+										    <h3>Extras</h3>
+										    <section>
+										        <legend>Extra Integrations</legend>
+										 		<div>
+											        <input id="pomodoro-2" name="pomodoro" type="checkbox"> 
+											        <label for="pomodoro-2">Pomodoro Timer</label>
+											    </div>
+
+											    <label for="url">URL</label>
+											    <input id="url" name="url" type="text" placeholder="(Optional)">
+
+											    <label for="location">Location</label>
+											    <input id="location" name="location" type="text" placeholder="(Optional)">
+
+											    <label for="comment">Extras/Comments/Description:</label>
+											    <textarea name="comment" id="comment" placeholder="(Optional)"></textarea>
+										    </section>
+										</form>
+								   	</section>
+								</div>
+							</div>
+						</div>
+					</div><!-- morph-button -->
 				</div>
 
 				<script>
@@ -654,11 +755,6 @@
                 {
                     form.steps("previous");
                 }
-
-                if( currentIndex === 1)
-                {
-                	//ajax call for task name and due date
-                }
             },
             onFinishing: function (event, currentIndex)
             {
@@ -668,6 +764,60 @@
             onFinished: function (event, currentIndex)
             {
                 alert("Submitted!");
+
+                var url = location_of_task = comment = "None";
+                if (document.getElementById("url").value) {
+                	console.log("Inside url if statement");
+                	url = document.getElementById("url").value;
+                }
+
+                if (!(document.getElementById("location").value === "")) {
+                	location_of_task = document.getElementById("location").value;
+                }
+
+                if (!(document.getElementById("comment").value === "")) {
+                	comment = document.getElementById("comment").value;
+                }
+
+                console.log("Task name:" + document.getElementById("taskName-2").value);
+                console.log("Date:" + document.getElementById("datepicker").value);
+                console.log("Percent:" + document.getElementById("input-number").value);
+                console.log("Hours:" + document.getElementById("time-2").value);
+                console.log("Priority:" + $('input[name="values"]:checked').val());
+                console.log("Continuous:" + document.getElementById("continuous-2").checked);
+                console.log("Pomodoro:" + document.getElementById("pomodoro-2").checked);
+                console.log("Url:" + url);
+                console.log("Location:" + location_of_task);
+                console.log("Comment:" + comment);
+
+                var succeed = false;
+
+                $('.ajaxProgress').show();
+				$.ajax({
+					type: "POST",
+					url: "create_task/",
+					dataType: "json",
+					data: {
+						csrfmiddlewaretoken: '{{ csrf_token }}',
+						task_name: document.getElementById("taskName-2").value,
+						task_date: document.getElementById("datepicker").value,
+						task_percent: document.getElementById("input-number").value,
+						task_time: document.getElementById("time-2").value,
+						task_priority: $('input[name="values"]:checked').val(),
+						task_continuous: document.getElementById("continuous-2").checked,
+						task_pomodoro: document.getElementById("pomodoro-2").checked,
+						task_url: url,
+						task_location: location_of_task,
+						task_comments: comment
+					},
+					success: function() {
+						succeed = true;
+					}
+
+				});
+
+				return succeed;
+
             }
         }).validate({
             errorPlacement: function errorPlacement(error, element) { element.before(error); },
@@ -712,6 +862,73 @@
 			html5Slider.noUiSlider.set([this.value]);
 		});
 	</script>
+
+	<!-- For morphing buttons -->
+	<script>
+			(function() {
+				var docElem = window.document.documentElement, didScroll, scrollPosition;
+
+				// trick to prevent scrolling when opening/closing button
+				function noScrollFn() {
+					window.scrollTo( scrollPosition ? scrollPosition.x : 0, scrollPosition ? scrollPosition.y : 0 );
+				}
+
+				function noScroll() {
+					window.removeEventListener( 'scroll', scrollHandler );
+					window.addEventListener( 'scroll', noScrollFn );
+				}
+
+				function scrollFn() {
+					window.addEventListener( 'scroll', scrollHandler );
+				}
+
+				function canScroll() {
+					window.removeEventListener( 'scroll', noScrollFn );
+					scrollFn();
+				}
+
+				function scrollHandler() {
+					if( !didScroll ) {
+						didScroll = true;
+						setTimeout( function() { scrollPage(); }, 60 );
+					}
+				};
+
+				function scrollPage() {
+					scrollPosition = { x : window.pageXOffset || docElem.scrollLeft, y : window.pageYOffset || docElem.scrollTop };
+					didScroll = false;
+				};
+
+				scrollFn();
+
+				[].slice.call( document.querySelectorAll( '.morph-button' ) ).forEach( function( bttn ) {
+					new UIMorphingButton( bttn, {
+						closeEl : '.icon-close',
+						onBeforeOpen : function() {
+							// don't allow to scroll
+							noScroll();
+						},
+						onAfterOpen : function() {
+							// can scroll again
+							canScroll();
+						},
+						onBeforeClose : function() {
+							// don't allow to scroll
+							noScroll();
+						},
+						onAfterClose : function() {
+							// can scroll again
+							canScroll();
+						}
+					} );
+				} );
+
+				// for demo purposes only
+				[].slice.call( document.querySelectorAll( 'form button' ) ).forEach( function( bttn ) { 
+					bttn.addEventListener( 'click', function( ev ) { ev.preventDefault(); } );
+				} );
+			})();
+		</script>
 </body>
 
 <!--   Core JS Files   -->
