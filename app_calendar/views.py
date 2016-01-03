@@ -146,18 +146,6 @@ def pull_user_event_data(request):
         http = credential.authorize(http)
         service = discovery.build('calendar', 'v3', http=http)
 
-
-        #Need to fix the timing issues. Do not use UTC NOW, use 12AM or something
-        #now = datetime.datetime.utcnow()
-        #now = now - datetime.timedelta(now.weekday())
-        #then = datetime.timedelta(days=5) #Indexed at 0
-        #then = now + then
-        #temp_model = UserExtended.objects.create(
-        #    authenticated_user = current_user,
-        #    time_zone = 'America/Phoenix',
-        #    google_auth = False,
-        #    user_login_count = 1
-        #)
         #Days left in the current week (to get the date for Sunday)
         now_utc = datetime.datetime.utcnow()
         local_tz = pytz.timezone(current_user_ext.time_zone)
@@ -191,7 +179,6 @@ def pull_user_event_data(request):
 
         now = str(now[0:10]) + 'T00:00:01Z'
         then = str(then[0:10]) + 'T23:59:59Z'
-
 
         #Get the events off the primary calendar, this should be changed eventually so the user can select the calendar they please to use
         eventsResult = service.events().list(
@@ -518,6 +505,7 @@ def pull_user_event_data(request):
                                 temp_model.save()
 
                         elif (dt.weekday() == 1 ):
+
 
                             if not_exists:
                                 temp_model.current_day = "Tuesday"
