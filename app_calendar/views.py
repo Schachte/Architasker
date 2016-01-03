@@ -13,7 +13,6 @@ import pytz
 import re
 from random import randint
 
-
 from pytz import timezone
 from dateutil.parser import parse
 from apiclient import discovery
@@ -91,7 +90,6 @@ def index(request):
         return redirect(authorize_url, request)
     else:
         return HttpResponse("Already authorized")
-
 
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''

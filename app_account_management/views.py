@@ -106,7 +106,6 @@ def processor_register(request):
                 data['return_error'] = 'Error: Passwords Don\'t Match!'
                 return HttpResponse(json.dumps(data), content_type = "application/json")
 
-
         if (User.objects.filter(username=request.POST.get('user_name')).exists()):
             data = {}
             data['return_error'] = 'Error: User Already Exists!'
