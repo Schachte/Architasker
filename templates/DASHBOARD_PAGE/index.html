@@ -44,6 +44,12 @@
 
 		<script type="text/javascript" charset="utf-8">
 
+
+            function stringEscape(s) {
+                return s ? s.replace(/\\/g,'\\\\').replace(/\n/g,'\\n').replace(/\t/g,'\\t').replace(/\v/g,'\\v').replace(/'/g,"\\'").replace(/"/g,'\\"').replace(/[\x00-\x1F\x80-\x9F]/g,hex) : s;
+                function hex(c) { var v = '0'+c.charCodeAt(0).toString(16); return '\\x'+v.substr(v.length-2); }
+            }
+
 			function init() {
 
                 var open_modal_google = function(id, event_color, start, end) {
@@ -99,6 +105,8 @@
 				// I think this is where the bug is where the data posting to the view is causing the error for the start and end times
 				var updateDayStatus = function(event_id, ev) {
 
+                    start = stringEscape(scheduler.getEvent(event_id).text);
+
 					$('.ajaxProgress').show();
 					$.ajax({
 						type: "POST",
@@ -108,7 +116,7 @@
 							csrfmiddlewaretoken: '{{ csrf_token }}',
 							start: formatDateFunc(scheduler.getEvent(event_id).start_date),
 							end: formatDateFunc(scheduler.getEvent(event_id).end_date),
-							text: scheduler.getEvent(event_id).text,
+							text: start,
 							id: scheduler.getEvent(event_id).id,
 							weekday: weekDay(scheduler.getEvent(event_id).start_date), //what if the event was a multi-day event?!?!
 							color: scheduler.getEvent(event_id).color
@@ -120,6 +128,7 @@
 
                 var update_event = function(id, ev, color) {
 
+                    event_text = stringEscape(ev.text);
 
                     if(typeof color === 'undefined'){
                         $('.ajaxProgress').show();
@@ -131,7 +140,7 @@
         							csrfmiddlewaretoken: '{{ csrf_token }}',
         							start: formatDateFunc(scheduler.getEvent(id).start_date),
         							end: formatDateFunc(scheduler.getEvent(id).end_date),
-        							text: ev.text,
+        							text: event_text,
         							id: id
         						},
         					});
@@ -151,7 +160,7 @@
     							csrfmiddlewaretoken: '{{ csrf_token }}',
     							start: formatDateFunc(scheduler.getEvent(id).start_date),
     							end: formatDateFunc(scheduler.getEvent(id).end_date),
-    							text: ev.text,
+    							text: event_text,
     							id: id,
                                 color: color
     						},
