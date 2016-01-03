@@ -1,0 +1,92 @@
+{% load staticfiles %}
+{% load static %}
+
+
+div.dhx_menu_icon.i1 {
+  background-image: url("imgs/1.png");
+ background-repeat: no-repeat;
+ margin-top: 1px;
+ margin: auto;
+}
+
+
+div.dhx_menu_icon.i2 {
+  background-image: url("imgs/2.png");
+ background-repeat: no-repeat;
+ margin-top: 1px;
+ margin: auto;
+}
+
+div.dhx_menu_icon.i3 {
+  background-image: url("imgs/3.png");
+ background-repeat: no-repeat;
+ margin-top: 1px;
+ margin: auto;
+}
+
+div.dhx_menu_icon.i4 {
+  background-image: url("imgs/4.png");
+ background-repeat: no-repeat;
+ margin-top: 1px;
+ margin: auto;
+}
+
+div.dhx_menu_icon.i5 {
+  background-image: url("imgs/5.png");
+ background-repeat: no-repeat;
+ margin-top: 1px;
+ margin: auto;
+}
+
+
+div.dhx_menu_icon.i6 {
+  background-image: url("imgs/6.png");
+ background-repeat: no-repeat;
+ margin-top: 1px;
+ margin: auto;
+}
+
+div.dhx_menu_icon.i7 {
+  background-image: url("imgs/7.png");
+ background-repeat: no-repeat;
+ margin-top: 1px;
+ margin: auto;
+}
+
+div.dhx_menu_icon.i8 {
+  background-image: url("imgs/8.png");
+ background-repeat: no-repeat;
+ margin-top: 1px;
+ margin: auto;
+}
+
+div.dhx_menu_icon.i9 {
+  background-image: url("imgs/9.png");
+ background-repeat: no-repeat;
+ margin-top: 1px;
+ margin: auto;
+}
+
+
+div.dhx_menu_icon.i10 {
+  background-image: url("imgs/10.png");
+ background-repeat: no-repeat;
+ margin-top: 1px;
+ margin: auto;
+}
+
+div.dhx_menu_icon.i11 {
+  background-image: url("imgs/11.png");
+ background-repeat: no-repeat;
+ margin-top: 1px;
+ margin: auto;
+}
+
+.hidden {
+  position: absolute;
+  left: -10000px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
