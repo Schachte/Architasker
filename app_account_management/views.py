@@ -12,6 +12,7 @@ from django.contrib.auth import authenticate
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseRedirect
 from django.contrib.auth import logout
 from .models import UserExtended
+from app_calendar.models import UserEvent
 
 
 def login_view(request):
@@ -103,3 +104,10 @@ def processor_register(request):
 def logout_process(request):
     logout(request)
     return HttpResponseRedirect('/login')
+
+#Need to hook up a button for this
+def clear_google_tasks(request):
+    user_google_tasks = UserEvent.objects.filter(authenticated_user=request.user, is_google_task=True).all()
+    for each_event in user_google_tasks:
+        each_event.delete()
+    return HttpResponseRedirect("/dashboard")
