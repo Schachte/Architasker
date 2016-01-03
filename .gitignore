@@ -6,3 +6,4 @@ procrastinate/*.pyc
 client_secrets.json
 SECURE_FILES.py
 migrations/
+procrastinate/*.pyc

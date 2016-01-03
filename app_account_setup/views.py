@@ -51,8 +51,6 @@ def ajax_user_timezone(request):
         return HttpResponse("failure")
 
 
-
-
 def get_setup_module_post_data(request):
     if request.method == "POST":
         if 'wakeup' in request.POST:
@@ -65,7 +63,6 @@ def get_setup_module_post_data(request):
         if 'bedtime' in request.POST:
             if not request.POST.get('bedtime') == 'Sleepy Time':
                 pass
-                # print(request.POST.get('bedtime'))
             else:
                 return HttpResponse("Invalid bed time")
 
