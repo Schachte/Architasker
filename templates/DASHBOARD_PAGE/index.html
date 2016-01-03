@@ -675,18 +675,18 @@
 					</div><!-- morph-button -->
 				</div>
 
-				<script>
-				$(document).ready(function(){
-				  $("#demoTask").on("hide.bs.collapse", function(){
-				    $(".btn").html('<span class="glyphicon glyphicon-collapse-down"></span> Add Task');
-				  });
-				  $("#demoTask").on("show.bs.collapse", function(){
-				    $(".btn").html('<span class="glyphicon glyphicon-collapse-up"></span> Close');
-				  });
-				});
+				 <script>
+				// $(document).ready(function(){
+				//   $("#demoTask").on("hide.bs.collapse", function(){
+				//     $(".btn").html('<span class="glyphicon glyphicon-collapse-down"></span> Add Task');
+				//   });
+				//   $("#demoTask").on("show.bs.collapse", function(){
+				//     $(".btn").html('<span class="glyphicon glyphicon-collapse-up"></span> Close');
+				//   });
+				// });
 
 				
-				</script>
+				// </script>
 
 
         <footer id="footerID" class="footer">
@@ -715,6 +715,63 @@
 </div>
 
 <script>
+		//-----------MORPHING BUTTON/MODAL WINDOW JS---------------------------------
+		var docElem = window.document.documentElement, didScroll, scrollPosition;
+
+				// trick to prevent scrolling when opening/closing button
+				function noScrollFn() {
+					window.scrollTo( scrollPosition ? scrollPosition.x : 0, scrollPosition ? scrollPosition.y : 0 );
+				}
+
+				function noScroll() {
+					window.removeEventListener( 'scroll', scrollHandler );
+					window.addEventListener( 'scroll', noScrollFn );
+				}
+
+				function scrollFn() {
+					window.addEventListener( 'scroll', scrollHandler );
+				}
+
+				function canScroll() {
+					window.removeEventListener( 'scroll', noScrollFn );
+					scrollFn();
+				}
+
+				function scrollHandler() {
+					if( !didScroll ) {
+						didScroll = true;
+						setTimeout( function() { scrollPage(); }, 60 );
+					}
+				};
+
+				function scrollPage() {
+					scrollPosition = { x : window.pageXOffset || docElem.scrollLeft, y : window.pageYOffset || docElem.scrollTop };
+					didScroll = false;
+				};
+
+				scrollFn();
+
+				var UIBtnn = new UIMorphingButton( document.querySelector( '.morph-button' ), {
+					closeEl : '.icon-close',
+					onBeforeOpen : function() {
+						// don't allow to scroll
+						noScroll();
+					},
+					onAfterOpen : function() {
+						// can scroll again
+						canScroll();
+					},
+					onBeforeClose : function() {
+						// don't allow to scroll
+						noScroll();
+					},
+					onAfterClose : function() {
+						// can scroll again
+						canScroll();
+					}
+				} );
+
+		// -----------FORM STUFF WITHIN MODAL WINDOW----------------------
         var form = $("#example-advanced-form").show();
 
         form.steps({
@@ -815,6 +872,8 @@
 					}
 
 				});
+				
+				UIBtnn.toggle();
 
 				return succeed;
 
@@ -863,72 +922,6 @@
 		});
 	</script>
 
-	<!-- For morphing buttons -->
-	<script>
-			(function() {
-				var docElem = window.document.documentElement, didScroll, scrollPosition;
-
-				// trick to prevent scrolling when opening/closing button
-				function noScrollFn() {
-					window.scrollTo( scrollPosition ? scrollPosition.x : 0, scrollPosition ? scrollPosition.y : 0 );
-				}
-
-				function noScroll() {
-					window.removeEventListener( 'scroll', scrollHandler );
-					window.addEventListener( 'scroll', noScrollFn );
-				}
-
-				function scrollFn() {
-					window.addEventListener( 'scroll', scrollHandler );
-				}
-
-				function canScroll() {
-					window.removeEventListener( 'scroll', noScrollFn );
-					scrollFn();
-				}
-
-				function scrollHandler() {
-					if( !didScroll ) {
-						didScroll = true;
-						setTimeout( function() { scrollPage(); }, 60 );
-					}
-				};
-
-				function scrollPage() {
-					scrollPosition = { x : window.pageXOffset || docElem.scrollLeft, y : window.pageYOffset || docElem.scrollTop };
-					didScroll = false;
-				};
-
-				scrollFn();
-
-				[].slice.call( document.querySelectorAll( '.morph-button' ) ).forEach( function( bttn ) {
-					new UIMorphingButton( bttn, {
-						closeEl : '.icon-close',
-						onBeforeOpen : function() {
-							// don't allow to scroll
-							noScroll();
-						},
-						onAfterOpen : function() {
-							// can scroll again
-							canScroll();
-						},
-						onBeforeClose : function() {
-							// don't allow to scroll
-							noScroll();
-						},
-						onAfterClose : function() {
-							// can scroll again
-							canScroll();
-						}
-					} );
-				} );
-
-				// for demo purposes only
-				[].slice.call( document.querySelectorAll( 'form button' ) ).forEach( function( bttn ) { 
-					bttn.addEventListener( 'click', function( ev ) { ev.preventDefault(); } );
-				} );
-			})();
-		</script>
 </body>
 
 <!--   Core JS Files   -->
