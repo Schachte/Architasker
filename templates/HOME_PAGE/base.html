@@ -13,6 +13,26 @@
       <meta name="description" content="ArchiTasker - Week Planner Made Simple">
       <meta name="author" content="">
 
+      <!-- JavaScript -->
+      <!-- <script src="{% static 'js/jquery.min.js' %}"></script> -->
+      <script src="{% static 'js/jquery-1.10.2.js' %}"></script> 
+      <script src="{% static 'js/bootstrap.js' %}"></script>
+      <script src="{% static 'js/owl.carousel.js' %}"></script>
+      <script src="{% static 'js/script.js' %}"></script>
+      <script src="{% static 'datepicker/jquery-ui.js' %}"></script>
+      <!-- StikyMenu -->
+      <script src="{% static 'js/stickUp.min.js' %}"></script>
+      <script type="text/javascript">
+
+      jQuery(function($) {
+        $(document).ready( function() {
+          $('.navbar-default').stickUp();
+
+        });
+      });
+
+      </script>
+
       <!-- Include Favicon -->
       <link rel="shortcut icon" href="{% static 'img/favicon.ico' %}" type="image/x-icon">
       <link rel="icon" href="{% static 'img/favicon.ico' %}" type="image/x-icon">
@@ -29,6 +49,9 @@
 
       <!-- Custom CSS-->
       <link href="{% static 'css/HOME_PAGE_CSS/general.css' %}" rel="stylesheet">
+
+      <!-- Datepicker CSS -->
+      <link rel="stylesheet" href="{% static 'datepicker/jquery-ui.theme2.css' %}">
 
     	 <!-- Owl-Carousel -->
       <link href="{% static 'css/HOME_PAGE_CSS/custom.css' %}" rel="stylesheet">
@@ -90,23 +113,7 @@
 
   {% endblock %}
 
-  <!-- JavaScript -->
-  <script src="{% static 'js/jquery-1.10.2.js' %}"></script>
-  <script src="{% static 'js/bootstrap.js' %}"></script>
-  <script src="{% static 'js/owl.carousel.js' %}"></script>
-  <script src="{% static 'js/script.js' %}"></script>
-  <!-- StikyMenu -->
-  <script src="{% static 'js/stickUp.min.js' %}"></script>
-  <script type="text/javascript">
-
-  jQuery(function($) {
-    $(document).ready( function() {
-      $('.navbar-default').stickUp();
-
-    });
-  });
-
-	</script>
+  
 
 
   <script>
@@ -139,7 +146,7 @@
 	<script src="{% static 'js/classie.js' %}"></script>
 	<script src="{% static 'js/uiMorphingButton_inflow.js' %}"></script>
   <!-- LOGIN -->
-  <script src='http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
+  <!-- <script src='http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script> -->
   <script src='{% static "js/da0415260bc83974687e3f9ae.js" %}'></script>
   <script src="{% static 'js/index.js' %}"></script>
   <!-- END LOGIN -->

@@ -41,12 +41,7 @@ def create_task(request):
         print("created task")
         return HttpResponse("none")
 
-# '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-# Function to calculate overall priority
-# '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-# def cluster_priorities(task):
-	
-#    return int(task.estimated_time / (task.day_num - ))
+
 
 
 
