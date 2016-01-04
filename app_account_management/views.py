@@ -12,6 +12,9 @@ from django.contrib.auth import authenticate
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseRedirect
 from django.contrib.auth import logout
 from .models import UserExtended
+from app_calendar.models import UserEvent
+from django.template.loader import render_to_string
+import json
 
 
 def login_view(request):
@@ -58,27 +61,60 @@ def processor_register(request):
     if request.method == "POST":
         if 'first_name' in request.POST:
             if request.POST.get('first_name') == '':
-                return HttpResponse("First name missing")
+                data = {}
+                data['return_error'] = 'First Name is Missing!'
+                return HttpResponse(json.dumps(data), content_type = "application/json")
         if 'last_name' in request.POST:
             if request.POST.get('last_name') == '':
-                return HttpResponse("Last name missing")
+                data = {}
+                data['return_error'] = 'Last Name is Missing!'
+                return HttpResponse(json.dumps(data), content_type = "application/json")
         if 'user_name' in request.POST:
             if request.POST.get('user_name') == '':
-                return HttpResponse("User name missing")
+                data = {}
+                data['return_error'] = 'User Name is Missing!'
+                return HttpResponse(json.dumps(data), content_type = "application/json")
+            elif len(request.POST.get('user_name')) < 6:
+                data = {}
+                data['return_error'] = 'Please enter a username greater than 6 characters!'
+                return HttpResponse(json.dumps(data), content_type = "application/json")
+
         if 'user_email' in request.POST:
             if request.POST.get('user_email') == '':
-                return HttpResponse("Email missing")
+                data = {}
+                data['return_error'] = 'Error: Email is Missing!'
+                return HttpResponse(json.dumps(data), content_type = "application/json")
+            elif not '@' in request.POST.get('user_email') or not '.com' in request.POST.get('user_email'):
+                data = {}
+                data['return_error'] = 'Error: Email is Invalid!'
+                return HttpResponse(json.dumps(data), content_type = "application/json")
         if 'pass_word' in request.POST:
             print("here")
             if request.POST.get('pass_word') == '':
-                return HttpResponse("Password missing")
+                data = {}
+                data['return_error'] = 'Error: Password Intial is Missing!'
+                return HttpResponse(json.dumps(data), content_type = "application/json")
         if 'pass_word2' in request.POST:
             print("here2")
             if request.POST.get('pass_word2') == '':
-                return HttpResponse("Password missing")
+                data = {}
+                data['return_error'] = 'Error: Password Verify is Missing!'
+                return HttpResponse(json.dumps(data), content_type = "application/json")
 
         if (not str(request.POST.get('pass_word')) == str(request.POST.get('pass_word2'))):
-            return HttpResponse("Passwords do not match")
+                data = {}
+                data['return_error'] = 'Error: Passwords Don\'t Match!'
+                return HttpResponse(json.dumps(data), content_type = "application/json")
+
+        if (User.objects.filter(username=request.POST.get('user_name')).exists()):
+            data = {}
+            data['return_error'] = 'Error: User Already Exists!'
+            return HttpResponse(json.dumps(data), content_type = "application/json")
+
+        if (User.objects.filter(email=request.POST.get('user_email')).exists()):
+            data = {}
+            data['return_error'] = 'Error: Email Already In-Use!'
+            return HttpResponse(json.dumps(data), content_type = "application/json")
 
         new_user = User.objects.create(
 
@@ -95,7 +131,13 @@ def processor_register(request):
         )
         new_user_extended.save()
 
-        return HttpResponse("Account created successfully, please login.")
+        user = authenticate(username=request.POST.get('user_name'))
+
+        login(request, user)
+
+        data = {}
+        data['return_error'] = 'successor'
+        return HttpResponse(json.dumps(data), content_type = "application/json")
     else:
         return HttpResponse("Error")
 
@@ -103,3 +145,10 @@ def processor_register(request):
 def logout_process(request):
     logout(request)
     return HttpResponseRedirect('/login')
+
+#Need to hook up a button for this
+def clear_google_tasks(request):
+    user_google_tasks = UserEvent.objects.filter(authenticated_user=request.user, is_google_task=True).all()
+    for each_event in user_google_tasks:
+        each_event.delete()
+    return HttpResponseRedirect("/dashboard")

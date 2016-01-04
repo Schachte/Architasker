@@ -10,11 +10,17 @@
 	<link rel="icon" type="image/png" href="assets/img/favicon.ico">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
 
+    <!-- Include Favicon -->
+    <link rel="shortcut icon" href="{% static 'img/favicon.ico' %}" type="image/x-icon">
+    <link rel="icon" href="{% static 'img/favicon.ico' %}" type="image/x-icon">
+
 	<title>ArchiTasker - Week Planner Made Simple</title>
 
 	<meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0' name='viewport' />
     <meta name="viewport" content="width=device-width" />
 
+
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet" integrity="sha256-7s5uDGW3AHqw6xtJmNNtr+OBRJUlgkNJEo78P4b0yRw= sha512-nNo+yCHEyn0smMxSswnf/OnX6/KwJuZTlNZBjauKhTK0c+zT+q5JOCx0UFhXQ6rJR9jg6Es8gPuD2uZcYDLqSw==" crossorigin="anonymous">
 
     <!-- Bootstrap core CSS     -->
     <link href="{% static 'css/DASHBOARD_CSS/bootstrap.min.css' %}" rel="stylesheet" />
@@ -36,12 +42,23 @@
     <link href="{% static 'css/DASHBOARD_CSS/pe-icon-7-stroke.css' %}" rel="stylesheet" />
 
 
-
-
-
 		<script type="text/javascript" charset="utf-8">
 
+
+            function stringEscape(s) {
+                return s ? s.replace(/\\/g,'\\\\').replace(/\n/g,'\\n').replace(/\t/g,'\\t').replace(/\v/g,'\\v').replace(/'/g,"\\'").replace(/"/g,'\\"').replace(/[\x00-\x1F\x80-\x9F]/g,hex) : s;
+                function hex(c) { var v = '0'+c.charCodeAt(0).toString(16); return '\\x'+v.substr(v.length-2); }
+            }
+
 			function init() {
+
+                var open_modal_google = function(id, event_color, start, end) {
+                    $("#modal_title").html("Google Event Name: <font color=\"" + event_color +"\"><b>" + scheduler.getEvent(id).text + "</b></font>");
+                    $("#start_time").html("Start Time: <b>" + start + "</b>");
+                    $("#end_time").html("End Time: <b>" + end + "</b>");
+                    $('#mymodal').modal('show');
+                }
+
 				google_ids = [];
 
 				var currently_selected_id = "";
@@ -88,6 +105,8 @@
 				// I think this is where the bug is where the data posting to the view is causing the error for the start and end times
 				var updateDayStatus = function(event_id, ev) {
 
+                    start = stringEscape(scheduler.getEvent(event_id).text);
+
 					$('.ajaxProgress').show();
 					$.ajax({
 						type: "POST",
@@ -97,14 +116,55 @@
 							csrfmiddlewaretoken: '{{ csrf_token }}',
 							start: formatDateFunc(scheduler.getEvent(event_id).start_date),
 							end: formatDateFunc(scheduler.getEvent(event_id).end_date),
-							text: scheduler.getEvent(event_id).text,
+							text: start,
 							id: scheduler.getEvent(event_id).id,
 							weekday: weekDay(scheduler.getEvent(event_id).start_date), //what if the event was a multi-day event?!?!
-							color: '#34495e'
+							color: scheduler.getEvent(event_id).color
 
 						},
 					});
 				};
+
+
+                var update_event = function(id, ev, color) {
+                    event_text = stringEscape(ev.text);
+                    if(typeof color === 'undefined'){
+                        $('.ajaxProgress').show();
+        					$.ajax({
+        						type: "POST",
+        						url: "update_event/",
+        						dataType: "json",
+        						data: {
+        							csrfmiddlewaretoken: '{{ csrf_token }}',
+        							start: formatDateFunc(scheduler.getEvent(id).start_date),
+        							end: formatDateFunc(scheduler.getEvent(id).end_date),
+        							text: event_text,
+        							id: id
+        						},
+        					});
+        		    		return true;
+                    }
+
+                    else {
+
+                    $('.ajaxProgress').show();
+    					$.ajax({
+    						type: "POST",
+    						url: "update_event/",
+    						dataType: "json",
+    						data: {
+    							csrfmiddlewaretoken: '{{ csrf_token }}',
+    							start: formatDateFunc(scheduler.getEvent(id).start_date),
+    							end: formatDateFunc(scheduler.getEvent(id).end_date),
+    							text: event_text,
+    							id: id,
+                                color: color
+    						},
+    					});
+    		    		return true;
+                    };
+                };
+
 
 				var deleteEvent = function(event_id, e) {
 					$('.ajaxProgress').show();
@@ -120,14 +180,100 @@
 					return true;
 				};
 
+                scheduler.config.icons_select = ['icon_details', 'icon_delete', 'i1', 'i2', 'i3', 'i4', 'i5', 'i6', 'i7', 'i8', 'i9', 'i10', 'i11'];
+
+        		scheduler.locale.labels.i1 = "i_1";
+        		scheduler.locale.labels.i2 = "i_2";
+        		scheduler.locale.labels.i3 = "i_3";
+        		scheduler.locale.labels.i4 = "i_4";
+                scheduler.locale.labels.i5 = "i_5";
+                scheduler.locale.labels.i6 = "i_6";
+                scheduler.locale.labels.i7 = "i_7";
+                scheduler.locale.labels.i8 = "i_8";
+                scheduler.locale.labels.i9 = "i_9";
+                scheduler.locale.labels.i10 = "i_10";
+                scheduler.locale.labels.i11 = "i_11";
+
+                scheduler._click.buttons.i1 = function(id){
+        			scheduler.getEvent(id).color = "#AEA8D3";
+        			scheduler.updateEvent(id);
+        			update_event(id, scheduler.getEvent(id), "#AEA8D3");
+        			return "";
+        		};
+
+                scheduler._click.buttons.i2 = function(id){
+        			scheduler.getEvent(id).color = "#87D37C";
+        			scheduler.updateEvent(id);
+        			update_event(id, scheduler.getEvent(id), "#87D37C");
+        			return "";
+        		};
+                scheduler._click.buttons.i3 = function(id){
+        			scheduler.getEvent(id).color = "#BE90D4";
+        			scheduler.updateEvent(id);
+        			update_event(id, scheduler.getEvent(id), "#BE90D4");
+        			return "";
+        		};
+
+                scheduler._click.buttons.i4 = function(id){
+        			scheduler.getEvent(id).color = "#E26A6A";
+        			scheduler.updateEvent(id);
+        			update_event(id, scheduler.getEvent(id), "#E26A6A");
+        			return "";
+        		};
+                scheduler._click.buttons.i5 = function(id){
+        			scheduler.getEvent(id).color = "#F9BF3B";
+        			scheduler.updateEvent(id);
+        			update_event(id, scheduler.getEvent(id), "#F9BF3B");
+        			return "";
+        		};
+
+                scheduler._click.buttons.i6 = function(id){
+        			scheduler.getEvent(id).color = "#EB974E";
+        			scheduler.updateEvent(id);
+        			update_event(id, scheduler.getEvent(id), "#EB974E");
+        			return "";
+        		};
+                scheduler._click.buttons.i7 = function(id){
+        			scheduler.getEvent(id).color = "#19B5FE";
+        			scheduler.updateEvent(id);
+        			update_event(id, scheduler.getEvent(id), "#19B5FE");
+        			return "";
+        		};
+
+                scheduler._click.buttons.i8 = function(id){
+        			scheduler.getEvent(id).color = "#D2D7D3";
+        			scheduler.updateEvent(id);
+        			update_event(id, scheduler.getEvent(id), "#D2D7D3");
+        			return "";
+        		};
+                scheduler._click.buttons.i9 = function(id){
+        			scheduler.getEvent(id).color = "#4B77BE";
+        			scheduler.updateEvent(id);
+        			update_event(id, scheduler.getEvent(id), "#4B77BE");
+        			return "";
+        		};
+
+                scheduler._click.buttons.i10 = function(id){
+        			scheduler.getEvent(id).color = "#26A65B";
+        			scheduler.updateEvent(id);
+        			update_event(id, scheduler.getEvent(id), "#26A65B");
+        			return "";
+        		};
+                scheduler._click.buttons.i11 = function(id){
+        			scheduler.getEvent(id).color = "#D24D57";
+        			scheduler.updateEvent(id);
+        			update_event(id, scheduler.getEvent(id), "#D24D57");
+        			return "";
+        		};
+
 				scheduler.attachEvent("onEventDeleted", deleteEvent);
 				scheduler.attachEvent("onClick", readonly_check);
 				scheduler.attachEvent("onDblClick", readonly_check);
 
 
-
 				// JS event for the onEventAdded function to do an AJAX call to the database for syncing the new event data
 				scheduler.attachEvent("onEventAdded", updateDayStatus);
+
 
 				scheduler.attachEvent("onEventChanged",function(id,ev){
 		    		$('.ajaxProgress').show();
@@ -147,6 +293,9 @@
 		    		return true;
 				});
 
+				scheduler.attachEvent("onEventChanged", update_event);
+
+
 				// Create a new date for gatehring the default times that load into the calendar
 				var d = new Date();
 
@@ -157,13 +306,12 @@
 				var calendar_month = d.getMonth();
 
 				//Get the current day for the calendar to load into the default value for the calendar
-				var calendar_day = d.getDate();
-
-				// document.write({{ mon.0 }});
+				var calendar_day = {{user_day_of_week}};
 
 
 				scheduler.attachEvent("onBeforeDrag", readonly_check);
 
+				scheduler.config.hour_date = "%g:%i%a";
 				// scheduler.config.readonly = true;
 				scheduler.init('scheduler_here',new Date(calendar_year,calendar_month,calendar_day),"week");
 
@@ -249,7 +397,6 @@
 
 				//Array to store all the currently gathered google events for the user on the calendar
 
-
 				//Storing all the google events to enable ability to make read-only
 				{% for monday_tasks in mon %}
 						{% if monday_tasks.is_google_task %}
@@ -287,7 +434,6 @@
 					{% endif %}
 				{% endfor %}
 
-
 				//Function to deal with making google tasks read only
 				function readonly_check(id) {
 
@@ -302,6 +448,7 @@
 						var readOnly = scheduler.getEvent(id).readonly;
 						scheduler.config.drag_move = true;
 						scheduler.config.drag_resize = readOnly;
+                        open_modal_google(scheduler.getEvent(id).id, scheduler.getEvent(id).color, formatDateFunc(scheduler.getEvent(id).start_date), formatDateFunc(scheduler.getEvent(id).end_date));
 						return false;
 					}
 					else {
@@ -309,6 +456,20 @@
 					}
 				}
 
+                // The goal is to open a modal window for the google events
+                function modal_check_for_google(id) {
+
+                    for (i = 0; i < google_ids.length; i++) {
+						if (google_ids[i] == id) {
+							found_google_task = true;
+						}
+					}
+					if (found_google_task) {
+
+                        open_modal_google(scheduler.getEvent(id).id, scheduler.getEvent(id).color);
+						return false;
+					}
+                }
 			}
 
 			$(function() {
@@ -344,6 +505,128 @@
 				margin-top: 100px;
 			}
 
+
+
+            @import url(http://fonts.googleapis.com/css?family=Open+Sans:400,700);
+
+            h1 {
+              text-align: center;
+              font-family: "Open Sans", sans-serif;
+              font-size: 22px;
+              color: #171717;
+              font-weight: 700;
+            }
+            h1 span {
+              font-weight: 400;
+            }
+
+            .container {
+
+              min-width: 640px;
+              display: -webkit-box;
+              display: -webkit-flex;
+              display: -ms-flexbox;
+              display: flex;
+              -webkit-box-orient: vertical;
+              -webkit-box-direction: normal;
+              -webkit-flex-direction: column;
+                  -ms-flex-direction: column;
+                      flex-direction: column;
+            }
+            .button-container {
+              display: -webkit-box;
+              display: -webkit-flex;
+              display: -ms-flexbox;
+              display: flex;
+              -webkit-box-pack: justify;
+              -webkit-justify-content: space-between;
+                  -ms-flex-pack: justify;
+                      justify-content: space-between;
+              margin: 60px auto;
+            }
+
+            .button {
+              border: 0 none;
+              border-radius: 36px;
+              padding: 5px 55px;
+              margin: 0 10px;
+              cursor: pointer;
+              display: inline-block;
+              font-size: 14px;
+              color: #fff;
+              text-transform: none;
+              -webkit-transition: all 80ms ease-in-out;
+              transition: all 80ms ease-in-out;
+            }
+            .button:hover {
+              opacity: .7;
+            }
+
+            .button.-dark {
+              background: #171717;
+              color: #FFFFFF;
+            }
+
+            .button.-green {
+              background: #3AB54A;
+              color: #FFFFFF;
+            }
+
+            .button.-blue {
+              background: #2C96BE;
+              color: #FFFFFF;
+            }
+
+            .button.-border {
+              background: transparent;
+              border: 2px solid #2C96BE;
+              color: #2C96BE;
+            }
+            .button.-border:hover {
+              border-color: #2C96BE;
+              color: #2C96BE;
+              opacity: 1;
+            }
+
+            #margin-paragraph-from-right {
+                margin-right: 20px;
+            }
+		</style>
+        <style>
+
+            .footer{
+                position: absolute;
+                left: 0;
+                bottom: 0;
+                height: 60px;
+                width: 100%;
+                overflow:hidden;
+            }
+
+
+
+            /* Paste this css to your style sheet file or under head tag */
+            /* This only works with JavaScript,
+            if it's not present, don't show loader */
+            .no-js #loader { display: none;  }
+            .js #loader { display: block; position: absolute; left: 100px; top: 0; }
+            .se-pre-con {
+            	position: fixed;
+            	left: 0px;
+            	top: 0px;
+            	width: 100%;
+            	height: 100%;
+            	z-index: 9999;
+            	background: url(http://i2.wp.com/smallenvelop.com/wp-content/uploads/2014/08/Preloader_3.gif?zoom=2&resize=64%2C64) center no-repeat #fff;
+            }
+
+
+            #header_text{
+                margin-top: 40px;
+                font-family: 'Comfortaa', cursive;
+                color: #444444;
+            }
+
 			/*CSS for collapsing form*/
 			#demoTask{
 				padding-top: 10px;
@@ -361,7 +644,17 @@
 			}
 		</style>
 
+            <link href='https://fonts.googleapis.com/css?family=Comfortaa:700' rel='stylesheet' type='text/css'>
+        <script>
 
+        //paste this code under head tag or in a seperate js file.
+        	// Wait for window load
+        	$(window).load(function() {
+        		// Animate loader off screen
+        		$(".se-pre-con").fadeOut("slow");;
+        	});
+
+        </script>
 </head>
 <body onload="init();">
 
@@ -371,10 +664,13 @@
 
     	<div class="sidebar-wrapper">
             <div class="logo">
-                <a href="http://www.creative-tim.com" class="simple-text">
+                <a href="/dashboard" class="simple-text">
                     Architasker
+                    <h6>Welcome back, {{first_name}}!</h6>
                 </a>
             </div>
+
+
 
             <ul class="nav">
                 <li class="active">
@@ -383,12 +679,42 @@
                         <p>Dashboard</p>
                     </a>
                 </li>
+
                 <li>
-                    <a href="user.html">
-                        <i class="pe-7s-user"></i>
-                        <p>User Settings</p>
+                    <a href="/dashboard">
+                        <i class="pe-7s-plus"></i>
+                        <p>Add Task</p>
                     </a>
                 </li>
+
+                <li>
+                    <a href="/settings">
+                        <i class="pe-7s-user"></i>
+                        <p>Your Account</p>
+                    </a>
+                </li>
+
+
+                <li>
+                    <a href="#">
+                        <i class="pe-7s-bell"></i>
+                        <p>Notifications</p>
+                    </a>
+                </li>
+
+
+
+                <li>
+                    <a href="#">
+                        <i class="pe-7s-help1"></i>
+                        <p>Help &amp; Information</p>
+                    </a>
+                </li>
+
+
+
+
+
             </ul>
     	</div>
     </div>
@@ -465,7 +791,21 @@
         </nav>
 
 
-				<center><h5 class="title">{{first_name | title}} {{last_name | title}}'s Calendar</h5></center>
+				{% if user_initial_setup == True %}
+
+
+				<center><h3 class="title" id="header_text">{{first_name | title}} {{last_name | title}}'s Weekly To-Do</h3></center>
+
+                {% if google_auth_complete == True %}
+
+                <a href="/sync">
+                    <div class='button -border center' style="float: right;">Sync Google Calendar</div>
+                </a>
+
+                {% else %}
+                <p align="right" id="margin-paragraph-from-right"><a href="/oauth" style="text-align: right">Want To Sync With Google Calendar? Click Here</a></p>
+                {% endif %}
+
 
 				<div id="scheduler_here" class="dhx_cal_container card col-md-12" style='width:100%; height:70%'>
 
@@ -482,6 +822,7 @@
 					 <div class="dhx_cal_data pushdown">
 					 </div>
 				</div>
+
 
 				<div class="container col-lg-12">
 				{% if user_is_authenticated == True %}
@@ -621,6 +962,15 @@
 				// </script>
 
 
+				{% else %}
+
+
+				<iframe id="encoder_iframe" height=75% width="100%" src="{% url 'screen_setup_module' %}"></iframe>
+
+				{% endif %}
+
+
+
         <footer id="footerID" class="footer">
             <div class="container-fluid">
                 <nav class="pull-left">
@@ -645,6 +995,23 @@
 
     </div>
 </div>
+<div class="modal fade" id = "mymodal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+        <h4 class="modal-title" id="modal_title">Google Event Name: </h4>
+      </div>
+      <div class="modal-body">
+         <p id="start_time"></p>
+         <p id="end_time"></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
 
 <script>
 		//-----------MORPHING BUTTON/MODAL WINDOW JS---------------------------------
@@ -927,6 +1294,9 @@
 	</script>
 
 </body>
+<div class="se-pre-con"></div>
+
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha256-KXn5puMvxCw+dAYznun+drMdG1IFl3agK0p/pqT9KAo= sha512-2e8qq0ETcfWRI4HJBzQiA3UoyFk6tbNyG+qSaIBZLyW9Xf3sWZHN/lxe9fTh1U45DpPf07yj94KsUHHWe4Yk1A==" crossorigin="anonymous"></script>
 
 <!--   Core JS Files   -->
 <!-- <script src="{% static 'js/DASHBOARD_JAVASCRIPT/jquery-1.10.2.js'%}" type="text/javascript"></script> -->
@@ -948,9 +1318,8 @@
 <script src="{% static 'js/DASHBOARD_JAVASCRIPT/demo.js' %}"></script>
 
 	<script type="text/javascript">
-			{% if user_login_count == False %}
+			{% if user_initial_setup == False %}
     	$(document).ready(function(){
-
         	$.notify({
             	icon: 'pe-7s-bell',
             	message: "Welcome to Architasker! Get started by setting up your account so we can begin adding tasks."
@@ -959,9 +1328,30 @@
                 type: 'info',
                 timer: -1
             });
-
     	});
+
+        {% if google_auth_complete %}
+
+        setTimeout(function(){  }, 500);
+            //If the user has already authorize timezone and OAUTH2
+            $('#encoder_iframe').load(function(){
+
+                    //Grab the inner iFrame
+                    var iframe = $('#encoder_iframe').contents();
+
+                    //Click the initial next button
+                    iframe.find("#next").click();
+
+                    //Set timeout for load and then next again for the final set
+                    setTimeout(function(){ iframe.find("#next_again").click(); }, 1000);
+
+            });
+
+        {% endif %}
+
+
 		{% endif %}
+
 	</script>
 
 </html>

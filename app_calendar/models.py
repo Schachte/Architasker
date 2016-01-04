@@ -31,4 +31,4 @@ class UserEvent(models.Model):
     url = models.CharField(max_length=255, default='None')
     color = models.CharField(max_length=255, default='None')
     current_day = models.CharField(max_length=255, null=True) #Maybe need to change the default day on this field
-    special_event_id = models.CharField(max_length=255, default="None", unique=True) #Make sure not duplicate events get stored in the DB
+    special_event_id = models.CharField(max_length=255, default="None") #Make sure not duplicate events get stored in the DB

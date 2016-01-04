@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
+from django.conf.global_settings import TEMPLATE_CONTEXT_PROCESSORS as TCP
 from SECURE_FILES import SECURITY_KEY_IMPORT
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -30,8 +31,7 @@ DEBUG = True
 ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
 INSTALLED_APPS = (
-    'jet.dashboard',
-    'jet',
+    'suit',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -43,6 +43,7 @@ INSTALLED_APPS = (
     'app_account_management',
     'app_dashboard',
     'app_tasks',
+    'app_account_setup'
 )
 
 MIDDLEWARE_CLASSES = (
@@ -74,6 +75,16 @@ TEMPLATES = [
     },
 ]
 
+
+TEMPLATE_CONTEXT_PROCESSORS = TCP + (
+    'django.core.context_processors.request',
+)
+
+
+SUIT_CONFIG = {
+    'ADMIN_NAME': 'Architasker'
+}
+
 WSGI_APPLICATION = 'procrastinate.wsgi.application'
 
 
@@ -82,46 +93,46 @@ AUTHENTICATION_BACKENDS = (
     'procrastinate.auth_backend.PasswordlessAuthBackend',
 )
 
-
-JET_THEMES = [
-    {
-        'theme': 'default', # theme folder name
-        'color': '#47bac1', # color of the theme's button in user menu
-        'title': 'Default' # theme title
-    },
-    {
-        'theme': 'violet',
-        'color': '#a464c4',
-        'title': 'Violet'
-    },
-    {
-        'theme': 'green',
-        'color': '#44b78b',
-        'title': 'Green'
-    },
-    {
-        'theme': 'light-green',
-        'color': '#2faa60',
-        'title': 'Light Green'
-    },
-    {
-        'theme': 'light-violet',
-        'color': '#a464c4',
-        'title': 'Light Violet'
-    },
-    {
-        'theme': 'light-blue',
-        'color': '#5EADDE',
-        'title': 'Light Blue'
-    },
-    {
-        'theme': 'light-gray',
-        'color': '#222',
-        'title': 'Light Gray'
-    }
-]
-
-JET_DEFAULT_THEME = 'light-gray'
+#
+# JET_THEMES = [
+#     {
+#         'theme': 'default', # theme folder name
+#         'color': '#47bac1', # color of the theme's button in user menu
+#         'title': 'Default' # theme title
+#     },
+#     {
+#         'theme': 'violet',
+#         'color': '#a464c4',
+#         'title': 'Violet'
+#     },
+#     {
+#         'theme': 'green',
+#         'color': '#44b78b',
+#         'title': 'Green'
+#     },
+#     {
+#         'theme': 'light-green',
+#         'color': '#2faa60',
+#         'title': 'Light Green'
+#     },
+#     {
+#         'theme': 'light-violet',
+#         'color': '#a464c4',
+#         'title': 'Light Violet'
+#     },
+#     {
+#         'theme': 'light-blue',
+#         'color': '#5EADDE',
+#         'title': 'Light Blue'
+#     },
+#     {
+#         'theme': 'light-gray',
+#         'color': '#222',
+#         'title': 'Light Gray'
+#     }
+# ]
+#
+# JET_DEFAULT_THEME = 'light-gray'
 
 
 # Database
@@ -156,11 +167,11 @@ STATIC_URL = '/static/'
 
 STATICFILES_DIRS = [
       os.path.join(BASE_DIR, "our_static"),
-      #os.path.join(BASE_DIR, "static_in_env"),
+    #   os.path.join(BASE_DIR, "static_in_env"),
       # '/var/www/static/',
   ]
 
-#STATIC_ROOT = os.path.join(BASE_DIR, "static")
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
