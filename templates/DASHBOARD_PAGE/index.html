@@ -584,11 +584,18 @@
             }
 
 
+            #header_text{
+                margin-top: 40px;
+                font-family: 'Comfortaa', cursive;
+                color: #444444;
+            }
+
+
 
 
         </style>
 
-
+            <link href='https://fonts.googleapis.com/css?family=Comfortaa:700' rel='stylesheet' type='text/css'>
         <script>
 
         //paste this code under head tag or in a seperate js file.
@@ -612,8 +619,9 @@
                     Architasker
                     <h6>Welcome back, {{first_name}}!</h6>
                 </a>
-
             </div>
+
+
 
             <ul class="nav">
                 <li class="active">
@@ -622,12 +630,42 @@
                         <p>Dashboard</p>
                     </a>
                 </li>
+
+                <li>
+                    <a href="/dashboard">
+                        <i class="pe-7s-plus"></i>
+                        <p>Add Task</p>
+                    </a>
+                </li>
+
                 <li>
                     <a href="/settings">
                         <i class="pe-7s-user"></i>
-                        <p>User Settings</p>
+                        <p>Your Account</p>
                     </a>
                 </li>
+
+
+                <li>
+                    <a href="#">
+                        <i class="pe-7s-bell"></i>
+                        <p>Notifications</p>
+                    </a>
+                </li>
+
+
+
+                <li>
+                    <a href="#">
+                        <i class="pe-7s-help1"></i>
+                        <p>Help &amp; Information</p>
+                    </a>
+                </li>
+
+
+
+
+
             </ul>
     	</div>
     </div>
@@ -707,7 +745,7 @@
 				{% if user_initial_setup == True %}
 
 
-				<center><h5 class="title">{{first_name | title}} {{last_name | title}}'s Calendar</h5></center>
+				<center><h3 class="title" id="header_text">{{first_name | title}} {{last_name | title}}'s Weekly To-Do</h3></center>
 
                 {% if google_auth_complete == True %}
 
