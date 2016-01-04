@@ -37,3 +37,13 @@ def create_task(request):
         temp_model.save()
         print("created task")
         return HttpResponse("none")
+
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+Function to calculate overall priority
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+def cluster_priorities(task):
+	
+   return int(task.estimated_time / (task.day_num - ))
+
+
+

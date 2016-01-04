@@ -1072,17 +1072,7 @@
             onStepChanging: function (event, currentIndex, newIndex)
             {
 
-                if (newIndex === 1)
-                {
-                	console.log(Date.parse('next sunday'));
-                    if(Date.parse(document.getElementById("datepicker").value) < Date.parse('next sunday'))
-                    {
-                    	var task_day = Date.parse(document.getElementById("datepicker").value).toString("dddd");
-                    	document.getElementById('task_day_of_week').value = task_day;
-                    	document.getElementById("html5").noUiSlider.set(100);
-                    	console.log(task_day);
-                    }
-                }
+                
 
                 // Allways allow previous action even if the current form is not valid!
                 if (currentIndex > newIndex)
@@ -1115,6 +1105,18 @@
                 if (currentIndex === 2 && priorIndex === 3)
                 {
                     form.steps("previous");
+                }
+
+                if (currentIndex === 1)
+                {
+                	console.log(Date.parse('next sunday'));
+                    if(Date.parse(document.getElementById("datepicker").value) < Date.parse('next sunday'))
+                    {
+                    	var task_day = Date.parse(document.getElementById("datepicker").value).toString("dddd");
+                    	document.getElementById('task_day_of_week').value = task_day;
+                    	document.getElementById("html5").noUiSlider.set(100);
+                    	console.log(task_day);
+                    }
                 }
             },
             onCanceled: function (event) 
