@@ -25,8 +25,11 @@ def create_task(request):
             location = request.POST.get('task_location'),
             comments = request.POST.get('task_comments'),
             day_date = request.POST.get('task_day_date'),
-            day_num = request.POST.get('task_day_num'),
+            day_num = int(request.POST.get('task_day_num')),
         )
+
+        if(int(request.POST.get('task_day_num')) == 0):
+        	temp_model.day_num = 7
 
         if(request.POST.get('task_continuous') == "true"):
         	temp_model.continuous = True
@@ -38,12 +41,12 @@ def create_task(request):
         print("created task")
         return HttpResponse("none")
 
-'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-Function to calculate overall priority
-'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-def cluster_priorities(task):
+# '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+# Function to calculate overall priority
+# '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+# def cluster_priorities(task):
 	
-   return int(task.estimated_time / (task.day_num - ))
+#    return int(task.estimated_time / (task.day_num - ))
 
 
 
