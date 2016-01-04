@@ -460,11 +460,31 @@ def pull_user_event_data(request):
 
                         current_user = User.objects.get(username=request.user.username)
 
+                        end_time = str(end_time)
+                        #This is an error-handling check to see if the time is formatted incorrectly
+                        if ('+' in str(end_time)):
+                            #Then the end time is formatted incorrectly
+
+                            #convert to a string object
+                            end_time = str(end_time)
+                            end_time = str(end_time[0:10])
+                            end_time = end_time + 'T00:00:00Z'
+
+                            #Convert back to a datetime object
+                        end_time = parse(end_time)
+
+
                         print('Event is ' + event['summary'])
                         print('Start time is ' + str(current))
                         print('End time is ' + str(end_time))
 
                         not_exists = False
+
+
+                        HEX_ASSOCIATION = {
+                            '1': '#AEA8D3', '2': '#87D37C', '3': '#BE90D4', '4': '#E26A6A', '5': '#F9BF3B', '6': '#EB974E', '7': '#19B5FE', '8': '#D2D7D3', '9': '#4B77BE', '10': '#26A65B',
+                            '11': '#D24D57'
+                        }
 
                         if not SNE.objects.filter(task_name = event['summary'], start_time = str(current), end_time = str(end_time)).exists():
                             not_exists = True
@@ -478,12 +498,10 @@ def pull_user_event_data(request):
                                 end_time = str(end_time),
                                 special_event_id = str(event['id']) + str(randint(0, 193453))
                             )
-                            print("We are going to save the model where start time is " + str(current))
+                        else:
+                            SNE.objects.filter(task_name = event['summary'], start_time = str(current), end_time = str(end_time)).update(color = HEX_ASSOCIATION[event['colorId']])
 
-                        HEX_ASSOCIATION = {
-                            '1': '#AEA8D3', '2': '#87D37C', '3': '#BE90D4', '4': '#E26A6A', '5': '#F9BF3B', '6': '#EB974E', '7': '#19B5FE', '8': '#D2D7D3', '9': '#4B77BE', '10': '#26A65B',
-                            '11': '#D24D57'
-                        }
+
 
                         if 'colorId' in event and not_exists:
                             temp_model.color = HEX_ASSOCIATION[event['colorId']]
@@ -593,6 +611,14 @@ def pull_user_event_data(request):
                             Begin calculating the time delta for the beginning and ending times of the event
                             '''
 
+                            end_time = str(string_converted_end['date'])
+                            #appends T00:00:00Z to the end of the end date
+                            end_time = end_time[0:10] + 'T00:00:00Z'
+
+                            # if (current_month_needs_to_be_replaced == True):
+                            '''
+                            Begin calculating the time delta for the beginning and ending times of the event
+                            '''
                             ending_date = int(event['end']['date'][8:10])
                             starting_date = int(event['start']['date'][8:10])
 
@@ -603,6 +629,9 @@ def pull_user_event_data(request):
                             current_date_conversion = parse(current)
 
                             end_time = current_date_conversion + datetime.timedelta(days=time_delta)
+                            end_time = str(end_time)
+                            end_time = end_time.replace(' ', 'T')
+                            end_time = parse(end_time)
 
                     if 'dateTime' in string_converted_end.keys():
                         end_time = str(string_converted_end['dateTime'])
@@ -640,6 +669,14 @@ def pull_user_event_data(request):
                             '''
                             Begin calculating the time delta for the beginning and ending times of the event
                             '''
+                            end_time = str(string_converted_end['date'])
+                            #appends T00:00:00Z to the end of the end date
+                            end_time = end_time[0:10] + 'T00:00:00Z'
+
+                            # if (current_month_needs_to_be_replaced == True):
+                            '''
+                            Begin calculating the time delta for the beginning and ending times of the event
+                            '''
                             ending_date = int(event['end']['date'][8:10])
                             starting_date = int(event['start']['date'][8:10])
 
@@ -650,15 +687,39 @@ def pull_user_event_data(request):
                             current_date_conversion = parse(current)
 
                             end_time = current_date_conversion + datetime.timedelta(days=time_delta)
+                            end_time = str(end_time)
+                            end_time = end_time.replace(' ', 'T')
+                            end_time = parse(end_time)
 
                     current_user = User.objects.get(username=request.user.username)
+
+                    end_time = str(end_time)
+                    #This is an error-handling check to see if the time is formatted incorrectly
+                    if ('+' in str(end_time)):
+                        #Then the end time is formatted incorrectly
+
+                        #convert to a string object
+                        end_time = str(end_time)
+                        end_time = str(end_time[0:10])
+                        end_time = end_time + 'T00:00:00Z'
+
+                        #Convert back to a datetime object
+                    end_time = parse(end_time)
+
+
 
                     print("IN THE ELSE------")
                     print('Event is ' + event['summary'])
                     print('Start time is ' + str(current))
-                    print('End time is ' + str(end_time))
+                    print('End time iszz ' + str(end_time))
+
 
                     not_exists = False
+
+                    HEX_ASSOCIATION = {
+                        '1': '#AEA8D3', '2': '#87D37C', '3': '#BE90D4', '4': '#E26A6A', '5': '#F9BF3B', '6': '#EB974E', '7': '#19B5FE', '8': '#D2D7D3', '9': '#4B77BE', '10': '#26A65B',
+                        '11': '#D24D57'
+                    }
 
                     if not SNE.objects.filter(task_name = event['summary'], start_time = str(current), end_time = str(end_time)).exists():
                         not_exists = True
@@ -673,12 +734,11 @@ def pull_user_event_data(request):
                             special_event_id = str(event['id'])
                         )
                         print("We are going to save the model where start time is " + str(current))
-                        # temp_model.save()
+                        # temp_model.save
+                    else:
+                        SNE.objects.filter(task_name = event['summary'], start_time = str(current), end_time = str(end_time)).update(color = HEX_ASSOCIATION[event['colorId']])
+                        # break
 
-                    HEX_ASSOCIATION = {
-                        '1': '#AEA8D3', '2': '#87D37C', '3': '#BE90D4', '4': '#E26A6A', '5': '#F9BF3B', '6': '#EB974E', '7': '#19B5FE', '8': '#D2D7D3', '9': '#4B77BE', '10': '#26A65B',
-                        '11': '#D24D57'
-                    }
 
                     if 'colorId' in event and not_exists:
                         temp_model.color = HEX_ASSOCIATION[event['colorId']]
