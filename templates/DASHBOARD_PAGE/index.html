@@ -313,11 +313,13 @@
 
 			$(function() {
 			    $( "#datepicker" ).datepicker({
-			      showOn: "button",
-			      buttonImage: "{% static 'datepicker/images/calendar.gif' %}",
-			      buttonImageOnly: true,
-			      buttonText: "Select date",
-			      minDate: 0
+			      // showOn: "button",
+			      // buttonImage: "{% static 'datepicker/images/calendar.gif' %}",
+			      // buttonImageOnly: true,
+			      // buttonText: "Select date",
+			      minDate: 0,
+			      showAnim: "blind",
+			      duration: "slow"
 
 			    });
 			});
@@ -491,89 +493,6 @@
 				<a href="/oauth">Want to sync with Google? Click Here</a>
 				{% endif %}
 
-				
-				    <!-- <a href="#footerID"><button type="button" class="btn btn-success" data-toggle="collapse" data-target="#demoTask">
-				      <span class="glyphicon glyphicon-collapse-down"></span> Add Task
-				    </button></a>
-				  <div id="demoTask" class="collapse">
-				  	<section id="advanced-form">
-					    <form id="example-advanced-form" action="#">
-						    <h3>Task</h3>
-						    <section>
-						        <legend>Task Information</legend>
-						 
-						        <label for="taskName-2">Task name *</label>
-						        <input id="taskName-2" name="taskName" type="text" class="required">
-						        <label for="datepicker">Due Date *</label>
-						        
-						        <input type="text" id="datepicker" name="dueDate" class="required">
-						    </section>
-						 
-						    <h3>Details</h3>
-						    <section>
-						    	<legend>Estimated Time &amp; Priority</legend>
-						    	<div>
-							    	<label for="percent-2">% to complete by end of the week*</label>
-							        
-							        <div>
-								        <input type="number" min="0" max="100" step="1" id="input-number" style='display:inline-block;'>
-										<div id="html5" style='width:35%; display:inline-block;'></div>
-									</div>
-								</div>
-
-								<div style='padding-top: 20px'>
-							        <label for="time-2">Estimated time (hours) to complete  <div id="valueOfSlider" style='display:inline-block;'></div> of task*</label>
-							        <input id="time-2" name="time" type="text" class="required">
-							    </div>
-
-							    <div style='padding-top: 20px'>
-									<label for="radiosSlider">Priority *</label>
-	      							<div id="radiosSlider"  style='width:350%'>
-									    <input id="value1" name="values" type="radio">
-									    <label for="value1">1</label>
-
-									    <input id="value2" name="values" type="radio">
-									    <label for="value2">2</label>
-
-									    <input id="value3" name="values" type="radio">
-									    <label for="value3">3</label>
-
-									    <input id="value4" name="values" type="radio">
-									    <label for="value4">4</label>
-
-									    <input id="value5" name="values" type="radio" checked>
-									    <label for="value5">5</label>
-
-									    <input id="value6" name="values" type="radio">
-									    <label for="value6">6</label>
-
-									    <input id="value7" name="values" type="radio">
-									    <label for="value7">7</label>
-
-									    <input id="value8" name="values" type="radio">
-									    <label for="value8">8</label>
-
-									    <input id="value9" name="values" type="radio">
-									    <label for="value9">9</label>
-
-									    <input id="value10" name="values" type="radio">
-									    <label for="value10">10</label>
-									</div>
-								</div>
-								
-						    </section>
-						 
-						    <h3>Extras</h3>
-						    <section>
-						        <legend>Extra Integrations</legend>
-						 
-						        <input id="pomodoro-2" name="pomodoro" type="checkbox" class="required"> <label for="pomodoro-2">Pomodoro Timer</label>
-						    </section>
-						</form>
-				   	</section>
-				  </div>
-				</div> -->
-
 				<div class="morph-button morph-button-modal morph-button-modal-1 morph-button-fixed">
 						<button type="button">Add Task</button>
 						<div class="morph-content">
@@ -597,7 +516,20 @@
 										    <section>
 										    	<legend>Estimated Time &amp; Priority</legend>
 										    	<div>
-											    	<label for="percent-2">% to complete by end of the week*</label>
+											    	<label for="percent-2">
+											    		Complete <div id="valueOfSlider" style='display:inline-block;'></div> by 
+											    		
+											    		<select id="task_day_of_week">
+											    			<option value="Monday">Monday</option>
+											    			<option value="Tuesday">Tuesday</option>
+											    			<option value="Wednesday">Wednesday</option>
+											    			<option value="Thursday">Thursday</option>
+											    			<option value="Friday">Friday</option>
+											    			<option value="Saturday">Saturday</option>
+											    			<option value="Sunday" selected>Sunday</option>
+											    		</select>
+
+											    	</label>
 											        <!-- <input id="percent-2" name="percent" type="text" class="required"> -->
 											        <div>
 												        <input type="number" min="0" max="100" step="1" id="input-number" style='display:inline-block;'>
@@ -606,8 +538,8 @@
 												</div>
 
 												<div style='padding-top: 20px'>
-											        <label for="time-2">Estimated time (hours) to complete  <div id="valueOfSlider" style='display:inline-block;'></div> of task*</label>
-											        <input id="time-2" name="time" type="text" class="required">
+											        <label for="task_time">Estimated time (hours) to complete entire task*</label>
+											        <input id="task_time" name="task_time" type="text" class="required">
 											    </div>
 
 											    <input id="continuous-2" name="continuous" type="checkbox"> 
@@ -760,6 +692,9 @@
 					onAfterOpen : function() {
 						// can scroll again
 						canScroll();
+						// form.find(".body:eq(" + 0 + ") label.error").remove();
+      //               	form.find(".body:eq(" + 0 + ") .error").removeClass("error");
+      //               	form.steps("setStep", 0);
 					},
 					onBeforeClose : function() {
 						// don't allow to scroll
@@ -768,6 +703,7 @@
 					onAfterClose : function() {
 						// can scroll again
 						canScroll();
+						//resetTaskForm();
 					}
 				} );
 
@@ -778,8 +714,22 @@
             headerTag: "h3",
             bodyTag: "section",
             transitionEffect: "slideLeft",
+            enableCancelButton: true,
             onStepChanging: function (event, currentIndex, newIndex)
             {
+
+                if (newIndex === 1)
+                {
+                	console.log(Date.parse('next sunday'));
+                    if(Date.parse(document.getElementById("datepicker").value) < Date.parse('next sunday'))
+                    {
+                    	var task_day = Date.parse(document.getElementById("datepicker").value).toString("dddd");
+                    	document.getElementById('task_day_of_week').value = task_day;
+                    	document.getElementById("html5").noUiSlider.set(100);
+                    	console.log(task_day);
+                    }
+                }
+
                 // Allways allow previous action even if the current form is not valid!
                 if (currentIndex > newIndex)
                 {
@@ -813,6 +763,12 @@
                     form.steps("previous");
                 }
             },
+            onCanceled: function (event) 
+            { 
+            	resetTaskForm();
+            	form.find(".body:eq(" + 0 + ") label.error").remove();
+                form.find(".body:eq(" + 0 + ") .error").removeClass("error");
+            },
             onFinishing: function (event, currentIndex)
             {
                 form.validate().settings.ignore = ":disabled";
@@ -820,10 +776,10 @@
             },
             onFinished: function (event, currentIndex)
             {
-                alert("Submitted!");
+                // alert("Submitted!");
 
                 var url = location_of_task = comment = "None";
-                if (document.getElementById("url").value) {
+                if (!(document.getElementById("url").value === "")) {
                 	console.log("Inside url if statement");
                 	url = document.getElementById("url").value;
                 }
@@ -836,16 +792,34 @@
                 	comment = document.getElementById("comment").value;
                 }
 
+                var task_day_date = Date.parse("next" + document.getElementById('task_day_of_week').value);
+                var mm = task_day_date.getMonth()+1;
+                var dd = task_day_date.getDate();
+                var yyyy = task_day_date.getFullYear();
+
+                if(dd<10) {
+    				dd='0'+dd;
+				} 
+
+				if(mm<10) {
+    				mm='0'+mm;
+				} 
+
+				task_day_date = mm+'/'+dd+'/'+yyyy;
+
                 console.log("Task name:" + document.getElementById("taskName-2").value);
                 console.log("Date:" + document.getElementById("datepicker").value);
                 console.log("Percent:" + document.getElementById("input-number").value);
-                console.log("Hours:" + document.getElementById("time-2").value);
+                console.log("Hours:" + document.getElementById("task_time").value);
                 console.log("Priority:" + $('input[name="values"]:checked').val());
                 console.log("Continuous:" + document.getElementById("continuous-2").checked);
                 console.log("Pomodoro:" + document.getElementById("pomodoro-2").checked);
                 console.log("Url:" + url);
                 console.log("Location:" + location_of_task);
                 console.log("Comment:" + comment);
+                console.log(Date.parse("next" + document.getElementById('task_day_of_week').value));
+
+
 
                 var succeed = false;
 
@@ -857,15 +831,17 @@
 					data: {
 						csrfmiddlewaretoken: '{{ csrf_token }}',
 						task_name: document.getElementById("taskName-2").value,
-						task_date: document.getElementById("datepicker").value,
+						task_due_date: document.getElementById("datepicker").value,
 						task_percent: document.getElementById("input-number").value,
-						task_time: document.getElementById("time-2").value,
+						task_time: document.getElementById("task_time").value,
 						task_priority: $('input[name="values"]:checked').val(),
 						task_continuous: document.getElementById("continuous-2").checked,
 						task_pomodoro: document.getElementById("pomodoro-2").checked,
 						task_url: url,
 						task_location: location_of_task,
-						task_comments: comment
+						task_comments: comment,
+						task_day_date: task_day_date,
+						task_day_num: Date.getDayNumberFromName(document.getElementById('task_day_of_week').value) 
 					},
 					success: function() {
 						succeed = true;
@@ -875,14 +851,18 @@
 				
 				UIBtnn.toggle();
 
+				resetTaskForm();
+
 				return succeed;
+
+
 
             }
         }).validate({
             errorPlacement: function errorPlacement(error, element) { element.before(error); },
             rules: {
-                confirm: {
-                    equalTo: "#password-2"
+                task_time: {
+                    number: true
                 }
             }
         });
@@ -890,6 +870,30 @@
         $(document).ready( function(){
         	$("#radiosSlider").radiosToSlider();
     	});
+
+    	function resetTaskForm() {
+			document.getElementById("taskName-2").value = "";
+				document.getElementById("datepicker").value = "";
+				document.getElementById("input-number").value = "";
+				document.getElementById("task_time").value = "";
+				document.getElementById("continuous-2").checked = false;
+				document.getElementById("pomodoro-2").checked = false;
+				document.getElementById("url").value = "";
+				document.getElementById("location").value = "";
+				document.getElementById("comment").value = "";
+				document.getElementById("html5").noUiSlider.set(50);
+				document.getElementById('task_day_of_week').value = "Sunday";
+				// document.getElementById("value5").checked = true;
+				// var $radios = $('input:radio[name=values]');
+				// $radios.filter('[value=5]').prop('checked', true);
+				$("input[name=values][value=" + 5 + "]").prop('checked', true);
+				// $("#task_day_of_week").val("Sunday");
+				// $("#task_day_of_week").selectmenu('refresh');
+				// $('input:radio[name=values]').val("5");
+
+				form.steps("reset");
+		};
+
     </script>
 
     <!-- Javascript for percent slider -->

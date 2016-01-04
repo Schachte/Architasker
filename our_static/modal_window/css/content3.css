@@ -210,13 +210,14 @@
 	color: #b09a86;
 	font-weight: 300;
 	font-size: 1.2em;
+	border-radius: 10px;
 }
 
 .content-style-form input[type="text"]:focus,
 .content-style-form textarea:focus,
 .content-style-form input[type="password"]:focus {
-	border-color: #e75854;
-	color: #e75854;
+	border-color: black;
+	color: black;
 }
 
 .content-style-form input:focus {

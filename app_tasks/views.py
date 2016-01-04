@@ -16,14 +16,16 @@ def create_task(request):
         temp_model = Task.objects.create(
             authenticated_user = current_user,
             task_name = request.POST.get('task_name'),
-            due_date = request.POST.get('task_date'),
+            due_date = request.POST.get('task_due_date'),
             percent_to_complete = int(request.POST.get('task_percent')),
             estimated_time = float(request.POST.get('task_time')),
             priority = int(request.POST.get('task_priority')),
             # color = request.POST.get('color'),
             url = request.POST.get('task_url'),
             location = request.POST.get('task_location'),
-            comments = request.POST.get('task_comments')
+            comments = request.POST.get('task_comments'),
+            day_date = request.POST.get('task_day_date'),
+            day_num = request.POST.get('task_day_num'),
         )
 
         if(request.POST.get('task_continuous') == "true"):

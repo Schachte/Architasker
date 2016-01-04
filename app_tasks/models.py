@@ -6,6 +6,8 @@ class UserTask(models.Model):
 	authenticated_user = models.ForeignKey(User, unique=False, null=False, default=None)
 	task_name = models.CharField(max_length=300, unique=False, default='None')
 	due_date = models.CharField(max_length=255, default='None')
+	day_date = models.CharField(max_length=255, default='None')
+	day_num = models.CharField(max_length=255, default='None')
 	percent_to_complete = models.IntegerField(default=0)
 	estimated_time = models.DecimalField(max_digits=6, decimal_places=3, default=0.0)
 	priority = models.IntegerField(default=0)
