@@ -925,3 +925,47 @@ def unauthorize_account(request):
         return render(request, 'user_calendar.html')
     else:
         return render(request, 'user_calendar.html')
+
+
+#Test function designed to check the open times for each day
+def check_free_times(request):
+    current_user = User.objects.get(username=request.user.username)
+
+    #Get a query set for all of the events that the user has under their account
+    user_events = SNE.objects.filter(authenticated_user=current_user)
+
+    #Array that will hold the start and end times for events already programmed
+    start_times         = []
+    end_times           = []
+
+    #loop through all the events associated with the currently logged in user
+    for each_event in user_events:
+
+        #Get the string representation for the queried objects
+        current_start_time = str(each_event.start_time)
+        current_end_time = str(each_event.end_time)
+
+        #WE NEED TO FIX IMPROPERLY FORMATTED TIMES HERE
+
+        #stupid ass string formatting fixes
+        if not 'Z' in current_start_time:
+            current_start_time = current_start_time + 'Z'
+
+        #stupid ass string formatting fixes
+        if not 'Z' in current_end_time:
+            current_end_time = current_end_time + 'Z'
+
+        '''
+        Printing and appending non-all day events
+        '''
+
+        if not 'T00:00:00Z' in current_start_time:
+            print("Start Time is: " + current_start_time + " " + each_event.task_name)
+            start_times.append(current_start_time)
+
+        if not 'T00:00:00Z' in current_end_time:
+            print("End Time is: " + current_end_time)
+            start_times.append(current_end_time)
+
+
+    return HttpResponse("The user has been queried successfully!")
