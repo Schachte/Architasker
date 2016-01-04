@@ -152,3 +152,6 @@ def clear_google_tasks(request):
     for each_event in user_google_tasks:
         each_event.delete()
     return HttpResponseRedirect("/dashboard")
+
+def settings_view(request):
+    return render(request, 'HELP_PAGE/help.html')
