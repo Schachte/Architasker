@@ -404,6 +404,7 @@ def pull_user_event_data(request):
                             current_date_conversion = parse(current)
 
                             end_time = current_date_conversion + datetime.timedelta(days=time_delta)
+                            end_time = str(end_time)
 
                         if 'dateTime' in string_converted_end.keys():
                             end_time = str(string_converted_end['dateTime'])
@@ -431,7 +432,7 @@ def pull_user_event_data(request):
                             end_time = str(end_time)
                             end_time = end_time.replace(' ', 'T')
                             end_time = end_time[0:10] + end_time_holder
-                            end_time = parse(end_time)
+                            # end_time = parse(end_time)
                             print(str(end_time) + " is the end time after conversion.")
 
                         elif 'date' in string_converted_end.keys():
@@ -439,7 +440,6 @@ def pull_user_event_data(request):
                             #appends T00:00:00Z to the end of the end date
                             end_time = end_time[0:10] + 'T00:00:00Z'
 
-                            # if (current_month_needs_to_be_replaced == True):
                             '''
                             Begin calculating the time delta for the beginning and ending times of the event
                             '''
@@ -455,15 +455,14 @@ def pull_user_event_data(request):
                             end_time = current_date_conversion + datetime.timedelta(days=time_delta)
                             end_time = str(end_time)
                             end_time = end_time.replace(' ', 'T')
-                            end_time = parse(end_time)
+                            # end_time = parse(end_time)
                             print(str(end_time) + " is the end time after conversion. for DATE")
 
                         current_user = User.objects.get(username=request.user.username)
-
                         end_time = str(end_time)
+
                         #This is an error-handling check to see if the time is formatted incorrectly
                         if ('+' in str(end_time)):
-                            #Then the end time is formatted incorrectly
 
                             #convert to a string object
                             end_time = str(end_time)
@@ -471,8 +470,17 @@ def pull_user_event_data(request):
                             end_time = end_time + 'T00:00:00Z'
 
                             #Convert back to a datetime object
-                        end_time = parse(end_time)
+                        # end_time = parse(end_time)
 
+
+                        current = str(current)
+
+                        #Check if the UTC version of the current time has been persisted properly
+                        if 'Z' not in current:
+                            current = current + 'Z'
+
+                        if 'Z' not in end_time:
+                            end_time = end_time + 'Z'
 
                         print('Event is ' + event['summary'])
                         print('Start time is ' + str(current))
@@ -561,13 +569,7 @@ def pull_user_event_data(request):
                             temp_model.current_day = "Monday"
                             temp_model.save()
                     multiple_recurrences_in_a_week = False
-                    # current_month_day_to_replace_start_array = []
-                    # current_year_to_replace_start_array = []
-                    # current_month_to_replace_start_array = []
 
-                    # except:
-                    #     print("NOT SAVED")
-                    #     pass
                 current_month_day_to_replace_start_array = []
                 current_year_to_replace_start_array = []
                 current_month_to_replace_start_array = []
@@ -615,7 +617,6 @@ def pull_user_event_data(request):
                             #appends T00:00:00Z to the end of the end date
                             end_time = end_time[0:10] + 'T00:00:00Z'
 
-                            # if (current_month_needs_to_be_replaced == True):
                             '''
                             Begin calculating the time delta for the beginning and ending times of the event
                             '''
@@ -631,7 +632,7 @@ def pull_user_event_data(request):
                             end_time = current_date_conversion + datetime.timedelta(days=time_delta)
                             end_time = str(end_time)
                             end_time = end_time.replace(' ', 'T')
-                            end_time = parse(end_time)
+                            # end_time = parse(end_time)
 
                     if 'dateTime' in string_converted_end.keys():
                         end_time = str(string_converted_end['dateTime'])
@@ -658,7 +659,7 @@ def pull_user_event_data(request):
                             end_time = str(end_time)
                             end_time = end_time.replace(' ', 'T')
                             end_time = end_time[0:10] + end_time_holder
-                            end_time = parse(end_time)
+
 
                     elif 'date' in string_converted_end.keys():
                         end_time = str(string_converted_end['date'])
@@ -673,7 +674,7 @@ def pull_user_event_data(request):
                             #appends T00:00:00Z to the end of the end date
                             end_time = end_time[0:10] + 'T00:00:00Z'
 
-                            # if (current_month_needs_to_be_replaced == True):
+
                             '''
                             Begin calculating the time delta for the beginning and ending times of the event
                             '''
@@ -689,7 +690,7 @@ def pull_user_event_data(request):
                             end_time = current_date_conversion + datetime.timedelta(days=time_delta)
                             end_time = str(end_time)
                             end_time = end_time.replace(' ', 'T')
-                            end_time = parse(end_time)
+                            # end_time = parse(end_time)
 
                     current_user = User.objects.get(username=request.user.username)
 
@@ -703,10 +704,14 @@ def pull_user_event_data(request):
                         end_time = str(end_time[0:10])
                         end_time = end_time + 'T00:00:00Z'
 
-                        #Convert back to a datetime object
-                    end_time = parse(end_time)
+                    current = str(current)
 
+                    #Check if the UTC version of the current time has been persisted properly
+                    if 'Z' not in current:
+                        current = current + 'Z'
 
+                    if 'Z' not in end_time:
+                        end_time = end_time + 'Z'
 
                     print("IN THE ELSE------")
                     print('Event is ' + event['summary'])
@@ -801,9 +806,6 @@ def pull_user_event_data(request):
                 current_month_day_to_replace_start_array = []
                 current_year_to_replace_start_array = []
                 current_month_to_replace_start_array = []
-                # except:
-                #     print("NOT SAVED")
-                #     pass
 
         extension_model = UserExtended.objects.get(authenticated_user=request.user)
         extension_model.google_auth = True
