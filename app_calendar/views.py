@@ -968,4 +968,11 @@ def check_free_times(request):
             start_times.append(current_end_time)
 
 
+
+        '''
+        Overall algorithm design
+        '''
+
+
+
     return HttpResponse("The user has been queried successfully!")
