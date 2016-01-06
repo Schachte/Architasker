@@ -13,13 +13,10 @@ class CredentialsModel(models.Model):
   id = models.ForeignKey(User, primary_key=True)
   credential = CredentialsField()
 
-
 class CredentialsAdmin(admin.ModelAdmin):
     pass
 
-
 admin.site.register(CredentialsModel, CredentialsAdmin)
-
 
 class UserEvent(models.Model):
     authenticated_user = models.ForeignKey(User, unique=False, null=False, default=None)

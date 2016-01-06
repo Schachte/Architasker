@@ -989,12 +989,50 @@ def unauthorize_account(request):
         return render(request, 'user_calendar.html')
 
 
-#Test function designed to check the open times for each day
-def check_free_times(request):
+def get_current_week_range(request):
+
     current_user = User.objects.get(username=request.user.username)
 
     #Get a query set for all of the events that the user has under their account
-    user_events = SNE.objects.filter(authenticated_user=current_user)
+    current_user_ext = UserExtended.objects.get(authenticated_user=current_user)
+
+    #Days left in the current week (to get the date for Sunday)
+    now_utc = datetime.datetime.utcnow()
+    local_tz = pytz.timezone(current_user_ext.time_zone)
+    now_utc = pytz.utc.localize(now_utc)
+    local_time = now_utc.astimezone(local_tz)
+    delta_for_BOW = 0 + local_time.weekday()
+    delta_for_EOW = 6 - local_time.weekday()
+
+    #Get the date for the end of the current week
+    current_EOW = local_time + datetime.timedelta(days=delta_for_EOW)
+    current_BOW = local_time - datetime.timedelta(days=delta_for_BOW)
+
+    now = current_BOW
+    then = current_EOW #End of week for the current week
+
+    now = now.isoformat() + 'Z'
+    then = then.isoformat() + 'Z'
+
+    now = str(now[0:10]) + 'T00:00:01Z'
+    then = str(then[0:10]) + 'T23:59:59Z'
+
+    time_range = [now, then]
+
+    return time_range
+
+
+#Test function designed to check the open times for each day
+def check_free_times(request):
+    current_user = User.objects.get(username=request.user.username)
+    #Get a query set for all of the events that the user has under their account
+    current_user_ext = UserExtended.objects.get(authenticated_user=current_user)
+
+    start_week_range = get_current_week_range(request)[0]
+    end_week_range = get_current_week_range(request)[1]
+
+    #Get a query set for all of the events that the user has under their account
+    user_events = SNE.objects.filter(authenticated_user=current_user, start_time__range=[parse(start_week_range), parse(end_week_range)])
 
     #Array that will hold the start and end times for events already programmed
     start_times         = []
@@ -1004,37 +1042,58 @@ def check_free_times(request):
     for each_event in user_events:
 
         #Get the string representation for the queried objects
-        current_start_time = str(each_event.start_time)
-        current_end_time = str(each_event.end_time)
+        current_start_time = each_event.start_time
+        current_end_time = each_event.end_time
 
-        #WE NEED TO FIX IMPROPERLY FORMATTED TIMES HERE
-
-        #stupid ass string formatting fixes
-        if not 'Z' in current_start_time:
-            current_start_time = current_start_time + 'Z'
-
-        #stupid ass string formatting fixes
-        if not 'Z' in current_end_time:
-            current_end_time = current_end_time + 'Z'
+        sorted_event_start_end_times = []
 
         '''
         Printing and appending non-all day events
         '''
 
         if not 'T00:00:00Z' in current_start_time:
-            print("Start Time is: " + current_start_time + " " + each_event.task_name)
+            # print("Start Time is: " + current_start_time + " " + each_event.task_name)
             start_times.append(current_start_time)
 
         if not 'T00:00:00Z' in current_end_time:
-            print("End Time is: " + current_end_time)
-            start_times.append(current_end_time)
+            # print("End Time is: " + current_end_time)
+            end_times.append(current_end_time)
 
+    for index, st in enumerate(start_times):
+        temp_tuple = (st, end_times[index])
+        sorted_event_start_end_times.append(temp_tuple)
 
+    #Sort the start and end tuple array
+    sorted_event_start_end_times.sort(key=lambda x: x[0])
 
-        '''
-        Overall algorithm design
-        '''
+    # for all_events in
 
+    wakeup_time = current_user_ext.wakeup_time
+    sleepy_time = current_user_ext.sleepy_time
 
+    free_blocks  = []
+
+    '''''''''''''''''''''
+    DEALING WITH 0 (WAKEUP)
+    '''''''''''''''''''''
+    free_blocks.append([wakeup_time, start_times[0]])
+
+    '''''''''''''''''''''
+    DEALING WITH N (EVENTS)
+    '''''''''''''''''''''
+    for index, event_start_end_array in enumerate(sorted_event_start_end_times):
+
+        if (index > 0):
+            #Converting into a date object
+            event_end_time = sorted_event_start_end_times[index-1][1]
+            print(event_end_time),
+
+            #Adding the 15 minutes
+            event_end_time = parse(event_end_time) + datetime.timedelta(minutes=15)
+
+            if (parse(event_start_end_array[0]) > event_end_time):
+                print("THIS HAS ENTERED" + str(event_end_time) + event_start_end_array[0] )
+                tester = parse(event_start_end_array[0]) - event_end_time
+                print(tester)
 
     return HttpResponse("The user has been queried successfully!")
