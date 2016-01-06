@@ -351,19 +351,229 @@ def pull_user_event_data(request):
                         # if (len(days_list_conversion) > 1):
                         #     multiple_recurrences_in_a_week = True
 
-            # try:
-            string_converted_date = convert(event['start'])
-            string_converted_end = convert(event['end'])
-            string_colors = convert(event)
+            try:
+                string_converted_date = convert(event['start'])
+                string_converted_end = convert(event['end'])
+                string_colors = convert(event)
 
-            #Storing the physical event into the DB store
-            if multiple_recurrences_in_a_week:
+                #Storing the physical event into the DB store
+                if multiple_recurrences_in_a_week:
 
-                recurrence_data_length = len(current_month_day_to_replace_start_array)
-                print("recurrence length is %d" %(recurrence_data_length))
+                    recurrence_data_length = len(current_month_day_to_replace_start_array)
+                    print("recurrence length is %d" %(recurrence_data_length))
 
-                for recurrence_data in range(0, recurrence_data_length):
+                    for recurrence_data in range(0, recurrence_data_length):
 
+                        if 'date' in string_converted_date.keys() or 'dateTime' in  string_converted_date.keys():
+
+                            if 'dateTime' in string_converted_date.keys():
+                                current = str(string_converted_date['dateTime'])
+                                times = current[11:]
+                                dt = datetime.datetime.strptime(current, '%Y-%m-%dT' + times)
+                                current = current[0:19]
+
+                                #This is where we are going to get the end time for the ending date after conversion
+                                ending_date = int(event['end']['dateTime'][8:10])
+
+                                starting_date = int(event['start']['dateTime'][8:10])
+
+                                #This will help us find the number of days past the start date to calculate the correct time converison for the event
+                                time_delta = ending_date - starting_date
+
+                                current = str(current_year_to_replace_start_array[recurrence_data]) + '-' + str(current_month_to_replace_start_array[recurrence_data]) + '-' + str(current_month_day_to_replace_start_array[recurrence_data]) + current[10:]
+
+                            elif 'date' in string_converted_date.keys():
+
+                                current = str(string_converted_date['date'])
+                                dt = datetime.datetime.strptime(current, '%Y-%m-%d')
+
+                                current = current[0:10] + 'T00:00:00Z'
+                                # if (current_month_needs_to_be_replaced == True):
+                                current = str(current_year_to_replace_start_array[recurrence_data]) + '-' + str(current_month_to_replace_start_array[recurrence_data]) + '-' + str(current_month_day_to_replace_start_array[recurrence_data]) + 'T00:00:00Z'
+
+                                '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+                                Begin calculating the time delta for the beginning and ending times of the event
+                                '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+                                ending_date = int(event['end']['date'][8:10])
+                                starting_date = int(event['start']['date'][8:10])
+
+                                #This will help us find the number of days past the start date to calculate the correct time converison for the event
+                                time_delta = ending_date - starting_date
+
+                                #initiate the conversion for the non-time events
+                                current_date_conversion = parse(current)
+
+                                end_time = current_date_conversion + datetime.timedelta(days=time_delta)
+                                end_time = str(end_time)
+
+                            if 'dateTime' in string_converted_end.keys():
+                                end_time = str(string_converted_end['dateTime'])
+                                end_time = end_time[0:19]
+                                end_time_holder = end_time[10:]
+                                print(str(end_time) + " is the endtime before the conversion")
+
+                                # if (current_month_needs_to_be_replaced == True):
+                                current = str(string_converted_date['dateTime'])
+                                times = current[11:]
+                                dt = datetime.datetime.strptime(current, '%Y-%m-%dT' + times)
+                                current = current[0:19]
+
+                                ending_date = int(event['end']['dateTime'][8:10])
+                                starting_date = int(event['start']['dateTime'][8:10])
+
+                                #This will help us find the number of days past the start date to calculate the correct time converison for the event
+                                time_delta = ending_date - starting_date
+                                current = str(current_year_to_replace_start_array[recurrence_data]) + '-' + str(current_month_to_replace_start_array[recurrence_data]) + '-' + str(current_month_day_to_replace_start_array[recurrence_data]) + current[10:]
+
+                                #Convert the string version of the date into a dateTime object to do timeDelta calculations on
+                                current_date_conversion = parse(current)
+                                #datetime.timedelta(days=10)
+                                end_time = current_date_conversion + datetime.timedelta(days=time_delta)
+                                end_time = str(end_time)
+                                end_time = end_time.replace(' ', 'T')
+                                end_time = end_time[0:10] + end_time_holder
+                                # end_time = parse(end_time)
+                                print(str(end_time) + " is the end time after conversion.")
+
+                            elif 'date' in string_converted_end.keys():
+                                end_time = str(string_converted_end['date'])
+                                #appends T00:00:00Z to the end of the end date
+                                end_time = end_time[0:10] + 'T00:00:00Z'
+
+                                '''
+                                Begin calculating the time delta for the beginning and ending times of the event
+                                '''
+                                ending_date = int(event['end']['date'][8:10])
+                                starting_date = int(event['start']['date'][8:10])
+
+                                #This will help us find the number of days past the start date to calculate the correct time converison for the event
+                                time_delta = ending_date - starting_date
+
+                                #initiate the conversion for the non-time events
+                                current_date_conversion = parse(current)
+
+                                end_time = current_date_conversion + datetime.timedelta(days=time_delta)
+                                end_time = str(end_time)
+                                end_time = end_time.replace(' ', 'T')
+                                # end_time = parse(end_time)
+                                print(str(end_time) + " is the end time after conversion. for DATE")
+
+                            current_user = User.objects.get(username=request.user.username)
+                            end_time = str(end_time)
+
+                            #This is an error-handling check to see if the time is formatted incorrectly
+                            if ('+' in str(end_time)):
+
+                                #convert to a string object
+                                end_time = str(end_time)
+                                end_time = str(end_time[0:10])
+                                end_time = end_time + 'T00:00:00Z'
+
+                                #Convert back to a datetime object
+                            # end_time = parse(end_time)
+
+
+                            current = str(current)
+
+                            #Check if the UTC version of the current time has been persisted properly
+                            if 'Z' not in current:
+                                current = current + 'Z'
+
+                            if 'Z' not in end_time:
+                                end_time = end_time + 'Z'
+
+                            print('Event is ' + event['summary'])
+                            print('Start time is ' + str(current))
+                            print('End time is ' + str(end_time))
+
+                            not_exists = False
+
+
+                            HEX_ASSOCIATION = {
+                                '1': '#AEA8D3', '2': '#87D37C', '3': '#BE90D4', '4': '#E26A6A', '5': '#F9BF3B', '6': '#EB974E', '7': '#19B5FE', '8': '#D2D7D3', '9': '#4B77BE', '10': '#26A65B',
+                                '11': '#D24D57'
+                            }
+
+                            if not SNE.objects.filter(task_name = event['summary'], start_time = str(current), end_time = str(end_time)).exists():
+                                not_exists = True
+
+                                temp_model = SNE.objects.create(
+                                    authenticated_user = current_user,
+                                    task_name = event['summary'],
+                                    is_google_task = True,
+                                    google_json = str(event),
+                                    start_time = str(current),
+                                    end_time = str(end_time),
+                                    special_event_id = str(event['id']) + str(randint(0, 193453))
+                                )
+                            else:
+                                SNE.objects.filter(task_name = event['summary'], start_time = str(current), end_time = str(end_time)).update(color = HEX_ASSOCIATION[event['colorId']])
+
+
+
+                            if 'colorId' in event and not_exists:
+                                temp_model.color = HEX_ASSOCIATION[event['colorId']]
+                            elif not 'colorId' in event and not_exists:
+                                temp_model.color = HEX_ASSOCIATION['1']
+
+
+                            '''
+                            I DONT ACUTALLY KNOW IF THE CODE BELOW IS ANY GOOD FOR RECURRING BASED-EVENTS
+                            '''
+
+                            #Parsing out the different events to store into day arrays for the week
+                            if (dt.weekday() == 0 ):
+
+                                if not_exists:
+                                    temp_model.current_day = "Monday"
+                                    temp_model.save()
+
+                            elif (dt.weekday() == 1 ):
+
+
+                                if not_exists:
+                                    temp_model.current_day = "Tuesday"
+                                    temp_model.save()
+
+                            elif (dt.weekday() == 2 ):
+
+                                if not_exists:
+                                    temp_model.current_day = "Wednesday"
+                                    temp_model.save()
+
+                            elif (dt.weekday() == 3 ):
+
+                                if not_exists:
+                                    temp_model.current_day = "Thursday"
+                                    temp_model.save()
+
+                            elif (dt.weekday() == 4 ):
+
+                                if not_exists:
+                                    temp_model.current_day = "Friday"
+                                    temp_model.save()
+
+                            elif (dt.weekday() == 5 ):
+
+                                if not_exists:
+                                    temp_model.current_day = "Saturday"
+                                    temp_model.save()
+
+                            elif (dt.weekday() == 6 ):
+
+                                if not_exists:
+                                    temp_model.current_day = "Sunday"
+                                    temp_model.save()
+
+                            else:
+                                temp_model.current_day = "Monday"
+                                temp_model.save()
+                        multiple_recurrences_in_a_week = False
+
+                    current_month_day_to_replace_start_array = []
+                    current_year_to_replace_start_array = []
+                    current_month_to_replace_start_array = []
+                else:
                     if 'date' in string_converted_date.keys() or 'dateTime' in  string_converted_date.keys():
 
                         if 'dateTime' in string_converted_date.keys():
@@ -374,104 +584,125 @@ def pull_user_event_data(request):
 
                             #This is where we are going to get the end time for the ending date after conversion
                             ending_date = int(event['end']['dateTime'][8:10])
-
                             starting_date = int(event['start']['dateTime'][8:10])
 
                             #This will help us find the number of days past the start date to calculate the correct time converison for the event
                             time_delta = ending_date - starting_date
 
-                            current = str(current_year_to_replace_start_array[recurrence_data]) + '-' + str(current_month_to_replace_start_array[recurrence_data]) + '-' + str(current_month_day_to_replace_start_array[recurrence_data]) + current[10:]
+                            if (current_month_needs_to_be_replaced == True):
+                                current = str(current_year_to_replace_start) + '-' + str(current_month_to_replace_start) + '-' + str(current_month_day_to_replace_start) + current[10:]
+
+                                #Convert the string version of the date into a dateTime object to do timeDelta calculations on
+                                current_date_conversion = parse(current)
+
+                                end_date_conversion = current_date_conversion + datetime.timedelta(days=time_delta)
+
 
                         elif 'date' in string_converted_date.keys():
 
                             current = str(string_converted_date['date'])
                             dt = datetime.datetime.strptime(current, '%Y-%m-%d')
 
+                            #appends T00:00:00Z to the end of the start date
+                            #This is how dhtmlxscheduler defines an all day event
                             current = current[0:10] + 'T00:00:00Z'
-                            # if (current_month_needs_to_be_replaced == True):
-                            current = str(current_year_to_replace_start_array[recurrence_data]) + '-' + str(current_month_to_replace_start_array[recurrence_data]) + '-' + str(current_month_day_to_replace_start_array[recurrence_data]) + 'T00:00:00Z'
+                            if (current_month_needs_to_be_replaced == True):
+                                current = str(current_year_to_replace_start) + '-' + str(current_month_to_replace_start) + '-' + str(current_month_day_to_replace_start) + 'T00:00:00Z'
 
-                            '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-                            Begin calculating the time delta for the beginning and ending times of the event
-                            '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-                            ending_date = int(event['end']['date'][8:10])
-                            starting_date = int(event['start']['date'][8:10])
+                                '''
+                                Begin calculating the time delta for the beginning and ending times of the event
+                                '''
 
-                            #This will help us find the number of days past the start date to calculate the correct time converison for the event
-                            time_delta = ending_date - starting_date
+                                end_time = str(string_converted_end['date'])
+                                #appends T00:00:00Z to the end of the end date
+                                end_time = end_time[0:10] + 'T00:00:00Z'
 
-                            #initiate the conversion for the non-time events
-                            current_date_conversion = parse(current)
+                                '''
+                                Begin calculating the time delta for the beginning and ending times of the event
+                                '''
+                                ending_date = int(event['end']['date'][8:10])
+                                starting_date = int(event['start']['date'][8:10])
 
-                            end_time = current_date_conversion + datetime.timedelta(days=time_delta)
-                            end_time = str(end_time)
+                                #This will help us find the number of days past the start date to calculate the correct time converison for the event
+                                time_delta = ending_date - starting_date
+
+                                #initiate the conversion for the non-time events
+                                current_date_conversion = parse(current)
+
+                                end_time = current_date_conversion + datetime.timedelta(days=time_delta)
+                                end_time = str(end_time)
+                                end_time = end_time.replace(' ', 'T')
+                                # end_time = parse(end_time)
 
                         if 'dateTime' in string_converted_end.keys():
                             end_time = str(string_converted_end['dateTime'])
                             end_time = end_time[0:19]
                             end_time_holder = end_time[10:]
-                            print(str(end_time) + " is the endtime before the conversion")
 
-                            # if (current_month_needs_to_be_replaced == True):
-                            current = str(string_converted_date['dateTime'])
-                            times = current[11:]
-                            dt = datetime.datetime.strptime(current, '%Y-%m-%dT' + times)
-                            current = current[0:19]
+                            if (current_month_needs_to_be_replaced == True):
+                                current = str(string_converted_date['dateTime'])
+                                times = current[11:]
+                                dt = datetime.datetime.strptime(current, '%Y-%m-%dT' + times)
+                                current = current[0:19]
 
-                            ending_date = int(event['end']['dateTime'][8:10])
-                            starting_date = int(event['start']['dateTime'][8:10])
+                                ending_date = int(event['end']['dateTime'][8:10])
+                                starting_date = int(event['start']['dateTime'][8:10])
 
-                            #This will help us find the number of days past the start date to calculate the correct time converison for the event
-                            time_delta = ending_date - starting_date
-                            current = str(current_year_to_replace_start_array[recurrence_data]) + '-' + str(current_month_to_replace_start_array[recurrence_data]) + '-' + str(current_month_day_to_replace_start_array[recurrence_data]) + current[10:]
+                                #This will help us find the number of days past the start date to calculate the correct time converison for the event
+                                time_delta = ending_date - starting_date
+                                current = str(current_year_to_replace_start) + '-' + str(current_month_to_replace_start) + '-' + str(current_month_day_to_replace_start) + current[10:]
 
-                            #Convert the string version of the date into a dateTime object to do timeDelta calculations on
-                            current_date_conversion = parse(current)
-                            #datetime.timedelta(days=10)
-                            end_time = current_date_conversion + datetime.timedelta(days=time_delta)
-                            end_time = str(end_time)
-                            end_time = end_time.replace(' ', 'T')
-                            end_time = end_time[0:10] + end_time_holder
-                            # end_time = parse(end_time)
-                            print(str(end_time) + " is the end time after conversion.")
+                                #Convert the string version of the date into a dateTime object to do timeDelta calculations on
+                                current_date_conversion = parse(current)
+
+                                end_time = current_date_conversion + datetime.timedelta(days=time_delta)
+                                end_time = str(end_time)
+                                end_time = end_time.replace(' ', 'T')
+                                end_time = end_time[0:10] + end_time_holder
+
 
                         elif 'date' in string_converted_end.keys():
                             end_time = str(string_converted_end['date'])
                             #appends T00:00:00Z to the end of the end date
                             end_time = end_time[0:10] + 'T00:00:00Z'
 
-                            '''
-                            Begin calculating the time delta for the beginning and ending times of the event
-                            '''
-                            ending_date = int(event['end']['date'][8:10])
-                            starting_date = int(event['start']['date'][8:10])
+                            if (current_month_needs_to_be_replaced == True):
+                                '''
+                                Begin calculating the time delta for the beginning and ending times of the event
+                                '''
+                                end_time = str(string_converted_end['date'])
+                                #appends T00:00:00Z to the end of the end date
+                                end_time = end_time[0:10] + 'T00:00:00Z'
 
-                            #This will help us find the number of days past the start date to calculate the correct time converison for the event
-                            time_delta = ending_date - starting_date
 
-                            #initiate the conversion for the non-time events
-                            current_date_conversion = parse(current)
+                                '''
+                                Begin calculating the time delta for the beginning and ending times of the event
+                                '''
+                                ending_date = int(event['end']['date'][8:10])
+                                starting_date = int(event['start']['date'][8:10])
 
-                            end_time = current_date_conversion + datetime.timedelta(days=time_delta)
-                            end_time = str(end_time)
-                            end_time = end_time.replace(' ', 'T')
-                            # end_time = parse(end_time)
-                            print(str(end_time) + " is the end time after conversion. for DATE")
+                                #This will help us find the number of days past the start date to calculate the correct time converison for the event
+                                time_delta = ending_date - starting_date
+
+                                #initiate the conversion for the non-time events
+                                current_date_conversion = parse(current)
+
+                                end_time = current_date_conversion + datetime.timedelta(days=time_delta)
+                                end_time = str(end_time)
+                                end_time = end_time.replace(' ', 'T')
+                                # end_time = parse(end_time)
 
                         current_user = User.objects.get(username=request.user.username)
-                        end_time = str(end_time)
 
+                        end_time = str(end_time)
                         #This is an error-handling check to see if the time is formatted incorrectly
                         if ('+' in str(end_time)):
+                            #Then the end time is formatted incorrectly
 
                             #convert to a string object
                             end_time = str(end_time)
                             end_time = str(end_time[0:10])
                             end_time = end_time + 'T00:00:00Z'
-
-                            #Convert back to a datetime object
-                        # end_time = parse(end_time)
-
 
                         current = str(current)
 
@@ -482,12 +713,13 @@ def pull_user_event_data(request):
                         if 'Z' not in end_time:
                             end_time = end_time + 'Z'
 
+                        print("IN THE ELSE------")
                         print('Event is ' + event['summary'])
                         print('Start time is ' + str(current))
-                        print('End time is ' + str(end_time))
+                        print('End time iszz ' + str(end_time))
+
 
                         not_exists = False
-
 
                         HEX_ASSOCIATION = {
                             '1': '#AEA8D3', '2': '#87D37C', '3': '#BE90D4', '4': '#E26A6A', '5': '#F9BF3B', '6': '#EB974E', '7': '#19B5FE', '8': '#D2D7D3', '9': '#4B77BE', '10': '#26A65B',
@@ -504,11 +736,13 @@ def pull_user_event_data(request):
                                 google_json = str(event),
                                 start_time = str(current),
                                 end_time = str(end_time),
-                                special_event_id = str(event['id']) + str(randint(0, 193453))
+                                special_event_id = str(event['id'])
                             )
+                            print("We are going to save the model where start time is " + str(current))
+                            # temp_model.save
                         else:
                             SNE.objects.filter(task_name = event['summary'], start_time = str(current), end_time = str(end_time)).update(color = HEX_ASSOCIATION[event['colorId']])
-
+                            # break
 
 
                         if 'colorId' in event and not_exists:
@@ -529,7 +763,6 @@ def pull_user_event_data(request):
                                 temp_model.save()
 
                         elif (dt.weekday() == 1 ):
-
 
                             if not_exists:
                                 temp_model.current_day = "Tuesday"
@@ -568,249 +801,18 @@ def pull_user_event_data(request):
                         else:
                             temp_model.current_day = "Monday"
                             temp_model.save()
-                    multiple_recurrences_in_a_week = False
 
-                current_month_day_to_replace_start_array = []
-                current_year_to_replace_start_array = []
-                current_month_to_replace_start_array = []
-            else:
-                if 'date' in string_converted_date.keys() or 'dateTime' in  string_converted_date.keys():
 
-                    if 'dateTime' in string_converted_date.keys():
-                        current = str(string_converted_date['dateTime'])
-                        times = current[11:]
-                        dt = datetime.datetime.strptime(current, '%Y-%m-%dT' + times)
-                        current = current[0:19]
+                    current_month_day_to_replace_start_array = []
+                    current_year_to_replace_start_array = []
+                    current_month_to_replace_start_array = []
 
-                        #This is where we are going to get the end time for the ending date after conversion
-                        ending_date = int(event['end']['dateTime'][8:10])
-                        starting_date = int(event['start']['dateTime'][8:10])
+                extension_model = UserExtended.objects.get(authenticated_user=request.user)
+                extension_model.google_auth = True
+                extension_model.save()
 
-                        #This will help us find the number of days past the start date to calculate the correct time converison for the event
-                        time_delta = ending_date - starting_date
-
-                        if (current_month_needs_to_be_replaced == True):
-                            current = str(current_year_to_replace_start) + '-' + str(current_month_to_replace_start) + '-' + str(current_month_day_to_replace_start) + current[10:]
-
-                            #Convert the string version of the date into a dateTime object to do timeDelta calculations on
-                            current_date_conversion = parse(current)
-
-                            end_date_conversion = current_date_conversion + datetime.timedelta(days=time_delta)
-
-
-                    elif 'date' in string_converted_date.keys():
-
-                        current = str(string_converted_date['date'])
-                        dt = datetime.datetime.strptime(current, '%Y-%m-%d')
-
-                        #appends T00:00:00Z to the end of the start date
-                        #This is how dhtmlxscheduler defines an all day event
-                        current = current[0:10] + 'T00:00:00Z'
-                        if (current_month_needs_to_be_replaced == True):
-                            current = str(current_year_to_replace_start) + '-' + str(current_month_to_replace_start) + '-' + str(current_month_day_to_replace_start) + 'T00:00:00Z'
-
-                            '''
-                            Begin calculating the time delta for the beginning and ending times of the event
-                            '''
-
-                            end_time = str(string_converted_end['date'])
-                            #appends T00:00:00Z to the end of the end date
-                            end_time = end_time[0:10] + 'T00:00:00Z'
-
-                            '''
-                            Begin calculating the time delta for the beginning and ending times of the event
-                            '''
-                            ending_date = int(event['end']['date'][8:10])
-                            starting_date = int(event['start']['date'][8:10])
-
-                            #This will help us find the number of days past the start date to calculate the correct time converison for the event
-                            time_delta = ending_date - starting_date
-
-                            #initiate the conversion for the non-time events
-                            current_date_conversion = parse(current)
-
-                            end_time = current_date_conversion + datetime.timedelta(days=time_delta)
-                            end_time = str(end_time)
-                            end_time = end_time.replace(' ', 'T')
-                            # end_time = parse(end_time)
-
-                    if 'dateTime' in string_converted_end.keys():
-                        end_time = str(string_converted_end['dateTime'])
-                        end_time = end_time[0:19]
-                        end_time_holder = end_time[10:]
-
-                        if (current_month_needs_to_be_replaced == True):
-                            current = str(string_converted_date['dateTime'])
-                            times = current[11:]
-                            dt = datetime.datetime.strptime(current, '%Y-%m-%dT' + times)
-                            current = current[0:19]
-
-                            ending_date = int(event['end']['dateTime'][8:10])
-                            starting_date = int(event['start']['dateTime'][8:10])
-
-                            #This will help us find the number of days past the start date to calculate the correct time converison for the event
-                            time_delta = ending_date - starting_date
-                            current = str(current_year_to_replace_start) + '-' + str(current_month_to_replace_start) + '-' + str(current_month_day_to_replace_start) + current[10:]
-
-                            #Convert the string version of the date into a dateTime object to do timeDelta calculations on
-                            current_date_conversion = parse(current)
-
-                            end_time = current_date_conversion + datetime.timedelta(days=time_delta)
-                            end_time = str(end_time)
-                            end_time = end_time.replace(' ', 'T')
-                            end_time = end_time[0:10] + end_time_holder
-
-
-                    elif 'date' in string_converted_end.keys():
-                        end_time = str(string_converted_end['date'])
-                        #appends T00:00:00Z to the end of the end date
-                        end_time = end_time[0:10] + 'T00:00:00Z'
-
-                        if (current_month_needs_to_be_replaced == True):
-                            '''
-                            Begin calculating the time delta for the beginning and ending times of the event
-                            '''
-                            end_time = str(string_converted_end['date'])
-                            #appends T00:00:00Z to the end of the end date
-                            end_time = end_time[0:10] + 'T00:00:00Z'
-
-
-                            '''
-                            Begin calculating the time delta for the beginning and ending times of the event
-                            '''
-                            ending_date = int(event['end']['date'][8:10])
-                            starting_date = int(event['start']['date'][8:10])
-
-                            #This will help us find the number of days past the start date to calculate the correct time converison for the event
-                            time_delta = ending_date - starting_date
-
-                            #initiate the conversion for the non-time events
-                            current_date_conversion = parse(current)
-
-                            end_time = current_date_conversion + datetime.timedelta(days=time_delta)
-                            end_time = str(end_time)
-                            end_time = end_time.replace(' ', 'T')
-                            # end_time = parse(end_time)
-
-                    current_user = User.objects.get(username=request.user.username)
-
-                    end_time = str(end_time)
-                    #This is an error-handling check to see if the time is formatted incorrectly
-                    if ('+' in str(end_time)):
-                        #Then the end time is formatted incorrectly
-
-                        #convert to a string object
-                        end_time = str(end_time)
-                        end_time = str(end_time[0:10])
-                        end_time = end_time + 'T00:00:00Z'
-
-                    current = str(current)
-
-                    #Check if the UTC version of the current time has been persisted properly
-                    if 'Z' not in current:
-                        current = current + 'Z'
-
-                    if 'Z' not in end_time:
-                        end_time = end_time + 'Z'
-
-                    print("IN THE ELSE------")
-                    print('Event is ' + event['summary'])
-                    print('Start time is ' + str(current))
-                    print('End time iszz ' + str(end_time))
-
-
-                    not_exists = False
-
-                    HEX_ASSOCIATION = {
-                        '1': '#AEA8D3', '2': '#87D37C', '3': '#BE90D4', '4': '#E26A6A', '5': '#F9BF3B', '6': '#EB974E', '7': '#19B5FE', '8': '#D2D7D3', '9': '#4B77BE', '10': '#26A65B',
-                        '11': '#D24D57'
-                    }
-
-                    if not SNE.objects.filter(task_name = event['summary'], start_time = str(current), end_time = str(end_time)).exists():
-                        not_exists = True
-
-                        temp_model = SNE.objects.create(
-                            authenticated_user = current_user,
-                            task_name = event['summary'],
-                            is_google_task = True,
-                            google_json = str(event),
-                            start_time = str(current),
-                            end_time = str(end_time),
-                            special_event_id = str(event['id'])
-                        )
-                        print("We are going to save the model where start time is " + str(current))
-                        # temp_model.save
-                    else:
-                        SNE.objects.filter(task_name = event['summary'], start_time = str(current), end_time = str(end_time)).update(color = HEX_ASSOCIATION[event['colorId']])
-                        # break
-
-
-                    if 'colorId' in event and not_exists:
-                        temp_model.color = HEX_ASSOCIATION[event['colorId']]
-                    elif not 'colorId' in event and not_exists:
-                        temp_model.color = HEX_ASSOCIATION['1']
-
-
-                    '''
-                    I DONT ACUTALLY KNOW IF THE CODE BELOW IS ANY GOOD FOR RECURRING BASED-EVENTS
-                    '''
-
-                    #Parsing out the different events to store into day arrays for the week
-                    if (dt.weekday() == 0 ):
-
-                        if not_exists:
-                            temp_model.current_day = "Monday"
-                            temp_model.save()
-
-                    elif (dt.weekday() == 1 ):
-
-                        if not_exists:
-                            temp_model.current_day = "Tuesday"
-                            temp_model.save()
-
-                    elif (dt.weekday() == 2 ):
-
-                        if not_exists:
-                            temp_model.current_day = "Wednesday"
-                            temp_model.save()
-
-                    elif (dt.weekday() == 3 ):
-
-                        if not_exists:
-                            temp_model.current_day = "Thursday"
-                            temp_model.save()
-
-                    elif (dt.weekday() == 4 ):
-
-                        if not_exists:
-                            temp_model.current_day = "Friday"
-                            temp_model.save()
-
-                    elif (dt.weekday() == 5 ):
-
-                        if not_exists:
-                            temp_model.current_day = "Saturday"
-                            temp_model.save()
-
-                    elif (dt.weekday() == 6 ):
-
-                        if not_exists:
-                            temp_model.current_day = "Sunday"
-                            temp_model.save()
-
-                    else:
-                        temp_model.current_day = "Monday"
-                        temp_model.save()
-
-
-                current_month_day_to_replace_start_array = []
-                current_year_to_replace_start_array = []
-                current_month_to_replace_start_array = []
-
-        extension_model = UserExtended.objects.get(authenticated_user=request.user)
-        extension_model.google_auth = True
-        extension_model.save()
-
+            except:
+                pass
     return HttpResponseRedirect('/dashboard')
 
 
@@ -825,8 +827,8 @@ def create_event(request):
         temp_model = SNE.objects.create(
             authenticated_user = current_user,
             task_name = request.POST.get('text'),
-            start_time = request.POST.get('start'),
-            end_time = request.POST.get('end'),
+            start_time = request.POST.get('start') + 'Z',
+            end_time = request.POST.get('end') + 'Z',
             special_event_id = request.POST.get('id'),
             color = '#34495e'
         )
@@ -886,8 +888,8 @@ def update_event(request):
             event_task = SNE.objects.filter(
             special_event_id=EVENT_ID).update(
                 task_name=data_dict['text'],
-                start_time = data_dict['start'],
-                end_time = data_dict['end']
+                start_time = data_dict['start'] + 'Z',
+                end_time = data_dict['end'] + 'Z'
                 )
 
             if 'color' in request.POST:
@@ -1034,11 +1036,13 @@ def check_free_times(request):
     #Get a query set for all of the events that the user has under their account
     user_events = SNE.objects.filter(authenticated_user=current_user, start_time__range=[parse(start_week_range), parse(end_week_range)])
 
+
     #Array that will hold the start and end times for events already programmed
     start_times         = []
     end_times           = []
 
     #loop through all the events associated with the currently logged in user
+    counter = 0
     for each_event in user_events:
 
         #Get the string representation for the queried objects
@@ -1051,17 +1055,18 @@ def check_free_times(request):
         Printing and appending non-all day events
         '''
 
-        if not 'T00:00:00Z' in current_start_time:
-            # print("Start Time is: " + current_start_time + " " + each_event.task_name)
+        #MAKE THIS AN AND STATEMENT
+        if not 'T00:00:00Z' in current_start_time and not 'T00:00:00Z' in current_end_time:
             start_times.append(current_start_time)
-
-        if not 'T00:00:00Z' in current_end_time:
-            # print("End Time is: " + current_end_time)
             end_times.append(current_end_time)
 
+
     for index, st in enumerate(start_times):
-        temp_tuple = (st, end_times[index])
-        sorted_event_start_end_times.append(temp_tuple)
+        try:
+            temp_tuple = (st, end_times[index])
+            sorted_event_start_end_times.append(temp_tuple)
+        except:
+            pass
 
     #Sort the start and end tuple array
     sorted_event_start_end_times.sort(key=lambda x: x[0])
@@ -1073,27 +1078,124 @@ def check_free_times(request):
 
     free_blocks  = []
 
+
+    week_day_cluster = {}   #Used to hold the clustered time data for the current week
+
+
+    '''
+    Segregating taken blocks into day dictionaries
+    '''
+
+    #Initialize the keys in the dict.
+    week_day_cluster['0']       = []
+    week_day_cluster['1']       = []
+    week_day_cluster['2']       = []
+    week_day_cluster['3']       = []
+    week_day_cluster['4']       = []
+    week_day_cluster['5']       = []
+    week_day_cluster['6']       = []
+
+    #Lets do some logic checks to see if the item is a multi day event or not
+    #If the item is a multi day event do we treat the item like it is an all day event?
+
+    for sorted_data in sorted_event_start_end_times:
+        if parse(sorted_data[0].encode("utf-8")).weekday() == 0 and parse(sorted_data[1].encode("utf-8")).weekday() == 0:
+            week_day_cluster['0'].append([(sorted_data[0].encode("utf-8"), sorted_data[1].encode("utf-8"))])
+        elif parse(sorted_data[0].encode("utf-8")).weekday() == 1 and parse(sorted_data[1].encode("utf-8")).weekday() == 1:
+            week_day_cluster['1'].append([(sorted_data[0].encode("utf-8"), sorted_data[1].encode("utf-8"))])
+        elif parse(sorted_data[0].encode("utf-8")).weekday() == 2 and parse(sorted_data[1].encode("utf-8")).weekday() == 2:
+            week_day_cluster['2'].append([(sorted_data[0].encode("utf-8"), sorted_data[1].encode("utf-8"))])
+        elif parse(sorted_data[0].encode("utf-8")).weekday() == 3 and parse(sorted_data[1].encode("utf-8")).weekday() == 3:
+            week_day_cluster['3'].append([(sorted_data[0].encode("utf-8"), sorted_data[1].encode("utf-8"))])
+        elif parse(sorted_data[0].encode("utf-8")).weekday() == 4 and parse(sorted_data[1].encode("utf-8")).weekday() == 4:
+            week_day_cluster['4'].append([(sorted_data[0].encode("utf-8"), sorted_data[1].encode("utf-8"))])
+        elif parse(sorted_data[0].encode("utf-8")).weekday() == 5 and parse(sorted_data[1].encode("utf-8")).weekday() == 5:
+            week_day_cluster['5'].append([(sorted_data[0].encode("utf-8"), sorted_data[1].encode("utf-8"))])
+        elif parse(sorted_data[0].encode("utf-8")).weekday() == 6 and parse(sorted_data[1].encode("utf-8")).weekday() == 6:
+            week_day_cluster['6'].append([(sorted_data[0].encode("utf-8"), sorted_data[1].encode("utf-8"))])
+
+
     '''''''''''''''''''''
     DEALING WITH 0 (WAKEUP)
     '''''''''''''''''''''
-    free_blocks.append([wakeup_time, start_times[0]])
+
+    temp_wakeup_time = wakeup_time
+    sleep_time = current_user_ext.sleepy_time #21:00
+    temp_sleep_time = sleep_time
+
+    for key, event_start_end in week_day_cluster.iteritems():
+        try:
+
+            wakeup_time = event_start_end[0][0][0][0:11]
+            wakeup_time = wakeup_time + temp_wakeup_time + ':00Z'
+            free_blocks.append([wakeup_time, event_start_end[0][0][0]])
+            print(wakeup_time, event_start_end[0][0][0])
+        except:
+
+            # print(parse(start_week_range) + datetime.timedelta(days=int(key)))
+            wakeup_time = str(parse(start_week_range) + datetime.timedelta(days=int(key)))[0:11]
+            wakeup_time = wakeup_time + temp_wakeup_time + ':00Z'
+            sleep_time = current_user_ext.sleepy_time #21:00
+            temp_sleep_time = sleep_time
+            sleep_time = wakeup_time[0:11]
+            sleep_time = sleep_time + temp_sleep_time + ':00Z'
+
+            wakeup_time = wakeup_time.replace(' ', 'T')
+            sleep_time = sleep_time.replace(' ', 'T')
+            
+            free_blocks.append([wakeup_time, sleep_time])
+            print(wakeup_time, sleep_time)
+            pass
+
 
     '''''''''''''''''''''
     DEALING WITH N (EVENTS)
     '''''''''''''''''''''
-    for index, event_start_end_array in enumerate(sorted_event_start_end_times):
 
-        if (index > 0):
-            #Converting into a date object
-            event_end_time = sorted_event_start_end_times[index-1][1]
-            print(event_end_time),
+    for key, event_start_end in week_day_cluster.iteritems():
+        for index, start_end in enumerate(event_start_end):
 
-            #Adding the 15 minutes
-            event_end_time = parse(event_end_time) + datetime.timedelta(minutes=15)
+            # try:
+            if (index > 0):
+                #Converting into a date object
+                event_end_time = event_start_end[index-1][0][1]
 
-            if (parse(event_start_end_array[0]) > event_end_time):
-                print("THIS HAS ENTERED" + str(event_end_time) + event_start_end_array[0] )
-                tester = parse(event_start_end_array[0]) - event_end_time
-                print(tester)
+                #Adding the 15 minutes
+                event_end_time = parse(event_end_time) + datetime.timedelta(minutes=15)
+
+                if (parse(start_end[0][0]) > event_end_time and ((parse(start_end[0][0]) - event_end_time).seconds)/60 >= (current_user_ext.min_task_time+current_user_ext.travel_time)):
+                    print("THIS HAS ENTERED" + str(event_end_time) + start_end[0][0])
+                    tester = parse(start_end[0][0]) - event_end_time
+                    print((tester.seconds)/60)
+                    print('-----')
+            elif len(event_start_end) == 1:
+                event_end_time = event_start_end[0][0][1]
+                sleep_time = current_user_ext.sleepy_time #21:00
+
+                temp_sleep_time = sleep_time
+                sleep_time = event_end_time[0:11]
+                sleep_time = sleep_time + temp_sleep_time + ':00Z'
+
+                temp_tuple = (event_end_time, sleep_time)
+                print(temp_tuple)
+
+    '''''''''''''''''''''
+    DEALING WITH K (BEDTIME)
+    '''''''''''''''''''''
+
+
+
+
+
+    #We need ot ensure that the dates for the start and end are the same
+    # if the dates are not the same, then they are multi-day or all day events which is a problem and they need to be filtered out
+
+    '''
+    PRINTING OUT TAKING BLOCKS
+    '''
+
+
+
+
 
     return HttpResponse("The user has been queried successfully!")
