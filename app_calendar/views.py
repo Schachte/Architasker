@@ -1217,29 +1217,39 @@ def check_free_times(request):
     '''''''''''''''''''''
 
 
+    #Array to keep track of the dates for values in dictionary that are empty
     days_in_current_week = []
+
+    #Loop through the dates in the current week and append them to the list
     for single_date in (parse(start_week_range) + datetime.timedelta(n) for n in range(7)):
         days_in_current_week.append(str(single_date))
 
-
-
+    #Loop through the end times for all the week day clustered data sets
     for key, event_start_end in week_day_cluster.iteritems():
+
+        #List to hold all the end-times before sorting
         end_time_data = []
 
+        #If the association in the dictionary has information, then continue
         if (len(event_start_end) > 0):
 
+            #add each end time
             for each_list_tuple in event_start_end:
                 end_time_data.append(each_list_tuple[0][1])
 
+            #Sort and string format the data
             temp_bed_time = sorted(end_time_data)[len(end_time_data)-1][0:11]
             temp_bed_time += current_user_ext.sleepy_time + ":00Z"
 
+            #Convert to date time object
             current_day_end_time = parse(sorted(end_time_data)[len(end_time_data)-1])
 
+            #Printing data THAT SHOULD BE CONVERTED TO THE APPENDING DATA
             if (current_day_end_time + datetime.timedelta(minutes=current_user_ext.min_task_time) + datetime.timedelta(minutes=current_user_ext.travel_time) <= parse(temp_bed_time)):
                 current_day_end_time += datetime.timedelta(minutes=current_user_ext.travel_time)
                 print(current_day_end_time, temp_bed_time)
 
+        #Entire day is free
         else:
             wakeup_time = days_in_current_week[int(key)][0:10]
             wakeup_time += "T%s:00Z"%(current_user_ext.wakeup_time)
