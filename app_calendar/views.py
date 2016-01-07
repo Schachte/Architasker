@@ -1235,6 +1235,8 @@ def check_free_times(request):
 
             if int(key) in min_day_start_times and int(key) in max_day_start_times:
                 print("%s overlap exists"%(key))
+                max_end = str(max_day_start_times[int(key)]).replace(' ', 'T')[0:19] + 'Z'
+                print("Max End is: %s"%(max_end))
             else:
                 wakeup_time = event_start_end[0][0][0][0:11]
                 wakeup_time = wakeup_time + temp_wakeup_time + ':00Z'
