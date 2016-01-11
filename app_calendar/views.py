@@ -1025,12 +1025,15 @@ def get_current_week_range(request):
 
     return time_range
 
+#Convert string output of a parse object into a regular object
+def convert_parse_time(initial_time):
+
+    #Convert to regular time
+    if ('+' in initial_time):
+        print("do this later")
 
 #Test function designed to check the open times for each day
 def check_free_times(request):
-
-
-
 
 
     current_user = User.objects.get(username=request.user.username)
@@ -1044,8 +1047,7 @@ def check_free_times(request):
     #Get a query set for all of the events that the user has under their account
     user_events = SNE.objects.filter(authenticated_user=current_user, start_time__range=[parse(start_week_range), parse(end_week_range) + datetime.timedelta(days=1)])
 
-    # for events in user_events:
-    #     print(events.start_time)
+
 
     #Array that will hold the start and end times for events already programmed
     start_times         = []
@@ -1140,28 +1142,8 @@ def check_free_times(request):
     #This is the dictionary of data that holds the min start time of each day
     min_day_start_times = {}
 
-    #Initializing empty arrays for the dictionary keys
-    # min_day_start_times[0] = []
-    # min_day_start_times[1] = []
-    # min_day_start_times[2] = []
-    # min_day_start_times[3] = []
-    # min_day_start_times[4] = []
-    # min_day_start_times[5] = []
-    # min_day_start_times[6] = []
-
     #This is the dictionary of data that holds the min start time of each day
     max_day_start_times = {}
-
-    #Initializing empty arrays for the dictionary keys
-    # max_day_start_times[0] = []
-    # max_day_start_times[1] = []
-    # max_day_start_times[2] = []
-    # max_day_start_times[3] = []
-    # max_day_start_times[4] = []
-    # max_day_start_times[5] = []
-    # max_day_start_times[6] = []
-
-
 
     #Array to keep track of the dates for values in dictionary that are empty
     days_in_current_week = []
@@ -1214,13 +1196,6 @@ def check_free_times(request):
             pass
 
 
-
-    print("DICT MIN")
-    print(min_day_start_times)
-
-    print("DICT MAX")
-    print(max_day_start_times)
-
     '''''''''''''''''''''
     DEALING WITH 0 (WAKEUP)
     '''''''''''''''''''''
@@ -1230,27 +1205,51 @@ def check_free_times(request):
     temp_sleep_time = sleep_time
 
     for key, event_start_end in week_day_cluster.iteritems():
-        print(event_start_end)
-        try:
+
+
+        if len(event_start_end) > 0:
 
             if int(key) in min_day_start_times and int(key) in max_day_start_times:
-                print("%s overlap exists"%(key))
-                max_end = str(max_day_start_times[int(key)]).replace(' ', 'T')[0:19] + 'Z'
-                print("Max End is: %s"%(max_end))
+                wakeup_time = str(max_day_start_times[int(key)]).replace(' ', 'T')[0:19] + 'Z'
             else:
                 wakeup_time = event_start_end[0][0][0][0:11]
                 wakeup_time = wakeup_time + temp_wakeup_time + ':00Z'
 
-            for event in event_start_end:
+
+            for index, event in enumerate(event_start_end):
+                #If wakeup time is before the event start time
                 if (parse(wakeup_time) < parse(event[0][0])):
-                    free_blocks.append([wakeup_time, event_start_end[0][0][0]])
+                    # free_blocks.append([wakeup_time, event_start_end[0][0])
+                    #if (parse(wakeup_time) + datetime.timedelta(minutes=current_user_ext.travel_time) + datetime.timedelta(minutes=current_user_ext.min_task_time) < parse(event[0][0])):
+# 
+                    wakeup_time = wakeup_time.encode('utf-8')
+                    beginning_wakeup_time_comparison = event[0][0][0:11]
+                    beginning_wakeup_time_comparison += current_user_ext.wakeup_time + ':00Z'
 
-                    all_free_times[int(key)].append((wakeup_time, event[0][0]))
+                    print("parse(event[0][0]) is: %s"%(str(parse(event[0][0]))))
+                    print("Wakeup time is: %s"%(wakeup_time))
+                    print(((parse(event[0][0]) - parse(wakeup_time)).seconds)/60)
 
+                    if (((parse(event[0][0]) - parse(wakeup_time)).seconds)/60 >= (current_user_ext.min_task_time+current_user_ext.travel_time)):
+                        print("A) Free time for %s is %s to %s"%(key, str(parse(wakeup_time) + datetime.timedelta(minutes=current_user_ext.travel_time)), event[0][0]))
+                        all_free_times[int(key)].append((str(parse(wakeup_time) + datetime.timedelta(minutes=current_user_ext.travel_time)), event[0][0]))
                     break
-        except:
+            else:
 
-            print("there are no events %s for %s"%(key, event_start_end))
+                sleep_time = event_start_end[0][0][0][0:11]
+                sleep_time = sleep_time + temp_sleep_time + ':00Z'
+                print(wakeup_time)
+                print(sleep_time)
+                if (parse(wakeup_time) + datetime.timedelta(minutes=current_user_ext.min_task_time) + datetime.timedelta(minutes=current_user_ext.travel_time) >= parse(sleep_time)):
+                    print("B)Free time for %s is %s to %s"%(key, str(parse(wakeup_time) + datetime.timedelta(current_user_ext.travel_time)), str(parse(sleep_time) + datetime.timedelta(minutes=current_user_ext.travel_time))))
+                    # all_free_times[int(key)].append((wakeup_time, sleep_time))
+
+                elif (parse(wakeup_time) + datetime.timedelta(minutes=current_user_ext.min_task_time) + datetime.timedelta(minutes=current_user_ext.travel_time) < parse(sleep_time)):
+                    print("C)Free time for %s is %s to %s"%(key, str(parse(wakeup_time) + datetime.timedelta(current_user_ext.travel_time)), str(parse(sleep_time) + datetime.timedelta(minutes=current_user_ext.travel_time))))
+                    all_free_times[int(key)].append((wakeup_time, sleep_time))
+                    
+
+        else:
 
             wakeup_time = str(parse(start_week_range) + datetime.timedelta(days=int(key)))[0:11]
 
@@ -1268,14 +1267,17 @@ def check_free_times(request):
 
             sleep_time = sleep_time.replace(' ', 'T')
 
-            # day_of_the_week_conversion = int(parse(wakeup_time).weekday())
+            all_free_times[int(key)].append((wakeup_time, sleep_time))
+
+            print("Free time for %s is %s to %s"%(key, wakeup_time, sleep_time))
 
             all_free_times[int(key)].append((wakeup_time, sleep_time))
 
-            # all_free_times[int(key)].append((wakeup_time, sleep_time))
             pass
 
 
+
+    # print(week_day_cluster)
 
     '''''''''''''''''''''
     DEALING WITH N (EVENTS)
@@ -1295,42 +1297,56 @@ def check_free_times(request):
             beginning_wakeup_time_comparison = start_end[0][0][0:11]
             beginning_wakeup_time_comparison += current_user_ext.wakeup_time + ':00Z'
 
-            if (index > 0):
-                #Converting into a date object
-                event_end_time = event_start_end[index-1][0][1]
+            event_start_time = event_start_end[int(index)][0][0]
+            sleep_time = current_user_ext.sleepy_time #21:00
+            temp_sleep_time = sleep_time
+            sleep_time = event_start_time[0:11]
+            sleep_time = sleep_time + temp_sleep_time + ':00Z'
+            temp_tuple = (event_start_time, sleep_time)
 
-                #Adding the 15 minutes
-                event_end_time = parse(event_end_time) + datetime.timedelta(minutes=15)
+            print("The end time for the event is ",)
+            print(event_start_time)
 
-                #Parallel cluster algorithm (credit to fatima)
-                if (parse(start_end[0][0]) < max_end_time_for_cluster):
-                    is_parallel = True
-                    if (parse(start_end[0][1]) > max_end_time_for_cluster):
-                        max_end_time_for_cluster = parse(start_end[0][1]) + datetime.timedelta(minutes=15)
-                       
+            if (not parse(event_start_time) > parse(sleep_time)):
 
-                else:
-                    if (is_parallel):
-                        print(max_end_time_for_cluster, start_end[0][0])
-                        is_parallel = False
+                if (index > 0):
+                    #Converting into a date object
+                    event_end_time = event_start_end[index-1][0][1]
 
-                    #if backtrack time conflict events and time for event is > min_task_time+travel_time and event end time > wakeup
-                    min_start_time_for_cluster = parse(start_end[0][0])
-                    max_end_time_for_cluster = parse(start_end[0][1]) + datetime.timedelta(minutes=15)
+                    #Adding the 15 minutes
+                    event_end_time = parse(event_end_time) + datetime.timedelta(minutes=current_user_ext.travel_time)
 
-                    if (((parse(start_end[0][0]) - event_end_time).seconds)/60 >= (current_user_ext.min_task_time+current_user_ext.travel_time) and event_end_time > parse(beginning_wakeup_time_comparison)):
-                        tester = parse(start_end[0][0]) - event_end_time
+                    #Parallel cluster algorithm (credit to fatima)
+                    if (parse(start_end[0][0]) < max_end_time_for_cluster):
+                        is_parallel = True
+                        if (parse(start_end[0][1]) > max_end_time_for_cluster):
+                            max_end_time_for_cluster = parse(start_end[0][1]) + datetime.timedelta(minutes=current_user_ext.travel_time)
+                           
+                    else:
+                        if (is_parallel):
+                            is_parallel = False
 
-            elif len(event_start_end) == 1 and parse(start_end[0][0]) > parse(beginning_wakeup_time_comparison):
-                event_end_time = event_start_end[0][0][1]
-                sleep_time = current_user_ext.sleepy_time #21:00
-                temp_sleep_time = sleep_time
-                sleep_time = event_end_time[0:11]
-                sleep_time = sleep_time + temp_sleep_time + ':00Z'
-                temp_tuple = (event_end_time, sleep_time)
+                        min_start_time_for_cluster = parse(start_end[0][0])
+                        max_end_time_for_cluster = parse(start_end[0][1]) + datetime.timedelta(minutes=current_user_ext.travel_time)
 
+                        if (((parse(start_end[0][0]) - event_end_time).seconds)/60 >= (current_user_ext.min_task_time) and event_end_time >= parse(beginning_wakeup_time_comparison)):
+                            if parse(start_end[0][0]) >= event_end_time + datetime.timedelta(minutes=current_user_ext.min_task_time):
 
-    print(all_free_times)
+                                #Check if key exists inside of the dictionary
+                                if (event_end_time, str(start_end[0][0])) not in all_free_times[int(key)]:
+                                    all_free_times[int(key)].append((str(event_end_time), start_end[0][0]))
+
+                elif len(event_start_end) == 1 and parse(start_end[0][0]) > parse(beginning_wakeup_time_comparison):
+                    event_end_time = event_start_end[0][0][1]
+                    sleep_time = current_user_ext.sleepy_time #21:00
+                    temp_sleep_time = sleep_time
+                    sleep_time = event_end_time[0:11]
+                    sleep_time = sleep_time + temp_sleep_time + ':00Z'
+                    temp_tuple = (event_end_time, sleep_time)
+                    all_free_times[int(key)].append((temp_tuple))
+
+    for key, pairs in all_free_times.iteritems():
+        print("Day is: %s for task - %s"%(key, pairs))
 
     '''''''''''''''''''''
     DEALING WITH K (BEDTIME)
@@ -1356,10 +1372,10 @@ def check_free_times(request):
             #Convert to date time object
             current_day_end_time = parse(sorted(end_time_data)[len(end_time_data)-1])
 
-            #Printing data THAT SHOULD BE CONVERTED TO THE APPENDING DATA
+            ##Printing data THAT SHOULD BE CONVERTED TO THE APPENDING DATA
             if (current_day_end_time + datetime.timedelta(minutes=current_user_ext.min_task_time) + datetime.timedelta(minutes=current_user_ext.travel_time) <= parse(temp_bed_time)):
                 current_day_end_time += datetime.timedelta(minutes=current_user_ext.travel_time)
-                print(current_day_end_time, temp_bed_time)
+               # print(current_day_end_time, temp_bed_time)
 
         #Entire day is free
         else:
@@ -1369,8 +1385,13 @@ def check_free_times(request):
             sleepy_time = days_in_current_week[int(key)][0:10]
             sleepy_time += "T%s:00Z"%(current_user_ext.sleepy_time)
 
-            print("The day %s has free time from %s to %s"%(key, wakeup_time, sleepy_time))
+           # print("The day %s has free time from %s to %s"%(key, wakeup_time, sleepy_time))
 
     # print(week_day_cluster['6'])
+
+
+    '''
+    We need to build a caluclation algorithm that can cluster and update the DB for each task
+    '''
 
     return HttpResponse("The user has been queried successfully!")
