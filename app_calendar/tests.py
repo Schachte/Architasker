@@ -4,17 +4,11 @@ from django.test import TestCase
 #This function is going to test that the priority and cluster for the percentile range is accurate
 class Test_PrioritizationAndClusteringTestCase(TestCase):
 	#List of 3 nested lists to represent the data structure of range percentiles
-
-	#Data[0] representing the range of data in the low %
-	#Data[2] representing the range of data in the high %
-
 	overall_data=[[], [], []]
-
 	'''
 		Formula:
  		PR% = L + ( 0.5 x S ) / N   Where, L = Number of below rank, S = Number of same rank, N = Total numbers.
 	'''
-
 	#Testing the percentile information here
 	all_data = [1, 6, 1.5, 9, 10, 5.66, 4.33, 3, 1.5]
 
