@@ -58,7 +58,8 @@ urlpatterns = [
     url(r'^setup_processor$', get_setup_module_post_data, name='get_setup_module_post_data'), #Process the POST data that is submitted by the fomr for the user
     url(r'^setup_redirector$', setup_redirector, name='setup_redirector'),
     url(r'^persist_timezone_ajax', ajax_user_timezone, name='ajax_user_timezone'),
-    url(r'^clear_google_tasks', clear_google_tasks, name='clear_google_tasks')
+    url(r'^clear_google_tasks', clear_google_tasks, name='clear_google_tasks'),
+    url(r'^free', check_free_times, name='check_free_times')
 
 ]
 
