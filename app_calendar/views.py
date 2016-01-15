@@ -1024,13 +1024,6 @@ def get_current_week_range(request):
 
     return time_range
 
-#Convert string output of a parse object into a regular object
-def convert_parse_time(initial_time):
-
-    #Convert to regular time
-    if ('+' in initial_time):
-        print("do this later")
-
 def parse_conversions(initial_date):
     if '+' in initial_date:
         initial_date = initial_date.replace(' ', 'T')
@@ -1234,7 +1227,15 @@ def check_free_times(request):
 
                     if (((parse(event[0][0]) - parse(wakeup_time)).seconds)/60 >= (current_user_ext.min_task_time+current_user_ext.travel_time)):
                         print("A) Free time for %s is %s to %s"%(key, str(parse(wakeup_time) + datetime.timedelta(minutes=current_user_ext.travel_time)), event[0][0]))
-                        all_free_times[int(key)].append((str(parse(wakeup_time) + datetime.timedelta(minutes=current_user_ext.travel_time)), event[0][0]))
+
+                        wakeup_time = str(parse(wakeup_time) + datetime.timedelta(minutes=current_user_ext.travel_time))
+                        sleep_time = event[0][0]
+                        wakeup_time = parse_conversions(wakeup_time)
+                        sleep_time = parse_conversions(wakeup_time)
+                        wakeup_time = wakeup_time.encode('utf-8')
+                        sleep_time = sleep_time.encode('utf-8')
+                        all_free_times[int(key)].append((wakeup_time, sleep_time))
+
                     break
             else:
 
@@ -1248,6 +1249,11 @@ def check_free_times(request):
 
                 elif (parse(wakeup_time) + datetime.timedelta(minutes=current_user_ext.min_task_time) + datetime.timedelta(minutes=current_user_ext.travel_time) < parse(sleep_time)):
                     print("C)Free time for %s is %s to %s"%(key, str(parse(wakeup_time) + datetime.timedelta(current_user_ext.travel_time)), str(parse(sleep_time) + datetime.timedelta(minutes=current_user_ext.travel_time))))
+                    
+                    wakeup_time = parse_conversions(wakeup_time)
+                    sleep_time = parse_conversions(wakeup_time)
+                    wakeup_time = wakeup_time.encode('utf-8')
+                    sleep_time = sleep_time.encode('utf-8')
                     all_free_times[int(key)].append((wakeup_time, sleep_time))
                     
 
@@ -1271,9 +1277,8 @@ def check_free_times(request):
 
             sleep_time = sleep_time.replace(' ', 'T')
 
-            all_free_times[int(key)].append((wakeup_time, sleep_time))
-
-            print("Free time for %s is %s to %s"%(key, wakeup_time, sleep_time))
+            wakeup_time = wakeup_time.encode('utf-8')
+            sleep_time = sleep_time.encode('utf-8')
 
             all_free_times[int(key)].append((wakeup_time, sleep_time))
 
@@ -1339,7 +1344,16 @@ def check_free_times(request):
 
                                 #Check if key exists inside of the dictionary
                                 if (event_end_time, str(start_end[0][0])) not in all_free_times[int(key)]:
-                                    all_free_times[int(key)].append((str(event_end_time), start_end[0][0]))
+                                    wakeup_time = str(event_end_time)
+                                    wakeup_time = wakeup_time.encode('utf-8')
+                                    sleep_time = start_end[0][0]
+                                    sleep_time = sleep_time.encode('utf-8')
+
+                                    wakeup_time = parse_conversions(wakeup_time)
+                                    sleep_time = parse_conversions(sleep_time)
+
+                                    all_free_times[int(key)].append((wakeup_time, sleep_time))
+
 
                 elif len(event_start_end) == 1 and parse(start_end[0][0]) > parse(beginning_wakeup_time_comparison):
                     event_end_time = event_start_end[0][0][1]
@@ -1347,6 +1361,8 @@ def check_free_times(request):
                     temp_sleep_time = sleep_time
                     sleep_time = event_end_time[0:11]
                     sleep_time = sleep_time + temp_sleep_time + ':00Z'
+                    event_end_time = event_end_time.encode('utf-8')
+                    sleep_time = sleep_time.encode('utf-8')
                     temp_tuple = (event_end_time, sleep_time)
                     all_free_times[int(key)].append((temp_tuple))
 
@@ -1385,6 +1401,11 @@ def check_free_times(request):
                 current_day_end_time += datetime.timedelta(minutes=current_user_ext.travel_time)
                 print("(%s, %s)"%(str(current_day_end_time), temp_bed_time))
                 try:
+                    current_day_end_time = parse_conversions(str(current_day_end_time))
+                    current_day_end_time = current_day_end_time.encode('utf-8')
+
+                    temp_bed_time = parse_conversions(temp_bed_time)
+                    temp_bed_time = temp_bed_time.encode('utf-8')
                     all_free_times[int(key)].append((str(current_day_end_time)), temp_bed_time)
                 except:
                     pass
@@ -1398,6 +1419,12 @@ def check_free_times(request):
             sleepy_time += "T%s:00Z"%(current_user_ext.sleepy_time)
 
             try:
+                wakeup_time = parse_conversions(wakeup_time)
+                sleepy_time = parse_conversions(sleepy_time)
+
+                wakeup_time = wakeup_time.encode('utf-8')
+                sleepy_time = sleepy_time.encode('utf-8')
+                
                 all_free_times[int(key)].append((wakeup_time, sleepy_time))
             except:
                 pass
@@ -1412,7 +1439,7 @@ def check_free_times(request):
     #         for each_data_point in each_tuple:
     #             each_date_point = parse_conversions(each_data_point)
 
-    # print(all_free_times)
+    print(all_free_times)
 
 
     '''
