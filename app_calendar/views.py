@@ -1231,7 +1231,7 @@ def check_free_times(request):
                         wakeup_time = str(parse(wakeup_time) + datetime.timedelta(minutes=current_user_ext.travel_time))
                         sleep_time = event[0][0]
                         wakeup_time = parse_conversions(wakeup_time)
-                        sleep_time = parse_conversions(wakeup_time)
+                        sleep_time = parse_conversions(sleep_time)
                         wakeup_time = wakeup_time.encode('utf-8')
                         sleep_time = sleep_time.encode('utf-8')
                         all_free_times[int(key)].append((wakeup_time, sleep_time))
@@ -1251,7 +1251,7 @@ def check_free_times(request):
                     print("C)Free time for %s is %s to %s"%(key, str(parse(wakeup_time) + datetime.timedelta(current_user_ext.travel_time)), str(parse(sleep_time) + datetime.timedelta(minutes=current_user_ext.travel_time))))
                     
                     wakeup_time = parse_conversions(wakeup_time)
-                    sleep_time = parse_conversions(wakeup_time)
+                    sleep_time = parse_conversions(sleep_time)
                     wakeup_time = wakeup_time.encode('utf-8')
                     sleep_time = sleep_time.encode('utf-8')
                     all_free_times[int(key)].append((wakeup_time, sleep_time))
@@ -1285,9 +1285,6 @@ def check_free_times(request):
             print("SUCCESS APPENDED FOR %s"%(key))
 
             print(all_free_times)
-
-
-    # print(week_day_cluster)
 
     '''''''''''''''''''''
     DEALING WITH N (EVENTS)
@@ -1421,25 +1418,22 @@ def check_free_times(request):
             try:
                 wakeup_time = parse_conversions(wakeup_time)
                 sleepy_time = parse_conversions(sleepy_time)
-
                 wakeup_time = wakeup_time.encode('utf-8')
                 sleepy_time = sleepy_time.encode('utf-8')
-                
                 all_free_times[int(key)].append((wakeup_time, sleepy_time))
             except:
                 pass
 
+    final_free_time_tuples = []
 
-    # all_free_times = convert(all_free_times)
+    for each_list in all_free_times.iteritems():
+        for each_tuple in each_list[1]:
+            if (not each_tuple in final_free_time_tuples):
+                final_free_time_tuples.append(each_tuple)
 
-    # # time_conversion_data = all_free_times
-
-    # for each_list in all_free_times.iteritems():
-    #     for each_tuple in each_list[1]:
-    #         for each_data_point in each_tuple:
-    #             each_date_point = parse_conversions(each_data_point)
-
-    print(all_free_times)
+    for data in final_free_time_tuples:
+        print(data)
+    # print(all_free_times)
 
 
     '''
