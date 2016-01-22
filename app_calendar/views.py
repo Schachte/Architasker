@@ -1215,7 +1215,7 @@ def check_free_times(request):
                 #If wakeup time is before the event start time
                 if (parse(wakeup_time) < parse(event[0][0])):
                     # free_blocks.append([wakeup_time, event_start_end[0][0])
-                    #if (parse(wakeup_time) + datetime.timedelta(minutes=current_user_ext.travel_time) + datetime.timedelta(minutes=current_user_ext.min_task_time) < parse(event[0][0])):
+                    #if (parse(wakeup_time) + datetime.timedelta(minutes=current_user_ext.min_task_time) < parse(event[0][0])):
 # 
                     wakeup_time = wakeup_time.encode('utf-8')
                     beginning_wakeup_time_comparison = event[0][0][0:11]
@@ -1225,10 +1225,10 @@ def check_free_times(request):
                     print("Wakeup time is: %s"%(wakeup_time))
                     print(((parse(event[0][0]) - parse(wakeup_time)).seconds)/60)
 
-                    if (((parse(event[0][0]) - parse(wakeup_time)).seconds)/60 >= (current_user_ext.min_task_time+current_user_ext.travel_time)):
-                        print("A) Free time for %s is %s to %s"%(key, str(parse(wakeup_time) + datetime.timedelta(minutes=current_user_ext.travel_time)), event[0][0]))
+                    if (((parse(event[0][0]) - parse(wakeup_time)).seconds)/60 >= (current_user_ext.min_task_time)):
+                        print("A) Free time for %s is %s to %s"%(key, str(parse(wakeup_time)), event[0][0]))
 
-                        wakeup_time = str(parse(wakeup_time) + datetime.timedelta(minutes=current_user_ext.travel_time))
+                        wakeup_time = str(parse(wakeup_time))
                         sleep_time = event[0][0]
                         wakeup_time = parse_conversions(wakeup_time)
                         sleep_time = parse_conversions(sleep_time)
@@ -1243,12 +1243,12 @@ def check_free_times(request):
                 sleep_time = sleep_time + temp_sleep_time + ':00Z'
                 print(wakeup_time)
                 print(sleep_time)
-                if (parse(wakeup_time) + datetime.timedelta(minutes=current_user_ext.min_task_time) + datetime.timedelta(minutes=current_user_ext.travel_time) >= parse(sleep_time)):
-                    print("B)Free time for %s is %s to %s"%(key, str(parse(wakeup_time) + datetime.timedelta(current_user_ext.travel_time)), str(parse(sleep_time) + datetime.timedelta(minutes=current_user_ext.travel_time))))
+                if (parse(wakeup_time) + datetime.timedelta(minutes=current_user_ext.min_task_time) >= parse(sleep_time)):
+                    print("B)Free time for %s is %s to %s"%(key, str(parse(wakeup_time))), str(parse(sleep_time)))
                     # all_free_times[int(key)].append((wakeup_time, sleep_time))
 
-                elif (parse(wakeup_time) + datetime.timedelta(minutes=current_user_ext.min_task_time) + datetime.timedelta(minutes=current_user_ext.travel_time) < parse(sleep_time)):
-                    print("C)Free time for %s is %s to %s"%(key, str(parse(wakeup_time) + datetime.timedelta(current_user_ext.travel_time)), str(parse(sleep_time) + datetime.timedelta(minutes=current_user_ext.travel_time))))
+                elif (parse(wakeup_time) + datetime.timedelta(minutes=current_user_ext.min_task_time) < parse(sleep_time)):
+                    print("C)Free time for %s is %s to %s"%(key, str(parse(wakeup_time))), str(parse(sleep_time)))
                     
                     wakeup_time = parse_conversions(wakeup_time)
                     sleep_time = parse_conversions(sleep_time)
@@ -1321,20 +1321,20 @@ def check_free_times(request):
                     event_end_time = event_start_end[index-1][0][1]
 
                     #Adding the 15 minutes
-                    event_end_time = parse(event_end_time) + datetime.timedelta(minutes=current_user_ext.travel_time)
+                    event_end_time = parse(event_end_time)
 
                     #Parallel cluster algorithm (credit to fatima)
                     if (parse(start_end[0][0]) < max_end_time_for_cluster):
                         is_parallel = True
                         if (parse(start_end[0][1]) > max_end_time_for_cluster):
-                            max_end_time_for_cluster = parse(start_end[0][1]) + datetime.timedelta(minutes=current_user_ext.travel_time)
+                            max_end_time_for_cluster = parse(start_end[0][1])
                            
                     else:
                         if (is_parallel):
                             is_parallel = False
 
                         min_start_time_for_cluster = parse(start_end[0][0])
-                        max_end_time_for_cluster = parse(start_end[0][1]) + datetime.timedelta(minutes=current_user_ext.travel_time)
+                        max_end_time_for_cluster = parse(start_end[0][1])
 
                         if (((parse(start_end[0][0]) - event_end_time).seconds)/60 >= (current_user_ext.min_task_time) and event_end_time >= parse(beginning_wakeup_time_comparison)):
                             if parse(start_end[0][0]) >= event_end_time + datetime.timedelta(minutes=current_user_ext.min_task_time):
@@ -1373,39 +1373,58 @@ def check_free_times(request):
     '''''''''''''''''''''
     #Loop through the end times for all the week day clustered data sets
     for key, event_start_end in week_day_cluster.iteritems():
-
         #List to hold all the end-times before sorting
         end_time_data = []
 
         #If the association in the dictionary has information, then continue
         if (len(event_start_end) > 0):
+            temp_bed_time = event_start_end[0][0][1][0:11] + current_user_ext.sleepy_time + ":00Z" 
+            temp_bed_time = parse(temp_bed_time)
+
 
             #add each end time
             for each_list_tuple in event_start_end:
+
+                if (parse(each_list_tuple[0][1]) > temp_bed_time and parse(each_list_tuple[0][0]) > temp_bed_time):
+                    continue
                 end_time_data.append(each_list_tuple[0][1])
 
             #Sort and string format the data
             temp_bed_time = sorted(end_time_data)[len(end_time_data)-1][0:11]
             temp_bed_time += current_user_ext.sleepy_time + ":00Z"
 
+            #Reverse back in the list of end times until you hit the first end time that is less than the users bedtime
+
+            #Converting bed time to date for comparisons
+            parsed_temp_bed_time = parse(temp_bed_time)
+
             #Convert to date time object
             current_day_end_time = parse(sorted(end_time_data)[len(end_time_data)-1])
 
-            ##Printing data THAT SHOULD BE CONVERTED TO THE APPENDING DATA
+            #Printing data THAT SHOULD BE CONVERTED TO THE APPENDING DATA
             print("The temp bed time is %s"%(temp_bed_time))
             print("The current day time end is %s"%(current_day_end_time))
-            if (current_day_end_time + datetime.timedelta(minutes=current_user_ext.min_task_time) + datetime.timedelta(minutes=current_user_ext.travel_time) <= parse(temp_bed_time)):
-                current_day_end_time += datetime.timedelta(minutes=current_user_ext.travel_time)
-                print("(%s, %s)"%(str(current_day_end_time), temp_bed_time))
+            if (current_day_end_time + datetime.timedelta(minutes=current_user_ext.min_task_time) <= parse(temp_bed_time)):
+                # current_day_end_time += datetime.timedelta(minutes=current_user_ext.travel_time)
+                # print("(%s, %s)"%(str(current_day_end_time), temp_bed_time))
                 try:
                     current_day_end_time = parse_conversions(str(current_day_end_time))
                     current_day_end_time = current_day_end_time.encode('utf-8')
-
                     temp_bed_time = parse_conversions(temp_bed_time)
                     temp_bed_time = temp_bed_time.encode('utf-8')
-                    all_free_times[int(key)].append((str(current_day_end_time)), temp_bed_time)
+                    all_free_times[int(key)].append((str(current_day_end_time), temp_bed_time))
                 except:
+                    print("WE HAVE HIT THE EXCEP BLOCK!")
                     pass
+            # else:
+            #     current_day_end_time = ''
+
+            #     for task_end_times in reversed(end_time_data):
+            #         if (parse(task_end_times) < parsed_temp_bed_time):
+            #             print("reversal data: %s"%(task_end_times))
+            #             current_day_end_time = parse(task_end_times)
+            #             all_free_times[int(key)].append((str(current_day_end_time), temp_bed_time))
+            #             break
 
         #Entire day is free
         else:
