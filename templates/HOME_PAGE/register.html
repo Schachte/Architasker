@@ -5,13 +5,28 @@
 
 {% block head_extras %}
 <link href="{% static 'login_css/style.css' %}" rel="stylesheet">
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+<script src="{% static 'js/jquery-1.10.2.js' %}"></script>
+<script src="{% static 'datepicker/jquery-ui.js' %}"></script>
+<!-- {% include 'javascript.html' %} -->
+<!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script> -->
 
 <style>
     #error_msg{
         color: #c0392b;
     }
 </style>
+
+<script>
+    $(function() {
+        $( "#datepicker" ).datepicker({
+            showAnim: "blind",
+            duration: "slow",
+            yearRange: "-100:+0",
+            changeMonth: true,
+            changeYear: true
+        });
+    });
+</script>
 
 {% endblock %}
 
@@ -36,6 +51,10 @@
           <label for="last_name">Last Name</label>
           <br/>
           <input type="text" id="last_name"  name="last_name">
+          <br/>
+          <label for="datepicker">Date of Birth</label>
+          <br/>
+          <input type="text" id="datepicker" name="dob">
           <br/>
     		<label for="username">Username</label>
     		<br/>
@@ -64,6 +83,14 @@
 
 <script>
 
+$(function() {
+    $( "#datepicker" ).datepicker({
+        minDate: 0,
+        showAnim: "blind",
+        duration: "slow"
+    });
+});
+
 $(document).ready(function() {
     console.log("submitting");
   $( "#submitter" ).click(function() {
@@ -74,6 +101,7 @@ $(document).ready(function() {
     var user_email = $('#email').val();
     var pass_word = $('#password').val();
     var pass_word2 = $('#password2').val();
+    var dob = $('#datepicker').val();
 
     $('.ajaxProgress').show();
     $.ajax({
@@ -87,7 +115,8 @@ $(document).ready(function() {
             user_name: user_name,
             user_email: user_email,
             pass_word: pass_word,
-            pass_word2: pass_word2
+            pass_word2: pass_word2,
+            dob: dob
         },
 
         success: function(response){
@@ -105,6 +134,8 @@ $(document).ready(function() {
 
   })
 })
+
+
 
 </script>
 

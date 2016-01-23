@@ -69,6 +69,11 @@ def processor_register(request):
                 data = {}
                 data['return_error'] = 'Last Name is Missing!'
                 return HttpResponse(json.dumps(data), content_type = "application/json")
+        if 'dob' in request.POST:
+            if request.POST.get('dob') == '':
+                data = {}
+                data['return_error'] = 'Date of Birth is Missing!'
+                return HttpResponse(json.dumps(data), content_type = "application/json")
         if 'user_name' in request.POST:
             if request.POST.get('user_name') == '':
                 data = {}
@@ -127,7 +132,8 @@ def processor_register(request):
         new_user.save()
 
         new_user_extended = UserExtended.objects.create(
-            authenticated_user = new_user
+            authenticated_user = new_user,
+            dob = request.POST.get('dob'),
         )
         new_user_extended.save()
 

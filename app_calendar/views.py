@@ -1023,4 +1023,3 @@ def get_current_week_range(request):
 
     return time_range
 
-

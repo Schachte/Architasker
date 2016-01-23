@@ -471,6 +471,7 @@ class UserExtended(models.Model):
     		('Arctic/Longyearbyen','Longyearbyen'),
     	)
     authenticated_user = models.ForeignKey(User, unique=False, null=False, default=None)
+    dob = models.CharField(max_length=255, default='None')
     # dob = models.DateField(default=None, null=True)
     time_zone = models.CharField(max_length=255, choices=TIME_ZONE_CHOICES, default='None')
     google_auth = models.BooleanField(default=False, unique=False)
