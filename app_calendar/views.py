@@ -1394,7 +1394,6 @@ def check_free_times(request):
             temp_bed_time += current_user_ext.sleepy_time + ":00Z"
 
             #Reverse back in the list of end times until you hit the first end time that is less than the users bedtime
-
             #Converting bed time to date for comparisons
             parsed_temp_bed_time = parse(temp_bed_time)
 
@@ -1430,7 +1429,6 @@ def check_free_times(request):
         else:
             wakeup_time = days_in_current_week[int(key)][0:10]
             wakeup_time += "T%s:00Z"%(current_user_ext.wakeup_time)
-
             sleepy_time = days_in_current_week[int(key)][0:10]
             sleepy_time += "T%s:00Z"%(current_user_ext.sleepy_time)
 
@@ -1444,7 +1442,6 @@ def check_free_times(request):
                 pass
 
     final_free_time_tuples = []
-
     for each_list in all_free_times.iteritems():
         for each_tuple in each_list[1]:
             if (not each_tuple in final_free_time_tuples):
@@ -1453,8 +1450,6 @@ def check_free_times(request):
     for data in final_free_time_tuples:
         print(data)
     # print(all_free_times)
-
-
     '''
     We need to build a caluclation algorithm that can cluster and update the DB for each task
     '''
