@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.db import models
 from django.contrib.auth.models import User
 from procrastinate.models import *
-
+from django.core.validators import MaxValueValidator, MinValueValidator
 # Create your models here.
 
 class UserExtended(models.Model):
@@ -471,6 +471,7 @@ class UserExtended(models.Model):
     		('Arctic/Longyearbyen','Longyearbyen'),
     	)
     authenticated_user = models.ForeignKey(User, unique=False, null=False, default=None)
+    dob = models.CharField(max_length=255, default='None')
     # dob = models.DateField(default=None, null=True)
     time_zone = models.CharField(max_length=255, choices=TIME_ZONE_CHOICES, default='None')
     google_auth = models.BooleanField(default=False, unique=False)
@@ -478,3 +479,5 @@ class UserExtended(models.Model):
     initial_setup_complete = models.BooleanField(default=False, unique=False)
     wakeup_time = models.CharField(max_length=255, default='None')
     sleepy_time = models.CharField(max_length=255, default='None')
+    min_task_time = models.IntegerField(default=20, validators=[MaxValueValidator(60), MinValueValidator(10)])
+    travel_time = models.IntegerField(default=15, validators=[MaxValueValidator(60), MinValueValidator(0)]) #Validate a max travel time
