@@ -10,7 +10,7 @@ class UserTask(models.Model):
 	day_num = models.IntegerField(default=0)
 	percent_to_complete = models.IntegerField(default=0)
 	estimated_time = models.DecimalField(max_digits=6, decimal_places=3, default=0.0)
-	priority = models.IntegerField(default=0)
+	difficulty = models.IntegerField(default=0)
 	continuous = models.BooleanField(default=False, unique=False)
 	pomodoro = models.BooleanField(default=False, unique=False)
 	todo = models.CharField(max_length=500, unique=False, default='None')
@@ -18,6 +18,9 @@ class UserTask(models.Model):
 	url = models.CharField(max_length=255, default='None')
 	location = models.CharField(max_length=255, default='None')
 	comments = models.CharField(max_length=800, default='None')
+	priority = models.IntegerField(default=0)
+	percentile = models.IntegerField(default=0)
+
 
 
 #create to do model, ajax call to store everything. w/ char field and foreign key (pk) ... crossed off, deleted, etc states need to be stored
