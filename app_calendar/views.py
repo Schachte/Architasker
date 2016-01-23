@@ -1395,3 +1395,5 @@ def check_free_times(request):
     '''
 
     return HttpResponse("The user has been queried successfully!")
+
+
