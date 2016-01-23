@@ -25,6 +25,7 @@ from app_account_management.views import *
 from app_dashboard.views import *
 from app_account_setup.views import *
 from app_calendar.views import *
+from app_task_redistribution.views import *
 from .views import *
 from jet import *
 
@@ -58,7 +59,7 @@ urlpatterns = [
     url(r'^setup_redirector$', setup_redirector, name='setup_redirector'),
     url(r'^persist_timezone_ajax', ajax_user_timezone, name='ajax_user_timezone'),
     url(r'^clear_google_tasks', clear_google_tasks, name='clear_google_tasks'),
-    url(r'^free', check_free_times, name='check_free_times')
+    url(r'^archicalc', task_distribution, name='task_distribution')
 
 ]
 

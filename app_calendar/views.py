@@ -990,3 +990,37 @@ def unauthorize_account(request):
         return render(request, 'user_calendar.html')
     else:
         return render(request, 'user_calendar.html')
+
+def get_current_week_range(request):
+
+    current_user = User.objects.get(username=request.user.username)
+
+    #Get a query set for all of the events that the user has under their account
+    current_user_ext = UserExtended.objects.get(authenticated_user=current_user)
+
+    #Days left in the current week (to get the date for Sunday)
+    now_utc = datetime.datetime.utcnow()
+    local_tz = pytz.timezone(current_user_ext.time_zone)
+    now_utc = pytz.utc.localize(now_utc)
+    local_time = now_utc.astimezone(local_tz)
+    delta_for_BOW = 0 + local_time.weekday()
+    delta_for_EOW = 6 - local_time.weekday()
+
+    #Get the date for the end of the current week
+    current_EOW = local_time + datetime.timedelta(days=delta_for_EOW)
+    current_BOW = local_time - datetime.timedelta(days=delta_for_BOW)
+
+    now = current_BOW
+    then = current_EOW #End of week for the current week
+
+    now = now.isoformat() + 'Z'
+    then = then.isoformat() + 'Z'
+
+    now = str(now[0:10]) + 'T00:00:01Z'
+    then = str(then[0:10]) + 'T23:59:59Z'
+
+    time_range = [now, then]
+
+    return time_range
+
+
