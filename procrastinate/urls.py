@@ -43,6 +43,7 @@ urlpatterns = [
     url(r'^delete_event/', 'app_calendar.views.delete_event', name="delete_event"),                  #Delete event task AJAX URl
     url(r'^update_event/', 'app_calendar.views.update_event', name="update_event"),                  #Update event task AJAX URl
     url(r'^create_task/', 'app_tasks.views.create_task', name="create_task"),
+    url(r'^prioritize_and_cluster/', 'app_tasks.views.prioritize_and_cluster', name="create_task"),
     url(r'^login', login_render, name="login_render"),                          #Login template render page
     url(r'^register$', register_view, name="register_view"),
     url(r'^registermein', processor_register, name="processor_register"),
@@ -60,6 +61,7 @@ urlpatterns = [
     url(r'^persist_timezone_ajax', ajax_user_timezone, name='ajax_user_timezone'),
     url(r'^clear_google_tasks', clear_google_tasks, name='clear_google_tasks'),
     url(r'^free', check_free_times, name='check_free_times')
+
 
 ]
 
