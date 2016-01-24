@@ -1080,7 +1080,7 @@
 <!-- 											    <input id="location" name="location" type="text" placeholder="Primary address this location will be completed in."> -->
 
 											    <div id="locationField">
-										      	<input id="autocomplete" placeholder="Enter your address"
+										      	<input id="autocomplete" name="location" placeholder="Enter your address"
 										             onFocus="geolocate()" type="text"></input>
 										    	</div>
 
@@ -1414,8 +1414,8 @@
                 	url = document.getElementById("url").value;
                 }
 
-                if (!(document.getElementById("location").value === "")) {
-                	location_of_task = document.getElementById("location").value;
+                if (!(document.getElementById("autocomplete").value === "")) {
+                	location_of_task = document.getElementById("autocomplete").value;
                 }
 
                 if (!(document.getElementById("comment").value === "")) {
