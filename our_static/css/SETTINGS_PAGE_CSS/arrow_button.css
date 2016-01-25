@@ -144,3 +144,28 @@ h1 {
   text-align: center;
 }
 
+.dropdown-content {
+    background-color: #f9f9f9;
+    min-width: 180px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    padding: 10px;
+    max-height:190px;
+    overflow-y:auto;
+    overflow-x:hidden;
+    display: inline-block;
+}
+
+.dropdown-content li {
+    color: black;
+    text-decoration: none;
+    display: block;
+}
+
+.dropdown-content li:hover {
+  cursor: pointer;
+  background-color: #f1f1f1;
+}
+
+.dropdown-content li.selected {
+  background-color: #006600;
+}
