@@ -56,7 +56,6 @@ FLOW = flow_from_clientsecrets(
     redirect_uri='http://127.0.0.1:8000/oauth2callback')
 
 
-
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 Function to convert unicode dictionaries into str dictionaries
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
