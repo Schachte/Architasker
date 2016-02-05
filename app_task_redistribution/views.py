@@ -337,7 +337,7 @@ def task_distribution(request):
 
 			min_day_start_times[int(key)] = (str(temp_min[0]))
 			max_day_start_times[int(key)] = (str(temp_max[len(temp_max)-1]))
-
+			
 		except:
 			pass
 

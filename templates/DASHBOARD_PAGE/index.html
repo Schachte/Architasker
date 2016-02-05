@@ -1080,7 +1080,7 @@
 <!-- 											    <input id="location" name="location" type="text" placeholder="Primary address this location will be completed in."> -->
 
 											    <div id="locationField">
-										      	<input id="autocomplete" name="location" placeholder="Enter your address"
+										      	<input id="autocomplete" name="autocomplete" placeholder="Enter your address"
 										             onFocus="geolocate()" type="text"></input>
 										    	</div>
 
@@ -1091,11 +1091,11 @@
 												  <dt><a href="javascript:void(0);"><span>Select Transit Mode</span></a></dt>
 												  <dd>
 												    <ul style="display: none;">
-												      <li><a href="javascript:void(0);"><img src="http://i.imgur.com/Ck4NVPl.png"><span style="background-position:0px -1694px"></span><span>Driving</span></a></li>
-												      <li><a href="javascript:void(0);"><img src="http://i.imgur.com/mDRDTU7.png"><span style="background-position:0px -1694px"></span><span>Bicycling</span></a></li>
-												      <li><a href="javascript:void(0);"><img src="http://i.imgur.com/dEeQtBH.png"><span style="background-position:0px -1694px"></span><span>Walking</span></a></li>
-
+												      <li><a href="javascript:void(0);" onclick=fill_transit('0');><img src="http://i.imgur.com/Ck4NVPl.png"><span style="background-position:0px -1694px"></span><span>Driving</span></a></li>
+												      <li><a href="javascript:void(0);" onclick=fill_transit('1');><img src="http://i.imgur.com/mDRDTU7.png"><span style="background-position:0px -1694px"></span><span>Bicycling</span></a></li>
+												      <li><a href="javascript:void(0);" onclick=fill_transit('2');><img src="http://i.imgur.com/dEeQtBH.png"><span style="background-position:0px -1694px"></span><span>Walking</span></a></li>
 												    </ul>
+
 												  </dd>
 												</dl>
 												</div>
@@ -1253,6 +1253,7 @@
                 </p>
             </div>
         </footer>
+        <input type="hidden" id="hidden_transit"></input>
 
     </div>
 </div>
@@ -1449,8 +1450,6 @@
                 console.log("Comment:" + comment);
                 console.log(Date.parse("next" + document.getElementById('task_day_of_week').value));
 
-
-
                 var succeed = false;
 
                 $('.ajaxProgress').show();
@@ -1468,10 +1467,11 @@
 						task_continuous: document.getElementById("continuous-2").checked,
 						task_pomodoro: document.getElementById("pomodoro-2").checked,
 						task_url: url,
-						task_location: location_of_task,
+						task_location: document.getElementById("autocomplete").value,
 						task_comments: comment,
 						task_day_date: task_day_date,
-						task_day_num: Date.getDayNumberFromName(document.getElementById('task_day_of_week').value) 
+						task_day_num: Date.getDayNumberFromName(document.getElementById('task_day_of_week').value),
+						task_transit_mode: document.getElementById("hidden_transit").text
 					},
 					success: function() {
 						succeed = true;
@@ -1720,6 +1720,11 @@ function geolocate() {
   }
 }
 
+function fill_transit(trans_type) {
+
+	trans_text = document.getElementById("hidden_transit");
+	trans_text.text = trans_type;
+}
 
 
 	</script>
