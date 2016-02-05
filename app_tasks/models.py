@@ -28,6 +28,12 @@ class UserTask(models.Model):
 	percentile = models.IntegerField(default=0)
 	transit_mode = models.IntegerField(choices=TRANSIT_CHOICES, default=1)
 
+class BreakdownUserTask(models.Model):
+	parent_task = models.ForeignKey(UserTask, unique=False, null=False, default=None)
+	# task_name = models.ForeignKey(UserTask.task_name, unique=False, null=False, default=None)
+
+
+
 
 
 #create to do model, ajax call to store everything. w/ char field and foreign key (pk) ... crossed off, deleted, etc states need to be stored

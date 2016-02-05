@@ -7,3 +7,4 @@ class UserTaskAdmin(admin.ModelAdmin):
   list_display = ['authenticated_user', 'task_name',]
 
 admin.site.register(UserTask,UserTaskAdmin)
+admin.site.register(BreakdownUserTask)
