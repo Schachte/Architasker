@@ -594,8 +594,34 @@ def task_distribution(request):
 |___/___\___|___|_|\_| |_| |_|_\___|___| |___/____\___/ \___|_|\_\___/
                                                                       
 		''')
+
+	#Take all the data in this list and convert it to a tuple
+	mon 	= []
+	tues 	= []
+	wed 	= []
+	thurs 	= []
+	fri 	= []
+	sat 	= []
+	sun 	= []
+
 	for data in final_free_time_tuples:
-		print(data)
+		print(parse(data[0]).weekday())
+		if (parse(data[0]).weekday() == 0):
+			mon.append(data)
+		elif (parse(data[0]).weekday() == 1):
+			tues.append(data)
+		elif (parse(data[0]).weekday() == 2):
+			wed.append(data)
+		elif (parse(data[0]).weekday() == 3):
+			thurs.append(data)
+		elif (parse(data[0]).weekday() == 4):
+			fri.append(data)
+		elif (parse(data[0]).weekday() == 5):
+			sat.append(data)
+		elif (parse(data[0]).weekday() == 6):
+			sun.append(data)
+
+	dictionary_free_blocks = {'0': mon, '1': tues, '2': wed, '3': thurs, '4': fri, '5':sat, '6': sun}
 
 	print('''
  ___ _  _ ___    ___ ___ ___ ___   ___ _    ___   ___ _  _____ 
