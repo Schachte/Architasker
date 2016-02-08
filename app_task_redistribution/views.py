@@ -633,7 +633,8 @@ def task_distribution(request):
 
 	#shouldn't the tuples be returned
 	#return dictionary instead of list
-	return HttpResponse("The user has been queried successfully!")
+	# return HttpResponse("The user has been queried successfully!")
+	return dictionary_free_blocks
 
 
 
@@ -727,7 +728,7 @@ def prioritize_and_cluster(request):
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 Calculate number of free hours available per day
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-def free_hours_per_day():
+def free_hours_per_day(request):
 
 	#what is this even doing?! ... it's not returning anything, right?! ... fix with Ryan
 	# free_time_blocks = task_distribution(request)
@@ -735,15 +736,18 @@ def free_hours_per_day():
 	# 	print(data)
 
 		#what if key is empty and there is no free time for day....take that into consideration
-	free_time_blocks = {
-    	0: [('2016-01-25T07:00:00Z', '2016-01-25T14:00:00Z'), ('2016-01-25T15:00:00Z', '2016-01-25T17:05:00Z'), ('2016-01-25T19:50:00Z', '2016-01-25T23:00:00Z')],
-    	1: [('2016-01-26T07:00:00Z', '2016-01-26T15:10:00Z'), ('2016-01-26T16:55:00Z', '2016-01-26T21:05:00Z')],
-    	2: [('2016-01-27T07:00:00Z', '2016-01-27T14:00:00Z'), ('2016-01-27T15:00:00Z', '2016-01-27T17:00:00Z'), ('2016-01-27T19:40:00Z', '2016-01-27T23:00:00Z')],
-    	3: [('2016-01-28T07:00:00Z', '2016-01-28T18:55:00Z'), ('2016-01-28T21:20:00Z', '2016-01-28T23:00:00Z')],
-    	4: [('2016-01-29T07:00:00Z', '2016-01-29T14:00:00Z'), ('2016-01-29T15:00:00Z', '2016-01-29T16:10:00Z'), ('2016-01-29T17:55:00Z', '2016-01-29T23:00:00Z')],
-    	5: [('2016-01-30T07:00:00Z', '2016-01-30T18:00:00Z'), ('2016-01-30T19:00:00Z', '2016-01-30T23:00:00Z')],
-    	6: [('2016-01-31T07:00:00Z', '2016-01-31T18:00:00Z'), ('2016-01-31T19:00:00Z', '2016-01-31T23:00:00Z')],
-	}
+	# free_time_blocks = {
+ #    	0: [('2016-01-25T07:00:00Z', '2016-01-25T14:00:00Z'), ('2016-01-25T15:00:00Z', '2016-01-25T17:05:00Z'), ('2016-01-25T19:50:00Z', '2016-01-25T23:00:00Z')],
+ #    	1: [('2016-01-26T07:00:00Z', '2016-01-26T15:10:00Z'), ('2016-01-26T16:55:00Z', '2016-01-26T21:05:00Z')],
+ #    	2: [('2016-01-27T07:00:00Z', '2016-01-27T14:00:00Z'), ('2016-01-27T15:00:00Z', '2016-01-27T17:00:00Z'), ('2016-01-27T19:40:00Z', '2016-01-27T23:00:00Z')],
+ #    	3: [('2016-01-28T07:00:00Z', '2016-01-28T18:55:00Z'), ('2016-01-28T21:20:00Z', '2016-01-28T23:00:00Z')],
+ #    	4: [('2016-01-29T07:00:00Z', '2016-01-29T14:00:00Z'), ('2016-01-29T15:00:00Z', '2016-01-29T16:10:00Z'), ('2016-01-29T17:55:00Z', '2016-01-29T23:00:00Z')],
+ #    	5: [('2016-01-30T07:00:00Z', '2016-01-30T18:00:00Z'), ('2016-01-30T19:00:00Z', '2016-01-30T23:00:00Z')],
+ #    	6: [('2016-01-31T07:00:00Z', '2016-01-31T18:00:00Z'), ('2016-01-31T19:00:00Z', '2016-01-31T23:00:00Z')],
+	# }
+
+	free_time_blocks = task_distribution(request)
+
 
 	#should this be stored in a dictionary or array?! ...going to change to list
 	#free_hours = {}
@@ -850,6 +854,14 @@ def task_hours_per_day(request):
 	#return HttpResponse("Calculated task hours per day successfully!")
 
 
+def check_80_percent_distribution(high_mid_low):
+	lower_than_80 = []
+	for task in high_mid_low:
+		if(task.percent_distributed < 80)
+			lower_than_80.append(task)
+
+	return lower_than_80
+
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 Allocate tasks
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -869,6 +881,22 @@ def allocate_tasks(request):
 	low = Task.objects.filter(authenticated_user=current_user, day_date__range=[parse(start_week_range), parse(end_week_range) + datetime.timedelta(days=1)], percentile__lt=25)
 	mid = Task.objects.filter(authenticated_user=current_user, day_date__range=[parse(start_week_range), parse(end_week_range) + datetime.timedelta(days=1)], percentile__lt=75, percentile__gt=24)
 	high = Task.objects.filter(authenticated_user=current_user, day_date__range=[parse(start_week_range), parse(end_week_range) + datetime.timedelta(days=1)], percentile__gt=74)
+
+	print(high)
+	#Looping through the days of the week
+	free_blocks = task_distribution(request)
+
+
+	#Loop through each of the days inside of the dictionary
+	for x in range(0,7):
+		for time in free_blocks[str(x)]:
+			high_lower_than_80 = check_80_percent_distribution(high)
+			if()
+
+			random_task = randint(0, len(high))
+
+			available_hours = (parse(time[1]) - parse(time[0]))
+
 
 
 

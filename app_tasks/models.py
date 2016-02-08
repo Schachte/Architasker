@@ -27,9 +27,13 @@ class UserTask(models.Model):
 	priority = models.IntegerField(default=0)
 	percentile = models.IntegerField(default=0)
 	transit_mode = models.IntegerField(choices=TRANSIT_CHOICES, default=1)
+	perent_distributed = models.FloatField(blank=True, null=True, default=0)
+
 
 class BreakdownUserTask(models.Model):
 	parent_task = models.ForeignKey(UserTask, unique=False, null=False, default=None)
+	start_time = models.CharField(max_length=255, default='None')
+	end_time = models.CharField(max_length=255, default='None')
 	# task_name = models.ForeignKey(UserTask.task_name, unique=False, null=False, default=None)
 
 
