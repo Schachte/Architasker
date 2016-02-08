@@ -770,7 +770,7 @@ def task_hours_per_day(request):
 
 	free_hours_list = free_hours_per_day()
 	total_free_hours = sum(free_hours_list)
-	print(tota l_free_hours)
+	# print(total_free_hours)
 
 	current_user = User.objects.get(username=request.user.username) #what is request...would this not work without the request?!
 
@@ -845,12 +845,34 @@ def task_hours_per_day(request):
 	for index, value in enumerate(task_hours_list_final):
 		print(str(index) + " " + str(value))
 
-	return HttpResponse("Calculated task hours per day successfully!")
+	return task_hours_list_final
+
+	#return HttpResponse("Calculated task hours per day successfully!")
 
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 Allocate tasks
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 def allocate_tasks(request):
-	
+
+	#Get the currently logged in user
+	current_user = User.objects.get(username=request.user.username)
+
+	#Get the initial and end date for the current week that we are in
+	start_week_range = get_current_week_range(request)[0]
+	end_week_range = get_current_week_range(request)[1]
+
+	#Call this function to assign priorities
+	prioritize_and_cluster(request)
+
+	#Generate cluster segregation
+	low = Task.objects.filter(authenticated_user=current_user, day_date__range=[parse(start_week_range), parse(end_week_range) + datetime.timedelta(days=1)], percentile__lt=25)
+	mid = Task.objects.filter(authenticated_user=current_user, day_date__range=[parse(start_week_range), parse(end_week_range) + datetime.timedelta(days=1)], percentile__lt=75, percentile__gt=24)
+	high = Task.objects.filter(authenticated_user=current_user, day_date__range=[parse(start_week_range), parse(end_week_range) + datetime.timedelta(days=1)], percentile__gt=74)
+
+
+
+
+
+
 	return HttpResponse("Allocated tasks successfully!")
