@@ -1,9 +1,12 @@
 import datetime
+import pytz
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseRedirect
 from django.contrib.auth.models import User
 from procrastinate import settings
 from .models import UserTask as Task
+from app_account_management.models import UserExtended
+from dateutil.parser import parse
 
 # Create your views here.
 
@@ -43,44 +46,7 @@ def create_task(request):
         return HttpResponse("none")
 
 
-'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-Calculate overall priority and percentile for each task
-'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-def prioritize_and_cluster(request):
 
-	current_user = User.objects.get(username=request.user.username)
-	user_tasks = Task.objects.filter(authenticated_user=current_user)
-
-	'''
-	Calculate and Store Priority
-	'''
-
-	for task in user_tasks:
-		priority = task.estimated_time / (task.day_num - datetime.datetime.today().weekday()) + task.difficulty
-		print(task.task_name + " " + str(priority))
-		#Check output of current day tomorrow
-		print("Current Day: " + str(datetime.datetime.today().weekday()))
-		task.priority = priority
-		task.save()
-
-	'''
-	Calculate and Store Percentile
-	'''
-
-	equation_N = user_tasks.count()
-
-	for task in user_tasks:
-
-		equation_L = Task.objects.filter(authenticated_user=current_user, priority__lt=task.priority).count()
-		equation_S = Task.objects.filter(authenticated_user=current_user, priority=task.priority).count()
-		
-		pr_percent = ((equation_L + (0.5*equation_S)) / equation_N)*100
-		print(task.task_name + " " + str(pr_percent))
-
-		task.percentile = pr_percent
-		task.save()
-
-	return HttpResponse("The user has been queried successfully!")
 
 
 
