@@ -16,6 +16,8 @@ Function to store new task into database
 def create_task(request):
 	
     if request.method == 'POST':
+    	print(request.POST.get('task_location'))
+    	print(request.POST.get('task_transit_mode'))
         current_user = User.objects.get(id=request.user.id)
         temp_model = Task.objects.create(
             authenticated_user = current_user,
@@ -26,10 +28,11 @@ def create_task(request):
             difficulty = int(request.POST.get('task_priority')),
             # color = request.POST.get('color'),
             url = request.POST.get('task_url'),
-            location = request.POST.get('task_location'),
             comments = request.POST.get('task_comments'),
             day_date = request.POST.get('task_day_date'),
             day_num = int(request.POST.get('task_day_num')),
+            location = request.POST.get('task_location'),
+            transit_mode = int(request.POST.get('task_transit_mode'))
         )
 
         if(int(request.POST.get('task_day_num')) == 0):
