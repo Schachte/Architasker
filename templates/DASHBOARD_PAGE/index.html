@@ -1610,13 +1610,22 @@
 					},
 					success: function() {
 						succeed = true;
+						location.href = "/dashboard";
+					},
+
+					error: function() {
+
+						console.log("did i get here?");
+						location.href = "/dashboard";
 					}
+
 
 				});
 				
 				UIBtnn.toggle();
 
 				resetTaskForm();
+
 
 				return succeed;
 
