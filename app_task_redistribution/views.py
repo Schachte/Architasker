@@ -45,6 +45,14 @@ from operator import itemgetter
 import urllib, json
 
 
+
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+Rounding numbers to the nearest .5 value
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+def round_numbers(task_hours):
+	return (round(task_hours*12)/12)
+
+
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 Function to convert unicode dictionaries into str dictionaries
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -691,7 +699,7 @@ def prioritize_and_cluster(request):
 	start_week_range = get_current_week_range(request)[0]
 	end_week_range = get_current_week_range(request)[1]
 
-	user_tasks = Task.objects.filter(authenticated_user=current_user, day_date__range=[parse(start_week_range), parse(end_week_range) + datetime.timedelta(days=1)])
+	user_tasks = Task.objects.filter(authenticated_user=current_user, day_date__range=[datetime.datetime.now(), parse(end_week_range) + datetime.timedelta(days=1)])
 
 	for task in user_tasks:
 		print(task.task_name)
@@ -749,9 +757,20 @@ def free_hours_per_day(request):
  #    	6: [('2016-01-31T07:00:00Z', '2016-01-31T18:00:00Z'), ('2016-01-31T19:00:00Z', '2016-01-31T23:00:00Z')],
 	# }
 
+	
+	current_user = User.objects.get(username=request.user.username) #what is request...would this not work without the request?!
+
+	#Variable that stores the current time based on the timezone of the user account
+	current_user_extended = UserExtended.objects.get(authenticated_user=request.user)
+	current_user_time_zone = current_user_extended.time_zone
+	current_user_time_zone = pytz.timezone(str(current_user_time_zone))
+	current_time = datetime.datetime.now(current_user_time_zone)
+	current_date = str(current_time)[0:10]
+
+
 	free_time_blocks = task_distribution(request)
 
-	starting_weekday = datetime.datetime.today().weekday()
+	starting_weekday = parse(current_date).weekday()
 	print("Starting weekday: " + str(starting_weekday))
 
 	free_hours = []
@@ -764,10 +783,10 @@ def free_hours_per_day(request):
 
 		elif(int(key) == starting_weekday):
 			print("Equal: %s" %key)
-			print(datetime.datetime.now())
+			print(current_time)
 			for each_tuple in value:
 				print(each_tuple)
-				if(parse(each_tuple[0]) > datetime.datetime.today().replace(tzinfo=tz.tzutc())):
+				if(parse(each_tuple[0]) > current_time):
 					print("Here")
 					hours += (parse(each_tuple[1]) - parse(each_tuple[0])).total_seconds() / 60
 			free_hours.insert(int(key), hours/60)
@@ -793,17 +812,32 @@ def task_hours_per_day(request):
 
 	free_hours_list = free_hours_per_day(request)
 
+	current_user = User.objects.get(username=request.user.username) #what is request...would this not work without the request?!
+
+	#Variable that stores the current time based on the timezone of the user account
+	current_user_extended = UserExtended.objects.get(authenticated_user=request.user)
+	current_user_time_zone = current_user_extended.time_zone
+	current_user_time_zone = pytz.timezone(str(current_user_time_zone))
+	current_time = datetime.datetime.now(current_user_time_zone)
+	current_date = str(current_time)[0:10]
+
+	print("current user time zone is"),
+	print(current_time)
+
+	print("the current day is")
+	print(parse(current_date))
+
+
 	total_free_hours = sum(free_hours_list)
 	print("Total free hours: " + str(total_free_hours))
 
-	current_user = User.objects.get(username=request.user.username) #what is request...would this not work without the request?!
 
 	#Get the initial and end date for the current week that we are in
 	start_week_range = get_current_week_range(request)[0]
 	end_week_range = get_current_week_range(request)[1]
 
-	user_tasks = Task.objects.filter(authenticated_user=current_user, day_date__range=[parse(start_week_range), parse(end_week_range) + datetime.timedelta(days=1)])
-	print("User Tasks: " + str(Task.objects.filter(authenticated_user=current_user, day_date__range=[parse(start_week_range), parse(end_week_range) + datetime.timedelta(days=1)]).count()))
+	user_tasks = Task.objects.filter(authenticated_user=current_user, day_date__range=[parse(current_date), parse(end_week_range) + datetime.timedelta(days=1)])
+	print("User Tasks: " + str(Task.objects.filter(authenticated_user=current_user, day_date__range=[parse(current_date), parse(end_week_range) + datetime.timedelta(days=1)]).count()))
 
 	total_task_hours = 0.0
 	for task in user_tasks:
@@ -862,7 +896,7 @@ def task_hours_per_day(request):
 	task_hours_list_final = task_hours_list
 
 	#need to run for values where day num is smaller than 6 and for when DUE DATE and DAY DATE are equal...MAKE SURE YOU DO THE SECOND PART!!!!
-	for early_task in Task.objects.filter(authenticated_user=current_user, day_date__range=[parse(start_week_range), parse(end_week_range) + datetime.timedelta(days=1)], day_num__lt=6):
+	for early_task in Task.objects.filter(authenticated_user=current_user, day_date__range=[parse(current_date), parse(end_week_range) + datetime.timedelta(days=1)], day_num__lt=6):
 		#should extimated time * % to complete be stored in the database instead of computing it every time?!
 		
 		# free_hours_after_task_due = 0.0
@@ -942,6 +976,28 @@ def task_hours_per_day(request):
 		print(early_task.sat_task_time)
 		print(early_task.sun_task_time)
 
+
+	user_tasks = Task.objects.filter(authenticated_user=current_user, day_date__range=[parse(current_date), parse(end_week_range) + datetime.timedelta(days=1)])
+	for task in user_tasks:
+		task.mon_task_time = round_numbers(task.mon_task_time)
+		task.tues_task_time = round_numbers(task.tues_task_time)
+		task.wed_task_time = round_numbers(task.wed_task_time)
+		task.thurs_task_time = round_numbers(task.thurs_task_time)
+		task.fri_task_time = round_numbers(task.fri_task_time)
+		task.sat_task_time = round_numbers(task.sat_task_time)
+		task.sun_task_time = round_numbers(task.sun_task_time)
+
+		task.save()
+
+		print("Final times")
+		print(task.task_name)
+		print(task.mon_task_time)
+		print(task.tues_task_time)
+		print(task.wed_task_time)
+		print(task.thurs_task_time)
+		print(task.fri_task_time)
+		print(task.sat_task_time)
+		print(task.sun_task_time)
 
 	
 	#NEED TO CONSIDER IF TASK IS ADDED THE DAY IT IS DUE!!!!!!! Because then sum of free time will be affected...idk
@@ -1031,6 +1087,112 @@ def task_reset(request):
 
 
 
+#Get query set/list of all tasks that NEED to be distributed within the current day
+def get_tasks_for_day(current_day_of_week, request, current_date):
+
+
+	#Get the initial and end date for the current week that we are in
+	start_week_range = get_current_week_range(request)[0]
+	end_week_range = get_current_week_range(request)[1]
+
+	#Get the currently logged in user
+	current_user = User.objects.get(username=request.user.username)
+
+	if (current_day_of_week == 0):
+		#monday stuff
+		user_tasks = Task.objects.filter(authenticated_user=current_user, day_date__range=[parse(current_date), parse(end_week_range) + datetime.timedelta(days=1)], mon_task_time__gt=0.01)
+
+	elif (current_day_of_week == 1):
+		#tuesday stuff
+		user_tasks = Task.objects.filter(authenticated_user=current_user, day_date__range=[parse(current_date), parse(end_week_range) + datetime.timedelta(days=1)], tues_task_time__gt=0.01)
+
+	elif (current_day_of_week == 2):
+		#wedmesdau stuff
+		user_tasks = Task.objects.filter(authenticated_user=current_user, day_date__range=[parse(current_date), parse(end_week_range) + datetime.timedelta(days=1)], wed_task_time__gt=0.01)
+
+	elif (current_day_of_week == 3):
+		#tjirs stuf
+		user_tasks = Task.objects.filter(authenticated_user=current_user, day_date__range=[parse(current_date), parse(end_week_range) + datetime.timedelta(days=1)], thurs_task_time__gt=0.01)
+
+	elif (current_day_of_week == 4):
+		#frod stuff
+		user_tasks = Task.objects.filter(authenticated_user=current_user, day_date__range=[parse(current_date), parse(end_week_range) + datetime.timedelta(days=1)], fri_task_time__gt=0.01)
+
+	elif (current_day_of_week == 5):
+		#saturday stuff
+		user_tasks = Task.objects.filter(authenticated_user=current_user, day_date__range=[parse(current_date), parse(end_week_range) + datetime.timedelta(days=1)], sat_task_time__gt=0.01)
+
+	elif (current_day_of_week == 6):
+		#sunday stuff
+		user_tasks = Task.objects.filter(authenticated_user=current_user, day_date__range=[parse(current_date), parse(end_week_range) + datetime.timedelta(days=1)], sun_task_time__gt=0.01)
+
+	return user_tasks
+
+
+
+def get_task_time_for_day(current_task, current_day_of_week):
+	if (current_day_of_week == 0):
+		#monday stuff
+		user_time = current_task.mon_task_time
+
+	elif (current_day_of_week == 1):
+		#tuesday stuff
+		user_time = current_task.tues_task_time
+
+	elif (current_day_of_week == 2):
+		#wedmesdau stuff
+		user_time = current_task.wed_task_time
+
+	elif (current_day_of_week == 3):
+		#tjirs stuf
+		user_time = current_task.thurs_task_time
+
+	elif (current_day_of_week == 4):
+		#frod stuff
+		user_time = current_task.fri_task_time
+
+	elif (current_day_of_week == 5):
+		#saturday stuff
+		user_time = current_task.sat_task_time
+
+	elif (current_day_of_week == 6):
+		#sunday stuff
+		user_time = current_task.sun_task_time
+	return user_time
+
+
+def subtract_task_time_for_day(current_task, current_day_of_week, num_to_subtract):
+	if (current_day_of_week == 0):
+		#monday stuff
+		current_task.mon_task_time -= num_to_subtract 
+
+	elif (current_day_of_week == 1):
+		#tuesday stuff
+		current_task.tues_task_time -= num_to_subtract
+
+	elif (current_day_of_week == 2):
+		#wedmesdau stuff
+		current_task.wed_task_time -= num_to_subtract
+
+	elif (current_day_of_week == 3):
+		#tjirs stuf
+		current_task.thurs_task_time -= num_to_subtract
+
+	elif (current_day_of_week == 4):
+		#frod stuff
+		current_task.fri_task_time -= num_to_subtract
+
+	elif (current_day_of_week == 5):
+		#saturday stuff
+		current_task.sat_task_time -= num_to_subtract
+
+	elif (current_day_of_week == 6):
+		#sunday stuff
+		current_task.sun_task_time -= num_to_subtract
+
+	current_task.save()
+
+
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 Allocate tasks
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -1044,7 +1206,7 @@ def allocate_tasks(request):
 	end_week_range = get_current_week_range(request)[1]
 
 	#Keep tasks before time new task is added and clear/reset the ones that are after the day added
-	task_reset(request)
+	#task_reset(request)
 
 	#Call this function to assign priorities
 	prioritize_and_cluster(request)
@@ -1054,6 +1216,120 @@ def allocate_tasks(request):
 
 	#Get number of hours that can be spent on tasks per day (array)
 	task_hours = task_hours_per_day(request)
+
+	'''
+	Task allocation logic:
+
+	-Grab a random task from the array of tasks to distribute
+	-Iterate by starting at the current day 
+	-
+
+	'''
+
+	#Variable that stores the current time based on the timezone of the user account
+	current_user_extended = UserExtended.objects.get(authenticated_user=request.user)
+	current_user_time_zone = current_user_extended.time_zone
+	current_user_time_zone = pytz.timezone(str(current_user_time_zone))
+	current_time = datetime.datetime.now(current_user_time_zone)
+	current_date = str(current_time)[0:10]
+
+	print("Current time is:")
+	print(current_time)
+
+	print("current date is:")
+	print(current_date)
+
+
+	#Looping through the current day of the week to the end of the week
+	for int_day_of_week in range(parse(current_date).weekday(), 7):
+
+		#Loop block by block within the current day we're on
+		for free_time in free_blocks[str(int_day_of_week)]:
+
+			start_time = free_time[0]
+			print(start_time)
+			end_time = free_time[1]
+			print(end_time)
+
+			available_hours_in_block = (parse(end_time) - parse(start_time)).total_seconds() / 3600
+
+			print("available_hours_in_block is %.8f"%(available_hours_in_block))
+
+			while (available_hours_in_block > 0.0001):
+
+				#Query tasks for the day of the week that need to be distributed
+				user_tasks = get_tasks_for_day(int_day_of_week, request, current_date)
+				user_tasks = list(user_tasks)
+
+				print("length of user task ssi %d"%(len(user_tasks)))
+
+				if (len(user_tasks) > 0):
+				#Grab a random task from the query set
+					random_task_index = randint(0, len(user_tasks) - 1)
+					random_task = user_tasks[random_task_index]
+
+					print(random_task)
+					print("Next free block in the queue is:")
+					print(free_time)
+
+					if(get_task_time_for_day(random_task, int_day_of_week) <= available_hours_in_block):
+						print("IF STATEMENT START: ")
+						print("available hours in block is %.8f"%(available_hours_in_block))
+						print("task time for day is %.8f"%(get_task_time_for_day(random_task, int_day_of_week)))
+						print("start time is %s"%(start_time))
+
+						temp_mini_task = BreakdownUserTask.objects.create(
+							parent_task = random_task,
+							start_time = parse(start_time),
+							end_time = parse(start_time) + datetime.timedelta(hours = float(get_task_time_for_day(random_task, int_day_of_week))),
+							current_day = parse(start_time).weekday()
+						)
+
+						temp_mini_task.save()
+
+						print("end time is %s"%(temp_mini_task.end_time))
+						print("task duration %.8f"%((temp_mini_task.end_time - temp_mini_task.start_time).total_seconds() / 3600))
+
+						start_time = str(temp_mini_task.end_time + datetime.timedelta(minutes = 15))
+
+						available_hours_in_block -= (((temp_mini_task.end_time - temp_mini_task.start_time).total_seconds() / 3600))
+						available_hours_in_block -= .25
+						print("available hours in block is %.8f"%(available_hours_in_block))
+						subtract_task_time_for_day(temp_mini_task.parent_task, int_day_of_week, (temp_mini_task.end_time - temp_mini_task.start_time).total_seconds() / 3600)
+
+						# if(start_time > end_time):
+						# 	available_hours_in_block = 0
+
+					else:
+
+						temp_mini_task = BreakdownUserTask.objects.create(
+							parent_task = random_task,
+							start_time = parse(start_time),
+							end_time = parse(start_time) + datetime.timedelta(hours = float(available_hours_in_block)),
+							current_day = parse(start_time).weekday()
+						)
+
+						temp_mini_task.save()
+						available_hours_in_block = 0
+						subtract_task_time_for_day(temp_mini_task.parent_task, int_day_of_week, (temp_mini_task.end_time - temp_mini_task.start_time).total_seconds() / 3600)
+
+				else:
+					break
+
+
+
+
+
+
+
+			#Check if we need to distribute this random task.
+			#If (enter)
+			#Else (continue)
+		
+
+
+
+
 
 	# #Loop through each of the days inside of the dictionary
 	# for x in range(0,7):	
