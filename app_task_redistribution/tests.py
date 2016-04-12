@@ -23,15 +23,16 @@ class FreeBlocksTestCase(TestCase):
 									min_task_time="0", travel_time = "0")
 
 		#Change start and end time according to current day
-		UserEvent.objects.create(authenticated_user = self.user3, start_time = "2016-02-08T7:00:00Z", end_time = "2016-02-08T9:00:00Z")
+		UserEvent.objects.create(authenticated_user = self.user3, start_time = "2016-04-11T7:00:00Z", end_time = "2016-04-11T9:00:00Z")
 		
 		self.user4 = User.objects.create(username="user4", password="password")
 		UserExtended.objects.create(authenticated_user = self.user4, wakeup_time = "8:00", 
 									sleepy_time = "20:00", time_zone = "America/Phoenix", 
 									min_task_time="0", travel_time = "0")
-		UserEvent.objects.create(authenticated_user = self.user4, start_time = "2016-02-08T7:00:00Z", end_time = "2016-02-08T9:00:00Z")
-		UserEvent.objects.create(authenticated_user = self.user4, start_time = "2016-02-08T6:00:00Z", end_time = "2016-02-08T10:00:00Z")
-		UserEvent.objects.create(authenticated_user = self.user4, start_time = "2016-02-08T8:00:00Z", end_time = "2016-02-08T11:00:00Z")
+
+		UserEvent.objects.create(authenticated_user = self.user4, start_time = "2016-04-11T7:00:00Z", end_time = "2016-04-11T9:00:00Z")
+		UserEvent.objects.create(authenticated_user = self.user4, start_time = "2016-04-11T6:00:00Z", end_time = "2016-04-11T10:00:00Z")
+		UserEvent.objects.create(authenticated_user = self.user4, start_time = "2016-04-11T8:00:00Z", end_time = "2016-04-11T11:00:00Z")
 
 	def test_all_week_free1(self):
 		request = self.factory.get('/archicalc')
@@ -106,19 +107,25 @@ class FreeBlocksTestCase(TestCase):
 			days_in_current_week.append(str(single_date))
 
 		free_time = task_distribution(request)
-		# expected_list = []
-		# for day in days_in_current_week:
-		# 	start = day[0:10] + "T8:00:00Z"
-		# 	end = day[0:10] + "T20:00:00Z"
-		# 	expected_list.append((start, end))
+		expected_list = []
+		for day in days_in_current_week:
+			start = day[0:10] + "T8:00:00Z"
+			end = day[0:10] + "T20:00:00Z"
+			expected_list.append((start, end))
+		start = days_in_current_week[0][0:10] + "T09:00:00Z"
+		end = days_in_current_week[0][0:10] + "T20:00:00Z"
+		expected_list[0] = (start, end)
 
-		expected_list = [	('2016-02-08T09:00:00Z', '2016-02-08T20:00:00Z'), 
-							('2016-02-09T8:00:00Z', '2016-02-09T20:00:00Z'), 
-							('2016-02-10T8:00:00Z', '2016-02-10T20:00:00Z'), 
-							('2016-02-11T8:00:00Z', '2016-02-11T20:00:00Z'), 
-							('2016-02-12T8:00:00Z', '2016-02-12T20:00:00Z'), 
-							('2016-02-13T8:00:00Z', '2016-02-13T20:00:00Z'), 
-							('2016-02-14T8:00:00Z', '2016-02-14T20:00:00Z')]
+		# expected_list = [	('2016-04-11T09:00:00Z', '2016-04-11T20:00:00Z'), 
+		# 					('2016-04-12T8:00:00Z', '2016-04-12T20:00:00Z'), 
+		# 					('2016-04-13T8:00:00Z', '2016-04-13T20:00:00Z'), 
+		# 					('2016-04-14T8:00:00Z', '2016-04-14T20:00:00Z'), 
+		# 					('2016-04-15T8:00:00Z', '2016-04-15T20:00:00Z'), 
+		# 					('2016-04-16T8:00:00Z', '2016-04-16T20:00:00Z'), 
+		# 					('2016-04-17T8:00:00Z', '2016-04-17T20:00:00Z')]
+		print expected_list
+		print free_time
+
 		self.assertEqual(expected_list, free_time)
 
 	def test_overlap_wakeup_cluster1(self):
@@ -132,19 +139,22 @@ class FreeBlocksTestCase(TestCase):
 			days_in_current_week.append(str(single_date))
 
 		free_time = task_distribution(request)
-		# expected_list = []
-		# for day in days_in_current_week:
-		# 	start = day[0:10] + "T8:00:00Z"
-		# 	end = day[0:10] + "T20:00:00Z"
-		# 	expected_list.append((start, end))
+		expected_list = []
+		for day in days_in_current_week:
+			start = day[0:10] + "T8:00:00Z"
+			end = day[0:10] + "T20:00:00Z"
+			expected_list.append((start, end))
+		start = days_in_current_week[0][0:10] + "T11:00:00Z"
+		end = days_in_current_week[0][0:10] + "T20:00:00Z"
+		expected_list[0] = (start, end)
 
-		expected_list = [	('2016-02-08T11:00:00Z', '2016-02-08T20:00:00Z'), 
-							('2016-02-09T8:00:00Z', '2016-02-09T20:00:00Z'), 
-							('2016-02-10T8:00:00Z', '2016-02-10T20:00:00Z'), 
-							('2016-02-11T8:00:00Z', '2016-02-11T20:00:00Z'), 
-							('2016-02-12T8:00:00Z', '2016-02-12T20:00:00Z'), 
-							('2016-02-13T8:00:00Z', '2016-02-13T20:00:00Z'), 
-							('2016-02-14T8:00:00Z', '2016-02-14T20:00:00Z')]
-		print expected_list
-		print free_time
+		# expected_list = [	('2016-04-11T11:00:00Z', '2016-04-11T20:00:00Z'), 
+		# 					('2016-04-12T8:00:00Z', '2016-04-12T20:00:00Z'), 
+		# 					('2016-04-13T8:00:00Z', '2016-04-13T20:00:00Z'), 
+		# 					('2016-04-14T8:00:00Z', '2016-04-14T20:00:00Z'), 
+		# 					('2016-04-15T8:00:00Z', '2016-04-15T20:00:00Z'), 
+		# 					('2016-04-16T8:00:00Z', '2016-04-16T20:00:00Z'), 
+		# 					('2016-04-17T8:00:00Z', '2016-04-17T20:00:00Z')]
+		# print expected_list
+		# print free_time
 		self.assertEqual(expected_list, free_time)
