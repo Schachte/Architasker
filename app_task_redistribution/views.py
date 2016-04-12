@@ -15,6 +15,8 @@ from random import randint
 from pytz import timezone
 from dateutil.parser import parse
 from apiclient import discovery
+import math
+from decimal import Decimal
 
 from django.template import loader, Context
 from django.contrib.auth.models import User
@@ -37,7 +39,7 @@ from procrastinate import settings
 from app_account_management.models import UserExtended
 from app_tasks.models import UserTask as Task
 from operator import itemgetter
-#from app_tasks.models import UserTask ... do we need this?!
+from app_tasks.models import BreakdownUserTask 
 from operator import itemgetter
 import urllib, json
 
@@ -758,7 +760,7 @@ def free_hours_per_day(request):
 		for each_tuple in value:
 			#should we be calculating everything in minutes or hours?!?! ... currently in hours
 			hours += (parse(each_tuple[1]) - parse(each_tuple[0])).total_seconds() / 60
-		free_hours.insert(key, hours/60)
+		free_hours.insert(int(key), hours/60)
 
 
 	for index, value in enumerate(free_hours):
@@ -772,9 +774,9 @@ Calculate number of tasks hours allocated per day
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 def task_hours_per_day(request):
 
-	free_hours_list = free_hours_per_day()
+	free_hours_list = free_hours_per_day(request)
 	total_free_hours = sum(free_hours_list)
-	# print(total_free_hours)
+	print("Total free hours: " + str(total_free_hours))
 
 	current_user = User.objects.get(username=request.user.username) #what is request...would this not work without the request?!
 
@@ -783,7 +785,7 @@ def task_hours_per_day(request):
 	end_week_range = get_current_week_range(request)[1]
 
 	user_tasks = Task.objects.filter(authenticated_user=current_user, day_date__range=[parse(start_week_range), parse(end_week_range) + datetime.timedelta(days=1)])
-	#print("User Tasks: " + str(Task.objects.filter(authenticated_user=current_user, day_date__range=[parse(start_week_range), parse(end_week_range) + datetime.timedelta(days=1)]).count()))
+	print("User Tasks: " + str(Task.objects.filter(authenticated_user=current_user, day_date__range=[parse(start_week_range), parse(end_week_range) + datetime.timedelta(days=1)]).count()))
 
 	total_task_hours = 0.0
 	for task in user_tasks:
@@ -794,6 +796,19 @@ def task_hours_per_day(request):
 		print("Task time " +str(task.estimated_time))
 		print(task.percent_to_complete/100 * float(task.estimated_time))
 		total_task_hours += float(task.percent_to_complete)/100 * float(task.estimated_time)
+
+		task_hour_for_day = float(task.percent_to_complete)/100 * float(task.estimated_time) / 7
+
+		task.mon_task_time = task_hour_for_day
+		task.tues_task_time = task_hour_for_day
+		task.wed_task_time = task_hour_for_day
+		task.thurs_task_time = task_hour_for_day
+		task.fri_task_time = task_hour_for_day
+		task.sat_task_time = task_hour_for_day
+		task.sun_task_time = task_hour_for_day
+
+		task.save()
+
 		print(total_task_hours)
 
 	print(total_task_hours)
@@ -826,6 +841,9 @@ def task_hours_per_day(request):
 		# 	if (index > early_task.day_num):
 		# 		free_hours_after_task_due += value
 
+
+		task_time_dictionary = {0: early_task.mon_task_time, 1: early_task.tues_task_time, 2: early_task.wed_task_time, 3: early_task.thurs_task_time, 4: early_task.fri_task_time, 5: early_task.sat_task_time, 6: early_task.sun_task_time}
+
 		print("Hours:" + str(early_task.percent_to_complete/100 * float(early_task.estimated_time)))
 		print("Total free time: " + str(total_free_hours))
 		print("Hours of free time after day it's due: " + str(sum(free_hours_list[early_task.day_num:])))
@@ -840,10 +858,17 @@ def task_hours_per_day(request):
 				print("Step 2: " + str(index) + " " + str(sum(free_hours_list[:early_task.day_num])) + " " + str(value))
 				task_hours_list_final[index] += (value * (hours_allocated_after_due/sum(free_hours_list[:early_task.day_num])))
 
+				task_time_dictionary[index] +=  (value * (hours_allocated_after_due/sum(free_hours_list[:early_task.day_num])))
+				early_task.save()
+
 			#3) For each day after day due: task time for day - task time for day(#1/total hours of free time after day due)
 			if (index >= early_task.day_num): 
 				print("Step 3: " + str(index) + " " + str(sum(free_hours_list[early_task.day_num:])) + " " + str(value))
 				task_hours_list_final[index] -= (value * (hours_allocated_after_due/sum(free_hours_list[early_task.day_num:])))
+
+				task_time_dictionary[index] -=  (value * (hours_allocated_after_due/sum(free_hours_list[:early_task.day_num])))
+				early_task.save()
+
 
 	print("Final work times for week")
 	for index, value in enumerate(task_hours_list_final):
@@ -854,13 +879,49 @@ def task_hours_per_day(request):
 	#return HttpResponse("Calculated task hours per day successfully!")
 
 
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+Array of tasks with lower than 80% completed/distributed 
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 def check_80_percent_distribution(high_mid_low):
 	lower_than_80 = []
 	for task in high_mid_low:
-		if(task.percent_distributed < 80)
+		if(task.percent_distributed < 80):
 			lower_than_80.append(task)
 
 	return lower_than_80
+
+
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+Available task options
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+def available_tasks(request):
+
+	#Get the currently logged in user
+	current_user = User.objects.get(username=request.user.username)
+
+	#Get the initial and end date for the current week that we are in
+	start_week_range = get_current_week_range(request)[0]
+	end_week_range = get_current_week_range(request)[1]
+
+	#Generate cluster segregation
+	low = Task.objects.filter(authenticated_user=current_user, day_date__range=[parse(start_week_range), parse(end_week_range) + datetime.timedelta(days=1)], percentile__lt=25, percent_distributed__lt=100)
+	mid = Task.objects.filter(authenticated_user=current_user, day_date__range=[parse(start_week_range), parse(end_week_range) + datetime.timedelta(days=1)], percentile__lt=75, percentile__gt=24, percent_distributed__lt=100)
+	high = Task.objects.filter(authenticated_user=current_user, day_date__range=[parse(start_week_range), parse(end_week_range) + datetime.timedelta(days=1)], percentile__gt=74, percent_distributed__lt=100)
+
+	avail_tasks = []
+
+	if(len(check_80_percent_distribution(high)) == 0):
+		if(len(check_80_percent_distribution(mid)) == 0):
+			avail_tasks = list(low) + list(mid) + list(high)
+
+		else:
+			avail_tasks = list(high) + check_80_percent_distribution(mid)
+
+	else:
+		avail_tasks = check_80_percent_distribution(high)
+
+	return avail_tasks
+
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 Allocate tasks
@@ -876,31 +937,91 @@ def allocate_tasks(request):
 
 	#Call this function to assign priorities
 	prioritize_and_cluster(request)
-
-	#Generate cluster segregation
-	low = Task.objects.filter(authenticated_user=current_user, day_date__range=[parse(start_week_range), parse(end_week_range) + datetime.timedelta(days=1)], percentile__lt=25)
-	mid = Task.objects.filter(authenticated_user=current_user, day_date__range=[parse(start_week_range), parse(end_week_range) + datetime.timedelta(days=1)], percentile__lt=75, percentile__gt=24)
-	high = Task.objects.filter(authenticated_user=current_user, day_date__range=[parse(start_week_range), parse(end_week_range) + datetime.timedelta(days=1)], percentile__gt=74)
-
-	print(high)
-	#Looping through the days of the week
+	
+	#Get times of free blocks
 	free_blocks = task_distribution(request)
+
+	#Get number of hours that can be spent on tasks per day (array)
+	task_hours = task_hours_per_day(request)
+
 
 
 	#Loop through each of the days inside of the dictionary
-	for x in range(0,7):
+	for x in range(0,7):	
+
+		task_hours_for_day = task_hours[x]
+		#task_hours_for_day = math.ceil(task_hours_for_day)
+		task_hours_for_day = task_hours_for_day
+		#DON'T KNOW HOW TO ROUND UP TO NEAREST .5
+
 		for time in free_blocks[str(x)]:
-			high_lower_than_80 = check_80_percent_distribution(high)
-			if()
 
-			random_task = randint(0, len(high))
+			start_time = time[0]
+			print(start_time)
+			end_time = time[1]
+			print(end_time)
 
-			available_hours = (parse(time[1]) - parse(time[0]))
+			print("Task hours for day %.2f" %(task_hours_for_day))
+
+			available_hours_in_block = (parse(time[1]) - parse(time[0])).total_seconds() / 3600
+			print(available_hours_in_block)
+			
+			while(task_hours_for_day > .1 and available_hours_in_block > .25):
+
+				random_task_index = randint(0, len(available_tasks(request)) - 1)
+				random_task = available_tasks(request)[random_task_index]
+
+				#number of hours that still need to be distributed
+				task_hours_to_distribute = random_task.estimated_time * (random_task.percent_to_complete/100) * (Decimal(100 - random_task.percent_distributed)/100)
+				#if(random_task.estimated_time * (random_task.percent_to_complete/100) * (Decimal(100 - random_task.percent_distributed)/100) <= available_hours_in_block):
+				if(task_hours_for_day <= available_hours_in_block):
+
+					temp_mini_task = BreakdownUserTask.objects.create(
+						parent_task = random_task,
+						start_time = parse(start_time),
+						end_time = parse(start_time) + datetime.timedelta(hours = float(task_hours_for_day)),
+						current_day = parse(start_time).weekday()
+					)
+
+					if( task_hours_to_distribute < task_hours_for_day):
+						temp_mini_task.end_time = parse(start_time) + datetime.timedelta(hours = float(task_hours_to_distribute))
+
+					temp_mini_task.save()
+
+					print("Hours distributed %.2f" %((((temp_mini_task.end_time) - (temp_mini_task.start_time)).total_seconds() / 3600)))
+					start_time = str(temp_mini_task.end_time + datetime.timedelta(minutes = 15))
+					available_hours_in_block -= ((temp_mini_task.end_time - temp_mini_task.start_time).total_seconds()) / 3600
+					print("If block: Available hours in block %.2f" %(available_hours_in_block))
+					task_hours_for_day -= (((temp_mini_task.end_time) - (temp_mini_task.start_time)).total_seconds() / 3600)
+					print("If block: Task hours for day %.2f" %(task_hours_for_day))
+
+					random_task.percent_distributed += float((((temp_mini_task.end_time) - (temp_mini_task.start_time)).total_seconds() / 3600) / float(random_task.estimated_time * (random_task.percent_to_complete/100))) * 100
+					random_task.save()
 
 
+				else:
+					temp_mini_task = BreakdownUserTask.objects.create(
+						parent_task = random_task,
+						start_time = parse(start_time),
+						end_time = parse(start_time) + datetime.timedelta(hours = available_hours_in_block),
+						current_day = parse(start_time).weekday()
+					)
 
+					if( task_hours_to_distribute < available_hours_in_block):
+						temp_mini_task.end_time = parse(start_time) + datetime.timedelta(hours = float(task_hours_to_distribute))
 
+					temp_mini_task.save()
+
+					available_hours_in_block = 0
+					print(temp_mini_task.end_time)
+					task_hours_for_day -= (((temp_mini_task.end_time) - (temp_mini_task.start_time)).total_seconds() / 3600)
+					print("Else block: Hours distributed %.2f" %((temp_mini_task.end_time - temp_mini_task.start_time).total_seconds()/3600))
+					print("Else block: Task hours for day %.2f" %(task_hours_for_day))
+					# print("If block: Available hours in block %d" %(available_hours_in_block))
+					random_task.percent_distributed += float((((temp_mini_task.end_time) - (temp_mini_task.start_time)).total_seconds() / 3600) / float(random_task.estimated_time * (random_task.percent_to_complete/100))) * 100
+					random_task.save()
 
 
 
 	return HttpResponse("Allocated tasks successfully!")
+	

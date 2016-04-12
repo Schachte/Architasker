@@ -40,6 +40,7 @@ from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseRedire
 from django.contrib.auth.decorators import login_required
 
 from .models import UserEvent as SNE
+from app_tasks.models import BreakdownUserTask as BUT
 from .models import CredentialsModel
 from procrastinate import settings
 from app_account_management.models import UserExtended
@@ -964,6 +965,13 @@ def get_calendar_data(request):
         'fri' : SNE.objects.filter(current_day = 'Friday'),
         'sat' : SNE.objects.filter(current_day = 'Saturday'),
         'sun' : SNE.objects.filter(current_day = 'Sunday'),
+        'mon_TASK' : BUT.objects.filter(current_day = 0),
+        'tues_TASK' : BUT.objects.filter(current_day = 1),
+        'wed_TASK' : BUT.objects.filter(current_day = 2),
+        'thurs_TASK' : BUT.objects.filter(current_day = 3),
+        'fri_TASK' : BUT.objects.filter(current_day = 4),
+        'sat_TASK' : BUT.objects.filter(current_day = 5),
+        'sun_TASK' : BUT.objects.filter(current_day = 6),
         'event_length' : event_length,
         'current_user' : request.user.username,
         'first_name' : request.user.first_name,

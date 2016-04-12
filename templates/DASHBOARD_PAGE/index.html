@@ -358,6 +358,78 @@
 				scheduler.init('scheduler_here',new Date(calendar_year,calendar_month,calendar_day),"week");
 
 				scheduler.parse( [
+
+						{% for mon_tasks in mon_TASK %}
+
+							{
+								text: "{{mon_tasks}}",
+								start_date: '{{ mon_tasks.start_time }}'.substring(0, 10)+" "+'{{ mon_tasks.start_time }}'.substring(11, 16),
+								end_date: '{{ mon_tasks.end_time }}'.substring(0, 10)+" "+'{{ mon_tasks.end_time }}'.substring(11, 16),
+							},
+
+						{% endfor %}
+
+						{% for tues_tasks in tues_TASK %}
+
+							{
+								text: "{{tues_tasks}}",
+								start_date: '{{ tues_tasks.start_time }}'.substring(0, 10)+" "+'{{ tues_tasks.start_time }}'.substring(11, 16),
+								end_date: '{{ tues_tasks.end_time }}'.substring(0, 10)+" "+'{{ tues_tasks.end_time }}'.substring(11, 16),
+							},
+
+						{% endfor %}
+
+						{% for wed_tasks in wed_TASK %}
+
+							{
+								text: "{{wed_tasks}}",
+								start_date: '{{ wed_tasks.start_time }}'.substring(0, 10)+" "+'{{ wed_tasks.start_time }}'.substring(11, 16),
+								end_date: '{{ wed_tasks.end_time }}'.substring(0, 10)+" "+'{{ wed_tasks.end_time }}'.substring(11, 16),
+							},
+
+						{% endfor %}
+
+						{% for thurs_tasks in thurs_TASK %}
+
+							{
+								text: "{{thurs_tasks}}",
+								start_date: '{{ thurs_tasks.start_time }}'.substring(0, 10)+" "+'{{ thurs_tasks.start_time }}'.substring(11, 16),
+								end_date: '{{ thurs_tasks.end_time }}'.substring(0, 10)+" "+'{{ thurs_tasks.end_time }}'.substring(11, 16),
+							},
+
+						{% endfor %}
+						{% for fri_tasks in fri_TASK %}
+
+							{
+								text: "{{fri_tasks}}",
+								start_date: '{{ fri_tasks.start_time }}'.substring(0, 10)+" "+'{{ fri_tasks.start_time }}'.substring(11, 16),
+								end_date: '{{ fri_tasks.end_time }}'.substring(0, 10)+" "+'{{ fri_tasks.end_time }}'.substring(11, 16),
+							},
+
+						{% endfor %}
+
+						{% for sat_tasks in sat_TASK %}
+
+							{
+								text: "{{sat_tasks}}",
+								start_date: '{{ sat_tasks.start_time }}'.substring(0, 10)+" "+'{{ sat_tasks.start_time }}'.substring(11, 16),
+								end_date: '{{ sat_tasks.end_time }}'.substring(0, 10)+" "+'{{ sat_tasks.end_time }}'.substring(11, 16),
+							},
+
+						{% endfor %}
+
+						{% for sun_tasks in sun_TASK %}
+
+							{
+								text: "{{sun_tasks}}",
+								start_date: '{{ sun_tasks.start_time }}'.substring(0, 10)+" "+'{{ sun_tasks.start_time }}'.substring(11, 16),
+								end_date: '{{ sun_tasks.end_time }}'.substring(0, 10)+" "+'{{ sun_tasks.end_time }}'.substring(11, 16),
+							},
+
+						{% endfor %}
+
+
+
 						{% for monday_tasks in mon %}
 						{% if monday_tasks.authenticated_user.username == current_user %}
 							{
@@ -435,6 +507,7 @@
 							},
 							{% endif %}
 						{% endfor %}
+
 				], "json");
 
 				//Array to store all the currently gathered google events for the user on the calendar
@@ -920,6 +993,10 @@
                 <a href="/dashboard" class="simple-text">
                     Architasker
                     <h6>Welcome back, {{first_name}}!</h6>
+                    
+                    {% for items in mon_TASK %}
+                    	{{items.start_time}}
+                    {% endfor %}
                 </a>
             </div>
 

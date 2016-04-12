@@ -8,6 +8,17 @@ TRANSIT_CHOICES = (
     (3, 'walking'),
 )
 
+
+DAY_CHOICES = (
+    (0, 'monday'),
+    (1, 'tuesday'),
+    (2, 'wednesday'),
+    (3, 'thursday'),
+    (4, 'friday'),
+    (5, 'saturday'),
+    (6, 'sunday')
+)
+
 class UserTask(models.Model):
 	authenticated_user = models.ForeignKey(User, unique=False, null=False, default=None)
 	task_name = models.CharField(max_length=300, unique=False, default='None')
@@ -27,14 +38,29 @@ class UserTask(models.Model):
 	priority = models.IntegerField(default=0)
 	percentile = models.IntegerField(default=0)
 	transit_mode = models.IntegerField(choices=TRANSIT_CHOICES, default=1)
-	perent_distributed = models.FloatField(blank=True, null=True, default=0)
+	percent_distributed = models.FloatField(blank=True, null=True, default=0)
+	mon_task_time = models.FloatField(blank=True, null=True, default=0)
+	tues_task_time = models.FloatField(blank=True, null=True, default=0)
+	wed_task_time = models.FloatField(blank=True, null=True, default=0)
+	thurs_task_time = models.FloatField(blank=True, null=True, default=0)
+	fri_task_time = models.FloatField(blank=True, null=True, default=0)
+	sat_task_time = models.FloatField(blank=True, null=True, default=0)
+	sun_task_time = models.FloatField(blank=True, null=True, default=0)
+
+	def __unicode__(self):
+		return self.task_name
 
 
 class BreakdownUserTask(models.Model):
 	parent_task = models.ForeignKey(UserTask, unique=False, null=False, default=None)
+	# sub_task = models.ForeignKey(UserTask, unique=False, null=False, default=None)
 	start_time = models.CharField(max_length=255, default='None')
 	end_time = models.CharField(max_length=255, default='None')
+	current_day = models.IntegerField(choices=DAY_CHOICES, default=0)
 	# task_name = models.ForeignKey(UserTask.task_name, unique=False, null=False, default=None)
+
+	def __str__(self):
+		return self.parent_task.task_name
 
 
 
