@@ -36,13 +36,21 @@
     <link href="{% static 'css/DASHBOARD_CSS/demo.css' %}" rel="stylesheet" />
 
 
+    <link rel="stylesheet" href="http://ericjgagnon.github.io/wickedpicker/wickedpicker/wickedpicker.min.css">
+    <script type="text/javascript" src="http://ericjgagnon.github.io/wickedpicker/wickedpicker/wickedpicker.min.js"></script>
+
     <!--     Fonts and icons     -->
     <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
     <link href='http://fonts.googleapis.com/css?family=Roboto:400,700,300' rel='stylesheet' type='text/css'>
     <link href="{% static 'css/DASHBOARD_CSS/pe-icon-7-stroke.css' %}" rel="stylesheet" />
 
+    <link href="http://senthilraj.github.io/TimePicki/css/timepicki.css" rel="stylesheet">
 
-<link type="text/css" rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500">
+	<script src='http://bgrins.github.io/spectrum/spectrum.js'></script>
+	<link rel='stylesheet' href='http://bgrins.github.io/spectrum/spectrum.css' />
+
+
+	<link type="text/css" rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500">
     <style>
       #locationField, #controls {
         position: relative;
@@ -82,10 +90,73 @@
         height: 20px;
         margin-bottom: 2px;
       }
+
+	td#addEventForm{
+		border-right:1px solid #F1F1F1;
+		border-top:1px solid #F1F1F1;
+		border-bottom:1px solid #F1F1F1;
+		border-left:0px solid #F1F1F1;
+		padding:5px;
+		margin:0;
+	    vertical-align: middle;
+	    width: 400x;
+	 }
+
+
+	/* Dropdown Button */
+	.dropbtn {
+	    background-color: #4CAF50;
+	    color: white;
+	    padding: 16px;
+	    font-size: 16px;
+	    border: none;
+	    cursor: pointer;
+	}
+
+	/* Dropdown button on hover & focus */
+	.dropbtn:hover, .dropbtn:focus {
+	    background-color: #3e8e41;
+	}
+
+	/* The container <div> - needed to position the dropdown content */
+	.dropdown {
+	    position: relative;
+	    display: inline-block;
+	}
+
+	/* Dropdown Content (Hidden by Default) */
+	.dropdown-content {
+	    display: none;
+	    position: absolute;
+	    background-color: #f9f9f9;
+	    min-width: 160px;
+	    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+	}
+
+	/* Links inside the dropdown */
+	.dropdown-content a {
+	    color: black;
+	    padding: 12px 16px;
+	    text-decoration: none;
+	    display: block;
+	}
+
+	/* Change color of dropdown links on hover */
+	.dropdown-content a:hover {background-color: #f1f1f1}
+
+	/* Show the dropdown menu (use JS to add this class to the .dropdown-content container when the user clicks on the dropdown button) */
+	.show {display:block;}
+
+
+
+.time_pick {
+	position: relative;
+	width: 500px;
+}
+
     </style>
 
 		<script type="text/javascript" charset="utf-8">
-
 
             function stringEscape(s) {
                 return s ? s.replace(/\\/g,'\\\\').replace(/\n/g,'\\n').replace(/\t/g,'\\t').replace(/\v/g,'\\v').replace(/'/g,"\\'").replace(/"/g,'\\"').replace(/[\x00-\x1F\x80-\x9F]/g,hex) : s;
@@ -221,6 +292,10 @@
 					});
 					return true;
 				};
+
+
+
+
 
                 scheduler.config.icons_select = ['icon_details', 'icon_delete', 'i1', 'i2', 'i3', 'i4', 'i5', 'i6', 'i7', 'i8', 'i9', 'i10', 'i11'];
 
@@ -991,6 +1066,17 @@
                     </a>
                 </li>
 
+                <li data-toggle="modal" data-target="#addEventModal">
+                    <a href="#">
+                        <i class="pe-7s-note"></i>
+                        <p>Add Event</p>
+                    </a>
+                </li>
+
+                <!-- Trigger the modal with a button -->
+
+
+
                 <li>
                     <a href="/dashboard">
                         <i class="pe-7s-plus"></i>
@@ -1029,6 +1115,11 @@
             </ul>
     	</div>
     </div>
+
+
+
+
+
 
     <div class="main-panel">
         <nav class="navbar navbar-default navbar-fixed">
@@ -1076,21 +1167,7 @@
                                Account
                             </a>
                         </li>
-                        <!-- <li class="dropdown">
-                              <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                                    Dropdown
-                                    <b class="caret"></b>
-                              </a>
-                              <ul class="dropdown-menu">
-                                <li><a href="#">Action</a></li>
-                                <li><a href="#">Another action</a></li>
-                                <li><a href="#">Something</a></li>
-                                <li><a href="#">Another action</a></li>
-                                <li><a href="#">Something</a></li>
-                                <li class="divider"></li>
-                                <li><a href="#">Separated link</a></li>
-                              </ul>
-                        </li> -->
+
                         <li>
                             <a href="/logout">
                                 Log out
@@ -1103,8 +1180,6 @@
 
 				{% if user_initial_setup == True %}
 
-
-				<center><h3 class="title" id="header_text">{{first_name | title}} {{last_name | title}}'s Weekly To-Do</h3></center>
 
 
                 {% if google_auth_complete == True %}
@@ -1616,10 +1691,15 @@
 		});
 	</script>
 
+
+    <!-- <script src="http://senthilraj.github.io/TimePicki/js/jquery.min.js"></script> -->
+    <script src="http://senthilraj.github.io/TimePicki/js/timepicki.js"></script>
+
+
 </body>
 <div class="se-pre-con"></div>
 
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha256-KXn5puMvxCw+dAYznun+drMdG1IFl3agK0p/pqT9KAo= sha512-2e8qq0ETcfWRI4HJBzQiA3UoyFk6tbNyG+qSaIBZLyW9Xf3sWZHN/lxe9fTh1U45DpPf07yj94KsUHHWe4Yk1A==" crossorigin="anonymous"></script>
+<!-- <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha256-KXn5puMvxCw+dAYznun+drMdG1IFl3agK0p/pqT9KAo= sha512-2e8qq0ETcfWRI4HJBzQiA3UoyFk6tbNyG+qSaIBZLyW9Xf3sWZHN/lxe9fTh1U45DpPf07yj94KsUHHWe4Yk1A==" crossorigin="anonymous"></script> -->
 
 <!--   Core JS Files   -->
 <!-- <script src="{% static 'js/DASHBOARD_JAVASCRIPT/jquery-1.10.2.js'%}" type="text/javascript"></script> -->
@@ -1787,7 +1867,185 @@ function fill_transit(trans_type) {
 }
 
 
+
+
 	</script>
+
+
+
+
+<!-- Modal -->
+<div id="addEventModal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Add Customized Event</h4>
+      </div>
+      <div class="modal-body">
+        <p>An event is something that is a planned and continuous.</p>
+        <h1>I WILL MAKE THIS LOOK GOOD LATER</h1>
+        <hr>
+        <form>
+
+				<table>
+				  <tr>
+				    <td id=""><label for='name'>Event Name:</label></td>
+				    <td id=""><input type='text' id='addEventName'></input></td>
+				 </tr>
+
+
+				  <tr>
+				    <td id=""><label for='name'>Select Day Due:</label></td>
+				    <td>
+					<select id="addEventForm">
+					  <option value="Monday">Monday</option>
+					  <option value="Tuesday">Tuesday</option>
+					  <option value="Wednesday">Wednesday</option>
+					  <option value="Thursday">Thursday</option>
+					  <option value="Friday">Friday</option>
+					  <option value="Saturday">Saturday</option>
+					  <option value="Sunday">Sunday</option>
+					</select>
+					</td>
+				 </tr>
+
+
+				  <tr>
+				    <td id=""><label for='name'>Event Start Time:</label></td>
+				    <td id="">
+
+					 <input id="timepicker1" type="text" name="timepicker1"/>
+
+				    </td>
+				 </tr>
+
+
+				  <tr>
+				    <td id=""><label for='name'>Event End Time:</label></td>
+				    <td id="">
+
+					 <input id="timepicker2" type="text" name="timepicker2"/>
+
+				    </td>
+				 </tr>
+
+
+				 <tr>
+
+				 	<td><label for='name'>Event Color:</label></td>
+				 	<td>
+					 	<input type='text' id="custom" />
+					 </td>
+				 </tr>
+
+				</table>
+
+				<button onclick="create_new_event_form()">Add Event</button>
+
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+    <script>
+		$('#timepicker1').timepicki();
+		$('#timepicker2').timepicki();
+    </script>
+
+    <script>
+$("#custom").spectrum({
+    showPaletteOnly: true,
+    togglePaletteOnly: true,
+    togglePaletteMoreText: 'more',
+    togglePaletteLessText: 'less',
+    color: 'blanchedalmond',
+    palette: [
+        ["#000","#444","#666","#999","#ccc","#eee","#f3f3f3","#fff"],
+        ["#f00","#f90","#ff0","#0f0","#0ff","#00f","#90f","#f0f"],
+        ["#f4cccc","#fce5cd","#fff2cc","#d9ead3","#d0e0e3","#cfe2f3","#d9d2e9","#ead1dc"],
+        ["#ea9999","#f9cb9c","#ffe599","#b6d7a8","#a2c4c9","#9fc5e8","#b4a7d6","#d5a6bd"],
+        ["#e06666","#f6b26b","#ffd966","#93c47d","#76a5af","#6fa8dc","#8e7cc3","#c27ba0"],
+        ["#c00","#e69138","#f1c232","#6aa84f","#45818e","#3d85c6","#674ea7","#a64d79"],
+        ["#900","#b45f06","#bf9000","#38761d","#134f5c","#0b5394","#351c75","#741b47"],
+        ["#600","#783f04","#7f6000","#274e13","#0c343d","#073763","#20124d","#4c1130"]
+    ]
+});
+	</script>
+
+<script>
+	function myFunction() {
+		var color_val = $("#custom").spectrum('get').toHexString();
+		return color_val;
+	    
+	}
+
+	function getWeekDay() {
+		var weekDay = $('#addEventForm').val();
+		return weekDay;
+	}
+
+	function getEventName() {
+		var eventName = $('#addEventName').val();
+		return eventName;
+	}
+
+	function getStartEndTimes() {
+
+		var startTime = $('#timepicker1').val();
+		var endTime = $('#timepicker2').val();
+
+		var totalTimes = [startTime, endTime];
+		return totalTimes;
+	}
+
+
+	
+		function create_new_event_form() {
+		    console.log("create post is working!") // sanity check
+		    var hex_color = myFunction();
+		    var weekDay = getWeekDay();
+		    var eventName = getEventName();
+		    var allTimes = getStartEndTimes();
+
+		    $.ajax({
+		        url : "create_event/", // the endpoint
+		        type : "POST", // http method
+				data: {
+					csrfmiddlewaretoken: '{{ csrf_token }}',
+					start: allTimes[0],
+					end: allTimes[1],
+					text: eventName,
+					id: "123123",
+					current_day: weekDay, //what if the event was a multi-day event?!?!
+					color: hex_color
+
+				},
+		        success : function(json) {
+
+		            console.log("success"); // another sanity check
+		            location.reload();
+		        },
+
+		        // handle a non-successful response
+		        error : function(xhr,errmsg,err) {
+		        	console.log("didn't work");
+		        }
+		    });
+		};
+
+
+
+
+
+</script>
 
 
 </html>

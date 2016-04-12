@@ -1086,7 +1086,6 @@ def task_reset(request):
 		mini_task.delete()
 
 
-
 #Get query set/list of all tasks that NEED to be distributed within the current day
 def get_tasks_for_day(current_day_of_week, request, current_date):
 
@@ -1198,6 +1197,9 @@ Allocate tasks
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 def allocate_tasks(request):
 
+	print("THE CURRENT USER IS "),
+	print(request.user)
+
 	#Get the currently logged in user
 	current_user = User.objects.get(username=request.user.username)
 
@@ -1307,95 +1309,6 @@ def allocate_tasks(request):
 				else:
 					break
 
-
-
-
-
-
-
-			#Check if we need to distribute this random task.
-			#If (enter)
-			#Else (continue)
-		
-
-
-
-
-
-	# #Loop through each of the days inside of the dictionary
-	# for x in range(0,7):	
-
-	# 	task_hours_for_day = task_hours[x]
-	# 	#task_hours_for_day = math.ceil(task_hours_for_day)
-	# 	task_hours_for_day = task_hours_for_day
-	# 	#DON'T KNOW HOW TO ROUND UP TO NEAREST .5
-
-	# 	for time in free_blocks[str(x)]:
-
-	# 		start_time = time[0]
-	# 		print(start_time)
-	# 		end_time = time[1]
-	# 		print(end_time)
-
-	# 		print("Task hours for day %.2f" %(task_hours_for_day))
-
-	# 		available_hours_in_block = (parse(time[1]) - parse(time[0])).total_seconds() / 3600
-	# 		print(available_hours_in_block)
-			
-	# 		while(task_hours_for_day > .1 and available_hours_in_block > .25):
-
-	# 			random_task_index = randint(0, len(available_tasks(request)) - 1)
-	# 			random_task = available_tasks(request)[random_task_index]
-
-	# 			#number of hours that still need to be distributed
-	# 			task_hours_to_distribute = random_task.estimated_time * random_task.percent_to_complete * (1 - random_task.percent_distributed)
-	# 			#if(random_task.estimated_time * (random_task.percent_to_complete/100) * (Decimal(100 - random_task.percent_distributed)/100) <= available_hours_in_block):
-	# 			if(task_hours_for_day <= available_hours_in_block):
-
-	# 				temp_mini_task = BreakdownUserTask.objects.create(
-	# 					parent_task = random_task,
-	# 					start_time = parse(start_time),
-	# 					end_time = parse(start_time) + datetime.timedelta(hours = float(task_hours_for_day)),
-	# 					current_day = parse(start_time).weekday()
-	# 				)
-
-	# 				if( task_hours_to_distribute < task_hours_for_day):
-	# 					temp_mini_task.end_time = parse(start_time) + datetime.timedelta(hours = float(task_hours_to_distribute))
-
-	# 				temp_mini_task.save()
-
-	# 				print("Hours distributed %.2f" %((((temp_mini_task.end_time) - (temp_mini_task.start_time)).total_seconds() / 3600)))
-	# 				start_time = str(temp_mini_task.end_time + datetime.timedelta(minutes = 15))
-	# 				available_hours_in_block -= ((temp_mini_task.end_time - temp_mini_task.start_time).total_seconds()) / 3600
-	# 				print("If block: Available hours in block %.2f" %(available_hours_in_block))
-	# 				task_hours_for_day -= (((temp_mini_task.end_time) - (temp_mini_task.start_time)).total_seconds() / 3600)
-	# 				print("If block: Task hours for day %.2f" %(task_hours_for_day))
-
-	# 				random_task.percent_distributed += float((((temp_mini_task.end_time) - (temp_mini_task.start_time)).total_seconds() / 3600) / float(random_task.estimated_time * random_task.percent_to_complete)) 
-	# 				random_task.save()
-
-
-	# 			else:
-	# 				temp_mini_task = BreakdownUserTask.objects.create(
-	# 					parent_task = random_task,
-	# 					start_time = parse(start_time),
-	# 					end_time = parse(start_time) + datetime.timedelta(hours = available_hours_in_block),
-	# 					current_day = parse(start_time).weekday()
-	# 				)
-
-	# 				if( task_hours_to_distribute < available_hours_in_block):
-	# 					temp_mini_task.end_time = parse(start_time) + datetime.timedelta(hours = float(task_hours_to_distribute))
-
-	# 				temp_mini_task.save()
-
-	# 				available_hours_in_block = 0
-	# 				print(temp_mini_task.end_time)
-	# 				task_hours_for_day -= (((temp_mini_task.end_time) - (temp_mini_task.start_time)).total_seconds() / 3600)
-	# 				print("Else block: Hours distributed %.2f" %((temp_mini_task.end_time - temp_mini_task.start_time).total_seconds()/3600))
-	# 				print("Else block: Task hours for day %.2f" %(task_hours_for_day))
-	# 				# print("If block: Available hours in block %d" %(available_hours_in_block))
-	# 				random_task.percent_distributed += float((((temp_mini_task.end_time) - (temp_mini_task.start_time)).total_seconds() / 3600) / float(random_task.estimated_time * random_task.percent_to_complete)) 
-	# 				random_task.save()
 
 
 

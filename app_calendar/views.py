@@ -817,22 +817,70 @@ def pull_user_event_data(request):
     return HttpResponseRedirect('/dashboard')
 
 
+
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+Function to get army time and date format for create event
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+def get_correct_date_time_format(request, day_num):
+
+    ranges = get_current_week_range(request)
+
+
+    if (day_num == 'Monday'):
+        print(parse(ranges[0]) + datetime.timedelta(days=0))
+    elif (day_num == 'Tuesday'):
+        print(parse(ranges[0]) + datetime.timedelta(days=1))
+    elif (day_num == 'Wednesday'):
+        print(parse(ranges[0]) + datetime.timedelta(days=2))
+    elif (day_num == 'Thursday'):
+        print(parse(ranges[0]) + datetime.timedelta(days=3))
+    elif (day_num == 'Friday'):
+        print(parse(ranges[0]) + datetime.timedelta(days=4))
+    elif (day_num == 'Saturday'):
+        print(parse(ranges[0]) + datetime.timedelta(days=5))
+    elif (day_num == 'Sunday'):
+        print(parse(ranges[0]) + datetime.timedelta(days=6))
+
+
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 Function to store new event created on calendar into database
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 @login_required(login_url='/login')
 def create_event(request):
+
+
+
     if request.method == 'POST':
 
-        current_user = User.objects.get(id=request.user.id)
-        temp_model = SNE.objects.create(
-            authenticated_user = current_user,
-            task_name = request.POST.get('text'),
-            start_time = request.POST.get('start') + 'Z',
-            end_time = request.POST.get('end') + 'Z',
-            special_event_id = request.POST.get('id'),
-            color = '#34495e'
-        )
+        if 'current_day' in request.POST:
+
+            print("IN CURRENT DAY")
+
+            get_correct_date_time_format(request, request.POST.get('current_day'))
+
+            current_user = User.objects.get(id=request.user.id)
+            temp_model = SNE.objects.create(
+                authenticated_user = current_user,
+                task_name = request.POST.get('text'),
+                start_time = request.POST.get('start') + 'Z',
+                end_time = request.POST.get('end') + 'Z',
+                special_event_id = request.POST.get('id'),
+                color = request.POST.get('color'),
+                current_day = request.POST.get('current_day')
+            )
+        else:
+            print("NOT IN CURRENT DAY")
+
+            current_user = User.objects.get(id=request.user.id)
+            temp_model = SNE.objects.create(
+                authenticated_user = current_user,
+                task_name = request.POST.get('text'),
+                start_time = request.POST.get('start') + 'Z',
+                end_time = request.POST.get('end') + 'Z',
+                special_event_id = request.POST.get('id'),
+                color = '#34495e'
+            )
+
 
         if (request.POST.get('weekday') == "Mon" ):
             temp_model.current_day = "Monday"
@@ -869,7 +917,6 @@ def delete_event(request):
         SNE.objects.get(special_event_id=request.POST.get('id')).delete()
         print("deleted")
         return HttpResponse("deleted")
-
 
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
