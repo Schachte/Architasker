@@ -823,6 +823,13 @@ Function to get army time and date format for create event
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 def get_correct_date_time_format(request, day_num):
 
+
+    #Here what we need to do is parse out the day of and append the correct military time to match the UTC time conversion for the start and end time
+
+    '''''''''''''''''''''''''''''''''''''''''''''
+    INSERT MILITARY TIME CONVERSION ALGORITHM HERE
+    '''''''''''''''''''''''''''''''''''''''''''''
+
     ranges = get_current_week_range(request)
 
 
@@ -847,8 +854,6 @@ Function to store new event created on calendar into database
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 @login_required(login_url='/login')
 def create_event(request):
-
-
 
     if request.method == 'POST':
 
@@ -880,7 +885,6 @@ def create_event(request):
                 special_event_id = request.POST.get('id'),
                 color = '#34495e'
             )
-
 
         if (request.POST.get('weekday') == "Mon" ):
             temp_model.current_day = "Monday"
