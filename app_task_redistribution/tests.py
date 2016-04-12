@@ -4,6 +4,14 @@ from app_calendar.models import UserEvent
 from app_account_management.models import UserExtended
 from .views import *
 
+
+#########################################################################################################
+#																										#
+# 	MAKE SURE TO COMMENT OUT THE HTTPRESPONSE AT THE END OF THE FREE BLOCK ALGORITHM AND UNCOMMENT		#
+# 	THE RETURN STATEMENT OF THE FREE BLOCK LIST BEFORE RUNNING THESE TESTS								#
+#																										#
+#########################################################################################################
+
 class FreeBlocksTestCase(TestCase):
 	def setUp(self):
 		self.factory = RequestFactory()
