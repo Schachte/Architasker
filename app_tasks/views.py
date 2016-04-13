@@ -7,6 +7,7 @@ from procrastinate import settings
 from .models import UserTask as Task
 from app_account_management.models import UserExtended
 from dateutil.parser import parse
+from app_task_redistribution.views import allocate_tasks
 
 # Create your views here.
 
@@ -23,7 +24,7 @@ def create_task(request):
             authenticated_user = current_user,
             task_name = request.POST.get('task_name'),
             due_date = request.POST.get('task_due_date'),
-            percent_to_complete = int(request.POST.get('task_percent')),
+            percent_to_complete = float(request.POST.get('task_percent'))/100,
             estimated_time = float(request.POST.get('task_time')),
             difficulty = int(request.POST.get('task_priority')),
             # color = request.POST.get('color'),
@@ -45,8 +46,11 @@ def create_task(request):
         	temp_model.pomodoro = True
 
         temp_model.save()
+        allocate_tasks(request)
+        context = {}
+        return render(request, 'DASHBOARD_PAGE/index.html', context)
         print("created task")
-        return HttpResponse("none")
+        #return HttpResponse("none")
 
 
 
