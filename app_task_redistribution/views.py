@@ -50,6 +50,8 @@ from string import ascii_uppercase
 from app_tasks.models import BreakdownUserTask as BUT
 from django.core import serializers
 
+from collections import namedtuple
+
 
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -1346,6 +1348,9 @@ def allocate_tasks(request):
 
 					else:
 
+						random_event_id = ''.join(choice(ascii_uppercase) for i in range(20))
+						random_event_id = 'task_' + random_event_id
+
 						mini_task_name = random_task.task_name
 
 						temp_mini_task = BreakdownUserTask.objects.create(
@@ -1509,7 +1514,26 @@ def event_conflict_analysis(request):
 				e_start = parse(converted_start_time)
 				e_end = parse(converted_end_time)
 
-				if ((e_start < b_start and e_end < b_start and e_start < b_end and e_end < b_end) or (e_start > b_start and e_end > b_start and e_start > b_end and e_end > b_end)):
+				min_time_zeroed = ' 00:00:00+00:00'
+				max_time_zeroed = ' 23:59:00+00:00'
+
+				current_day_min= str(b_start)
+				current_day_max= str(b_start)
+
+				current_day_min += min_time_zeroed
+				current_day_max += max_time_zeroed
+
+				current_day_min = parse(current_day_min)
+				current_day_max = parse(current_day_max)
+
+				print(current_day_min)
+				print("IS CURRENT DAY MIN!")
+
+				print(current_day_max)
+				print("IS CURRENT DAY MIN!")
+
+
+				if ((e_start > current_day_min and e_end < current_day_max) and (e_start < b_start and e_end < b_start and e_start < b_end and e_end < b_end) or (e_start > b_start and e_end > b_start and e_start > b_end and e_end > b_end)):
 					continue
 				else:
 					conflicts.append(each_breakdown_task)
@@ -1523,8 +1547,10 @@ def event_conflict_analysis(request):
 			print(data)
 			json.dumps(data)
 		else:
-			print("No tasks for day %d"%(day_to_check	))
-			data = ''
+			data = []
+			data = serializers.serialize("json", data)
+			json.dumps(data)
+
 		return HttpResponse(data)
 	else:
 		print("not a post")

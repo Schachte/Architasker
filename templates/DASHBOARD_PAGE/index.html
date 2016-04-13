@@ -158,6 +158,8 @@
 
 		<script type="text/javascript" charset="utf-8">
 
+		var event_can_add = false;
+
             function stringEscape(s) {
                 return s ? s.replace(/\\/g,'\\\\').replace(/\n/g,'\\n').replace(/\t/g,'\\t').replace(/\v/g,'\\v').replace(/'/g,"\\'").replace(/"/g,'\\"').replace(/[\x00-\x1F\x80-\x9F]/g,hex) : s;
                 function hex(c) { var v = '0'+c.charCodeAt(0).toString(16); return '\\x'+v.substr(v.length-2); }
@@ -2167,21 +2169,44 @@ $("#custom").spectrum({
 		        	}
 		        	else {
 		        		console.log("There are no conflicts!");
+		        		event_can_add = true;
+		  
 		        	}
 		        },
 
 		        // handle a non-successful response
 		        error : function(xhr,errmsg,err) {
-		        	console.log("didn't work");
+		        	console.log("didn't work2");
+		        },
+
+		        complete : function() {
+
+		        	// var event_can_add = false;
+
+		        	console.log(event_can_add);
+
+		        	if (event_can_add == true)
+			        {
+			        	console.log("asuh");
+			        	ajaxAddEventCaller();
+			        }
+			        else {
+			        	console.log("busy!");
+			        }
 		        }
+
 			});
 		};
 
 
 		function refresher() {
 
-
 			location.href = '/dashboard';
+		};
+
+		function ajaxAddEventCaller() {
+			console.log("here");
+			create_new_event_form();
 		};
 
 
