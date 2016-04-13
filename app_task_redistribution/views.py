@@ -9,6 +9,7 @@ import collections
 import time
 import urllib
 import pytz
+import json
 import re
 from random import randint
 
@@ -46,6 +47,8 @@ import urllib, json
 
 from random import choice
 from string import ascii_uppercase
+from app_tasks.models import BreakdownUserTask as BUT
+from django.core import serializers
 
 
 
@@ -1315,12 +1318,15 @@ def allocate_tasks(request):
 						random_event_id = ''.join(choice(ascii_uppercase) for i in range(20))
 						random_event_id = 'task_' + random_event_id
 
+						mini_task_name = random_task.task_name
+
 						temp_mini_task = BreakdownUserTask.objects.create(
 							parent_task = random_task,
 							start_time = parse(start_time),
 							end_time = parse(start_time) + datetime.timedelta(hours = float(get_task_time_for_day(random_task, int_day_of_week))),
 							current_day = parse(start_time).weekday(),
-							UID = random_event_id
+							UID = random_event_id,
+							bdt_name = mini_task_name
 						)
 
 						temp_mini_task.save()
@@ -1340,12 +1346,15 @@ def allocate_tasks(request):
 
 					else:
 
+						mini_task_name = random_task.task_name
+
 						temp_mini_task = BreakdownUserTask.objects.create(
 							parent_task = random_task,
 							start_time = parse(start_time),
 							end_time = parse(start_time) + datetime.timedelta(hours = float(available_hours_in_block)),
 							current_day = parse(start_time).weekday(),
-							UID = random_event_id
+							UID = random_event_id,
+							bdt_name = mini_task_name
 						)
 
 						temp_mini_task.save()
@@ -1357,4 +1366,167 @@ def allocate_tasks(request):
 
 
 	return HttpResponse("Allocated tasks successfully!")
-	
+
+
+
+
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+Function to get army time and date format for create event
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+def get_correct_date_time_format(request, day_num, clock_str):
+
+
+    #Here what we need to do is parse out the day of and append the correct military time to match the UTC time conversion for the start and end time
+
+    print("Day num is %s"%(day_num))
+
+    ranges = get_current_week_range(request)
+
+    print("ranges are "),
+    print(ranges)
+
+    #time inputs as 04 : 15 : PMZ
+
+    #Get rid of the spaces within the string
+    clock_str = clock_str.replace(' ', '')
+
+    print("clock str after space replace is %s"%(clock_str))
+
+    #Provide the appropriate offset for the conversion
+    if 'A' in clock_str:
+        clock_str = clock_str[0:5] + ' ' + 'AM'
+        print("THIS IS AM!")
+    elif 'P' in clock_str:
+        clock_str = clock_str[0:5] + ' ' + 'PM' 
+        print("THIS IS PM!")
+
+    clock_str = datetime.datetime.strptime(clock_str, '%I:%M %p')
+    clock_str = str(clock_str)
+    clock_str = 'T'+clock_str[11:]
+
+    print("Final clock_str is %s"%(clock_str))
+
+
+    if (day_num == 'Monday'):
+        date_portion = parse(ranges[0]) + datetime.timedelta(days=1)
+        date_portion = str(date_portion)
+        date_portion = date_portion[0:10] #This is just the date now 2016-04-13 .
+    elif (day_num == 'Tuesday'):
+        date_portion = parse(ranges[0]) + datetime.timedelta(days=2)
+        date_portion = str(date_portion)
+        date_portion = date_portion[0:10] #This is just the date now 2016-04-13 .
+    elif (day_num == 'Wednesday'):
+        date_portion = parse(ranges[0]) + datetime.timedelta(days=3)
+        date_portion = str(date_portion)
+        date_portion = date_portion[0:10] #This is just the date now 2016-04-13 .
+    elif (day_num == 'Thursday'):
+        date_portion = parse(ranges[0]) + datetime.timedelta(days=4)
+        date_portion = str(date_portion)
+        date_portion = date_portion[0:10] #This is just the date now 2016-04-13 .
+    elif (day_num == 'Friday'):
+        date_portion = parse(ranges[0]) + datetime.timedelta(days=5)
+        date_portion = str(date_portion)
+        date_portion = date_portion[0:10] #This is just the date now 2016-04-13 .
+    elif (day_num == 'Saturday'):
+        date_portion = parse(ranges[0]) + datetime.timedelta(days=6)
+        date_portion = str(date_portion)
+        date_portion = date_portion[0:10] #This is just the date now 2016-04-13 .
+    elif (day_num == 'Sunday'):
+        date_portion = parse(ranges[0]) + datetime.timedelta(days=7)
+        date_portion = str(date_portion)
+        date_portion = date_portion[0:10] #This is just the date now 2016-04-13 .
+
+    completed_date_time = date_portion + clock_str
+    print(completed_date_time)
+
+    return completed_date_time
+
+
+
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+Check Event Conflict Analysis With Other Tasks
+-	User adds an event, this function controls the logic for 
+	displaying the modal window with conflict data
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+def event_conflict_analysis(request):
+
+	if request.method == 'POST':
+		
+		#Get the post variable for the day
+		day_to_check = request.POST.get('current_day')
+		start_time = request.POST.get('start')
+		end_time = request.POST.get('end')
+
+		#Get some times to use from standard to military
+		converted_start_time = get_correct_date_time_format(request, request.POST.get('current_day'), request.POST.get('start'))
+		converted_end_time = get_correct_date_time_format(request, request.POST.get('current_day'), request.POST.get('end'))
+
+		#Get a start and end date for the week
+		ranges = get_current_week_range(request)
+
+		#Push each day within the week to a list for easy selection
+		week_list = []
+		for days_iterator in range(0, 7):
+			current_day = parse(ranges[0])
+			current_day = current_day + datetime.timedelta(days=days_iterator)
+			week_list.append(str(current_day))
+
+		#POST var string to int conversion
+		if (day_to_check == 'Monday'):
+			day_to_check = 0
+		elif (day_to_check == 'Tuesday'):
+			day_to_check = 1
+		elif (day_to_check == 'Wednesday'):
+			day_to_check = 2
+		elif (day_to_check == 'Thursday'):
+			day_to_check = 3		
+		elif (day_to_check == 'Friday'):
+			day_to_check = 4
+		elif (day_to_check == 'Saturday'):
+			day_to_check = 5
+		elif (day_to_check == 'Sunday'):
+			day_to_check = 6
+
+		#Parse object to string for character manipulation
+		converted_start_time = str(converted_start_time)
+		converted_end_time = str(converted_end_time)
+
+		#Concatenate the correct day and time for the event to check event conflict analysis
+		converted_start_time = week_list[day_to_check][0:10] + ' ' + converted_start_time[11:] + "+00:00"
+		converted_end_time = week_list[day_to_check][0:10] + ' ' + converted_end_time[11:] + "+00:00"
+
+		#Get all the user mini breakdown sets within a query set
+		user_breakdown_mini_tasks = BUT.objects.filter(parent_task__authenticated_user = request.user, current_day=day_to_check)
+		conflicts = []
+
+
+		if (len(user_breakdown_mini_tasks) > 0):
+			for each_breakdown_task in user_breakdown_mini_tasks:
+				b_start = parse(each_breakdown_task.start_time)
+				b_end = parse(each_breakdown_task.end_time)
+
+				e_start = parse(converted_start_time)
+				e_end = parse(converted_end_time)
+
+				if ((e_start < b_start and e_end < b_start and e_start < b_end and e_end < b_end) or (e_start > b_start and e_end > b_start and e_start > b_end and e_end > b_end)):
+					continue
+				else:
+					conflicts.append(each_breakdown_task)
+
+		for tasks_breakdown in conflicts:
+			print("Event conflicts with: %s"%(tasks_breakdown))
+
+
+		if (len(user_breakdown_mini_tasks) > 0):
+			data = serializers.serialize("json", conflicts)
+			print(data)
+			json.dumps(data)
+		else:
+			print("No tasks for day %d"%(day_to_check	))
+			data = ''
+		return HttpResponse(data)
+	else:
+		print("not a post")
+		return HttpResponse("Error, this is not a valid input response dingus")
+

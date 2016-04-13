@@ -66,6 +66,7 @@ urlpatterns = [
     url(r'^archicalc', task_distribution, name='task_distribution'),
     url(r'^get_distance', get_travel_time, name='get_travel_time'),
     url(r'^allocate_test', allocate_tasks, name='allocate_tasks'),
+    url(r'^event_conflict', event_conflict_analysis, name='event_conflict_analysis'),
 
 
 ]

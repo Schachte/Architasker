@@ -305,6 +305,7 @@
 
 
 
+
                 scheduler.config.icons_select = ['icon_details', 'icon_delete', 'i1', 'i2', 'i3', 'i4', 'i5', 'i6', 'i7', 'i8', 'i9', 'i10', 'i11'];
 
         		scheduler.locale.labels.i1 = "i_1";
@@ -721,7 +722,6 @@
 			});
 
 			
-
 		</script>
 
 
@@ -1997,7 +1997,7 @@ function fill_transit(trans_type) {
 
 				</table>
 
-				<button onclick="create_new_event_form()">Add Event</button>
+				<button onclick="checkEventConflictAnalysis();return false;">Add Event</button>
 
         </form>
       </div>
@@ -2008,6 +2008,30 @@ function fill_transit(trans_type) {
 
   </div>
 </div>
+
+
+
+<div class="modal fade" id="conflictmodal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Hold on! There are event and task conflicts!</h4>
+      </div>
+      <div class="modal-body">
+        The event <b><span id="event_name_list_1"></p></b> conflicts with the following tasks:<br>
+        <ul id = "event_name_list">
+
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button onclick="refresher()" type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <!-- <button type="button" class="btn btn-primary">Save changes</button> -->
+      </div>
+    </div>
+  </div>
+</div>
+
 
     <script>
 		$('#timepicker1').timepicki();
@@ -2097,6 +2121,68 @@ $("#custom").spectrum({
 
 
 
+		//This is an ajax call that will help display event and mini task conflict analysis in modal
+		function checkEventConflictAnalysis() {
+
+			var allTimes = getStartEndTimes();
+			var weekDay = getWeekDay();
+
+			$('.ajaxProgress').show();
+			$.ajax({
+				type: "POST",
+				url: "event_conflict/",
+				dataType: "json",
+				data: {
+					csrfmiddlewaretoken: '{{ csrf_token }}',
+					start: allTimes[0],
+					end: allTimes[1],
+					current_day: weekDay,
+				},
+		        success : function(my_json) {
+
+		            console.log("Success"); // another sanity check
+		            $('#addEventModal').modal('hide');
+		            console.log(my_json);
+
+		            var count = Object.keys(my_json).length;
+
+		            if (count > 0) {
+		            	console.log("There are " + count + " conflicts");
+
+		            	//Get the event name with conflicts
+		            	var eventName = getEventName();
+
+		            	//Set the html of the conflict analysis modal window with the event name
+		            	event_name_HTML = document.getElementById("event_name_list_1");
+		            	event_name_HTML.innerHTML = eventName;
+
+		            	//Set the list by looping through JSON elements
+		            	conflict_list_HTML = document.getElementById("event_name_list");
+
+						for (i = 0; i < count; i++) {
+						    conflict_list_HTML.innerHTML += "<li>" + my_json[i]['fields']['bdt_name'] +"</li>";
+						}
+
+		            	$('#conflictmodal').modal('show');
+		        	}
+		        	else {
+		        		console.log("There are no conflicts!");
+		        	}
+		        },
+
+		        // handle a non-successful response
+		        error : function(xhr,errmsg,err) {
+		        	console.log("didn't work");
+		        }
+			});
+		};
+
+
+		function refresher() {
+
+
+			location.href = '/dashboard';
+		};
 
 
 </script>

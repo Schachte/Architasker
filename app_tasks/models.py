@@ -53,15 +53,14 @@ class UserTask(models.Model):
 
 class BreakdownUserTask(models.Model):
 	parent_task = models.ForeignKey(UserTask, unique=False, null=False, default=None)
-	# sub_task = models.ForeignKey(UserTask, unique=False, null=False, default=None)
+	UID = models.CharField(max_length=255, default='None')
 	start_time = models.CharField(max_length=255, default='None')
 	end_time = models.CharField(max_length=255, default='None')
 	current_day = models.IntegerField(choices=DAY_CHOICES, default=0)
-	# task_name = models.ForeignKey(UserTask.task_name, unique=False, null=False, default=None)
-	UID = models.CharField(max_length=255, default='None')
+	bdt_name = models.CharField(max_length=255, default='None')
 
 	def __str__(self):
-		return self.parent_task.task_name
+		return self.bdt_name
 
 
 
