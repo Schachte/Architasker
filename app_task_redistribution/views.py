@@ -44,6 +44,9 @@ from app_tasks.models import BreakdownUserTask
 from operator import itemgetter
 import urllib, json
 
+from random import choice
+from string import ascii_uppercase
+
 
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -1257,11 +1260,6 @@ def allocate_tasks(request):
 	#Get number of hours that can be spent on tasks per day (array)
 	task_hours = task_hours_per_day(request)
 
-
-	#task conflict analysis...if 0 is returned then no error, 1 means there are more task hours than free hours
-	if(task_conflict_analysis(request) == 1):
-		return HttpResponse("Conflict Analysis!")
-
 	#Variable that stores the current time based on the timezone of the user account
 	current_user_extended = UserExtended.objects.get(authenticated_user=request.user)
 	current_user_time_zone = current_user_extended.time_zone
@@ -1314,11 +1312,15 @@ def allocate_tasks(request):
 						print("task time for day is %.8f"%(get_task_time_for_day(random_task, int_day_of_week)))
 						print("start time is %s"%(start_time))
 
+						random_event_id = ''.join(choice(ascii_uppercase) for i in range(20))
+						random_event_id = 'task_' + random_event_id
+
 						temp_mini_task = BreakdownUserTask.objects.create(
 							parent_task = random_task,
 							start_time = parse(start_time),
 							end_time = parse(start_time) + datetime.timedelta(hours = float(get_task_time_for_day(random_task, int_day_of_week))),
-							current_day = parse(start_time).weekday()
+							current_day = parse(start_time).weekday(),
+							UID = random_event_id
 						)
 
 						temp_mini_task.save()
@@ -1342,7 +1344,8 @@ def allocate_tasks(request):
 							parent_task = random_task,
 							start_time = parse(start_time),
 							end_time = parse(start_time) + datetime.timedelta(hours = float(available_hours_in_block)),
-							current_day = parse(start_time).weekday()
+							current_day = parse(start_time).weekday(),
+							UID = random_event_id
 						)
 
 						temp_mini_task.save()

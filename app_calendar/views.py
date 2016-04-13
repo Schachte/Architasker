@@ -47,6 +47,10 @@ from app_account_management.models import UserExtended
 
 from operator import itemgetter
 
+
+from random import choice
+from string import ascii_uppercase
+
 #Load the API key
 CLIENT_SECRETS = os.path.join(os.path.dirname(__file__), '..', 'client_secrets.json')
 
@@ -821,7 +825,7 @@ def pull_user_event_data(request):
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 Function to get army time and date format for create event
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-def get_correct_date_time_format(request, day_num):
+def get_correct_date_time_format(request, day_num, clock_str):
 
 
     #Here what we need to do is parse out the day of and append the correct military time to match the UTC time conversion for the start and end time
@@ -830,23 +834,69 @@ def get_correct_date_time_format(request, day_num):
     INSERT MILITARY TIME CONVERSION ALGORITHM HERE
     '''''''''''''''''''''''''''''''''''''''''''''
 
+
+    print("Day num is %s"%(day_num))
+
     ranges = get_current_week_range(request)
+
+    print("ranges are "),
+    print(ranges)
+
+    #time inputs as 04 : 15 : PMZ
+
+    #Get rid of the spaces within the string
+    clock_str = clock_str.replace(' ', '')
+
+    print("clock str after space replace is %s"%(clock_str))
+
+    #Provide the appropriate offset for the conversion
+    if 'A' in clock_str:
+        clock_str = clock_str[0:5] + ' ' + 'AM'
+        print("THIS IS AM!")
+    elif 'P' in clock_str:
+        clock_str = clock_str[0:5] + ' ' + 'PM' 
+        print("THIS IS PM!")
+
+    clock_str = datetime.datetime.strptime(clock_str, '%I:%M %p')
+    clock_str = str(clock_str)
+    clock_str = 'T'+clock_str[11:]
+
+    print("Final clock_str is %s"%(clock_str))
 
 
     if (day_num == 'Monday'):
-        print(parse(ranges[0]) + datetime.timedelta(days=0))
+        date_portion = parse(ranges[0]) + datetime.timedelta(days=0)
+        date_portion = str(date_portion)
+        date_portion = date_portion[0:10] #This is just the date now 2016-04-13 .
     elif (day_num == 'Tuesday'):
-        print(parse(ranges[0]) + datetime.timedelta(days=1))
+        date_portion = parse(ranges[0]) + datetime.timedelta(days=1)
+        date_portion = str(date_portion)
+        date_portion = date_portion[0:10] #This is just the date now 2016-04-13 .
     elif (day_num == 'Wednesday'):
-        print(parse(ranges[0]) + datetime.timedelta(days=2))
+        date_portion = parse(ranges[0]) + datetime.timedelta(days=2)
+        date_portion = str(date_portion)
+        date_portion = date_portion[0:10] #This is just the date now 2016-04-13 .
     elif (day_num == 'Thursday'):
-        print(parse(ranges[0]) + datetime.timedelta(days=3))
+        date_portion = parse(ranges[0]) + datetime.timedelta(days=3)
+        date_portion = str(date_portion)
+        date_portion = date_portion[0:10] #This is just the date now 2016-04-13 .
     elif (day_num == 'Friday'):
-        print(parse(ranges[0]) + datetime.timedelta(days=4))
+        date_portion = parse(ranges[0]) + datetime.timedelta(days=4)
+        date_portion = str(date_portion)
+        date_portion = date_portion[0:10] #This is just the date now 2016-04-13 .
     elif (day_num == 'Saturday'):
-        print(parse(ranges[0]) + datetime.timedelta(days=5))
+        date_portion = parse(ranges[0]) + datetime.timedelta(days=5)
+        date_portion = str(date_portion)
+        date_portion = date_portion[0:10] #This is just the date now 2016-04-13 .
     elif (day_num == 'Sunday'):
-        print(parse(ranges[0]) + datetime.timedelta(days=6))
+        date_portion = parse(ranges[0]) + datetime.timedelta(days=6)
+        date_portion = str(date_portion)
+        date_portion = date_portion[0:10] #This is just the date now 2016-04-13 .
+
+    completed_date_time = date_portion + clock_str
+    print(completed_date_time)
+
+    return completed_date_time + 'Z'
 
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -859,17 +909,19 @@ def create_event(request):
 
         if 'current_day' in request.POST:
 
-            print("IN CURRENT DAY")
 
-            get_correct_date_time_format(request, request.POST.get('current_day'))
+            converted_start_time = get_correct_date_time_format(request, request.POST.get('current_day'), request.POST.get('start'))
+            converted_end_time = get_correct_date_time_format(request, request.POST.get('current_day'), request.POST.get('end'))
+            random_event_id = ''.join(choice(ascii_uppercase) for i in range(15))
+
 
             current_user = User.objects.get(id=request.user.id)
             temp_model = SNE.objects.create(
                 authenticated_user = current_user,
                 task_name = request.POST.get('text'),
-                start_time = request.POST.get('start') + 'Z',
-                end_time = request.POST.get('end') + 'Z',
-                special_event_id = request.POST.get('id'),
+                start_time = converted_start_time,
+                end_time = converted_end_time,
+                special_event_id = random_event_id,
                 color = request.POST.get('color'),
                 current_day = request.POST.get('current_day')
             )
@@ -1006,6 +1058,8 @@ def get_calendar_data(request):
     else:
         event_length = 0
 
+    user_breakdown_mini_tasks = BUT.objects.filter(parent_task__authenticated_user = request.user)
+
     context = {
 
         'user_is_authenticated' : user_is_authenticated,
@@ -1030,6 +1084,7 @@ def get_calendar_data(request):
         'user_login_count' : user_login_count,
         'user_initial_setup' : user_initial_setup,
         'google_auth_complete' : google_auth_complete,
+        'breakdown_tasks':user_breakdown_mini_tasks,
     }
 
     if (not current_user_time_zone == 'None'):

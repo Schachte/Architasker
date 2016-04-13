@@ -172,6 +172,14 @@
                     $('#mymodal').modal('show');
                 }
 
+                var open_modal_breakdown_tasks = function(id, event_color, start, end) {
+                    $("#modal_title").html("Breakdown Task Name: <font color=\"" + "black" +"\"><b>" + scheduler.getEvent(id).text + "</b></font>");
+                    $("#start_time").html("Start Time: <b>" + start + "</b>");
+                    $("#end_time").html("End Time: <b>" + end + "</b>");
+                    $('#mymodal').modal('show');
+                }
+
+
 				google_ids = [];
 
 				var currently_selected_id = "";
@@ -438,6 +446,7 @@
 
 							{
 								text: "{{mon_tasks}}",
+								id: '{{ mon_tasks.UID }}',
 								start_date: '{{ mon_tasks.start_time }}'.substring(0, 10)+" "+'{{ mon_tasks.start_time }}'.substring(11, 16),
 								end_date: '{{ mon_tasks.end_time }}'.substring(0, 10)+" "+'{{ mon_tasks.end_time }}'.substring(11, 16),
 							},
@@ -448,6 +457,7 @@
 
 							{
 								text: "{{tues_tasks}}",
+								id: '{{ tues_tasks.UID }}',
 								start_date: '{{ tues_tasks.start_time }}'.substring(0, 10)+" "+'{{ tues_tasks.start_time }}'.substring(11, 16),
 								end_date: '{{ tues_tasks.end_time }}'.substring(0, 10)+" "+'{{ tues_tasks.end_time }}'.substring(11, 16),
 							},
@@ -458,6 +468,7 @@
 
 							{
 								text: "{{wed_tasks}}",
+								id: '{{ wed_tasks.UID }}',
 								start_date: '{{ wed_tasks.start_time }}'.substring(0, 10)+" "+'{{ wed_tasks.start_time }}'.substring(11, 16),
 								end_date: '{{ wed_tasks.end_time }}'.substring(0, 10)+" "+'{{ wed_tasks.end_time }}'.substring(11, 16),
 							},
@@ -468,6 +479,7 @@
 
 							{
 								text: "{{thurs_tasks}}",
+								id: '{{ thurs_tasks.UID }}',
 								start_date: '{{ thurs_tasks.start_time }}'.substring(0, 10)+" "+'{{ thurs_tasks.start_time }}'.substring(11, 16),
 								end_date: '{{ thurs_tasks.end_time }}'.substring(0, 10)+" "+'{{ thurs_tasks.end_time }}'.substring(11, 16),
 							},
@@ -477,6 +489,7 @@
 
 							{
 								text: "{{fri_tasks}}",
+								id: '{{ fri_tasks.UID }}',
 								start_date: '{{ fri_tasks.start_time }}'.substring(0, 10)+" "+'{{ fri_tasks.start_time }}'.substring(11, 16),
 								end_date: '{{ fri_tasks.end_time }}'.substring(0, 10)+" "+'{{ fri_tasks.end_time }}'.substring(11, 16),
 							},
@@ -487,6 +500,7 @@
 
 							{
 								text: "{{sat_tasks}}",
+								id: '{{ sat_tasks.UID }}',
 								start_date: '{{ sat_tasks.start_time }}'.substring(0, 10)+" "+'{{ sat_tasks.start_time }}'.substring(11, 16),
 								end_date: '{{ sat_tasks.end_time }}'.substring(0, 10)+" "+'{{ sat_tasks.end_time }}'.substring(11, 16),
 							},
@@ -497,6 +511,7 @@
 
 							{
 								text: "{{sun_tasks}}",
+								id: '{{ sun_tasks.UID }}',
 								start_date: '{{ sun_tasks.start_time }}'.substring(0, 10)+" "+'{{ sun_tasks.start_time }}'.substring(11, 16),
 								end_date: '{{ sun_tasks.end_time }}'.substring(0, 10)+" "+'{{ sun_tasks.end_time }}'.substring(11, 16),
 							},
@@ -624,16 +639,37 @@
 					{% endif %}
 				{% endfor %}
 
+
+				var breakdown_mini_tasks = []
+
+				//Storing all the google events to enable ability to make read-only
+				{% for BDMT in breakdown_tasks %}
+					breakdown_mini_tasks.push('{{ BDMT.UID }}');
+				{% endfor %}
+
+
+
 				//Function to deal with making google tasks read only
 				function readonly_check(id) {
 
+
 					var found_google_task = false;
+					var found_mini_task = false;
 
 					for (i = 0; i < google_ids.length; i++) {
 						if (google_ids[i] == id) {
 							found_google_task = true;
 						}
 					}
+
+					//Search through the breakdown mini tasks
+					for (i = 0; i < breakdown_mini_tasks.length; i++) {
+						if (breakdown_mini_tasks[i] == id) {
+							found_mini_task = true;
+						}
+					}
+
+
 					if (found_google_task) {
 						var readOnly = scheduler.getEvent(id).readonly;
 						scheduler.config.drag_move = true;
@@ -641,7 +677,16 @@
                         open_modal_google(scheduler.getEvent(id).id, scheduler.getEvent(id).color, formatDateFunc(scheduler.getEvent(id).start_date), formatDateFunc(scheduler.getEvent(id).end_date));
 						return false;
 					}
-					else {
+
+					else if (found_mini_task) {
+						var readOnly = scheduler.getEvent(id).readonly;
+						scheduler.config.drag_move = true;
+						scheduler.config.drag_resize = readOnly;
+                        open_modal_breakdown_tasks(scheduler.getEvent(id).id, scheduler.getEvent(id).color, formatDateFunc(scheduler.getEvent(id).start_date), formatDateFunc(scheduler.getEvent(id).end_date));
+						return false;
+					}
+
+					else {9
 						return true;
 					}
 				}
