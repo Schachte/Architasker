@@ -1253,19 +1253,10 @@ def allocate_tasks(request):
 	#Get number of hours that can be spent on tasks per day (array)
 	task_hours = task_hours_per_day(request)
 
+
 	#task conflict analysis...if 0 is returned then no error, 1 means there are more task hours than free hours
 	if(task_conflict_analysis(request) == 1):
 		return HttpResponse("Conflict Analysis!")
-
-
-	'''
-	Task allocation logic:
-
-	-Grab a random task from the array of tasks to distribute
-	-Iterate by starting at the current day 
-	-
-
-	'''
 
 	#Variable that stores the current time based on the timezone of the user account
 	current_user_extended = UserExtended.objects.get(authenticated_user=request.user)
