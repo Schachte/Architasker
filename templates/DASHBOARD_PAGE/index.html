@@ -2087,6 +2087,23 @@ $("#custom").spectrum({
 	}
 
 
+	function setWeekDay() {
+		$('#addEventForm').val('');
+	}
+
+	function setEventName() {
+		$('#addEventName').val('');
+	}
+
+	function setStartEndTimes() {
+
+		$('#timepicker1').val('0:00:00');
+		$('#timepicker2').val('0:00:00');
+
+	}
+
+
+
 	
 		function create_new_event_form() {
 		    console.log("create post is working!") // sanity check
@@ -2201,7 +2218,10 @@ $("#custom").spectrum({
 
 		function refresher() {
 
-			location.href = '/dashboard';
+			// location.href = '/dashboard';
+			setWeekDay();
+			setEventName();
+			setStartEndTimes();
 		};
 
 		function ajaxAddEventCaller() {
