@@ -32,6 +32,7 @@ from django.utils import timezone
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseRedirect
 from django.contrib.auth.decorators import login_required
+from dateutil import tz
 
 from app_calendar.models import UserEvent as SNE
 from app_calendar.models import CredentialsModel
@@ -750,19 +751,35 @@ def free_hours_per_day(request):
 
 	free_time_blocks = task_distribution(request)
 
+	starting_weekday = datetime.datetime.today().weekday()
+	print("Starting weekday: " + str(starting_weekday))
 
-	#should this be stored in a dictionary or array?! ...going to change to list
-	#free_hours = {}
 	free_hours = []
 
 	for key, value in free_time_blocks.iteritems():
 		hours = 0.0
-		for each_tuple in value:
-			#should we be calculating everything in minutes or hours?!?! ... currently in hours
-			hours += (parse(each_tuple[1]) - parse(each_tuple[0])).total_seconds() / 60
-		free_hours.insert(int(key), hours/60)
+		if(int(key) < starting_weekday):
+			print("Before: %s" %key)
+			free_hours.insert(int(key), 0)
 
+		elif(int(key) == starting_weekday):
+			print("Equal: %s" %key)
+			print(datetime.datetime.now())
+			for each_tuple in value:
+				print(each_tuple)
+				if(parse(each_tuple[0]) > datetime.datetime.today().replace(tzinfo=tz.tzutc())):
+					print("Here")
+					hours += (parse(each_tuple[1]) - parse(each_tuple[0])).total_seconds() / 60
+			free_hours.insert(int(key), hours/60)
 
+		else:
+			print("After: %s" %key)
+			for each_tuple in value:
+				#should we be calculating everything in minutes or hours?!?! ... currently in hours
+				hours += (parse(each_tuple[1]) - parse(each_tuple[0])).total_seconds() / 60
+			free_hours.insert(int(key), hours/60)
+
+	print("Free hours:")
 	for index, value in enumerate(free_hours):
 		print(str(index) + " " + str(value))
 
@@ -775,6 +792,7 @@ Calculate number of tasks hours allocated per day
 def task_hours_per_day(request):
 
 	free_hours_list = free_hours_per_day(request)
+
 	total_free_hours = sum(free_hours_list)
 	print("Total free hours: " + str(total_free_hours))
 
@@ -792,22 +810,10 @@ def task_hours_per_day(request):
 		print(task.task_name)
 		#do we want to divide by a 100 here to store it in the database as a decimal
 		#Should I change estimated time in database to float
-		print("Percent "+ str(task.percent_to_complete/100))
+		print("Percent "+ str(task.percent_to_complete))
 		print("Task time " +str(task.estimated_time))
-		print(task.percent_to_complete/100 * float(task.estimated_time))
-		total_task_hours += float(task.percent_to_complete)/100 * float(task.estimated_time)
-
-		task_hour_for_day = float(task.percent_to_complete)/100 * float(task.estimated_time) / 7
-
-		task.mon_task_time = task_hour_for_day
-		task.tues_task_time = task_hour_for_day
-		task.wed_task_time = task_hour_for_day
-		task.thurs_task_time = task_hour_for_day
-		task.fri_task_time = task_hour_for_day
-		task.sat_task_time = task_hour_for_day
-		task.sun_task_time = task_hour_for_day
-
-		task.save()
+		print(task.percent_to_complete * task.estimated_time * (1 - task.percent_distributed))
+		total_task_hours += task.percent_to_complete * task.estimated_time * (1 - task.percent_distributed)
 
 		print(total_task_hours)
 
@@ -821,6 +827,29 @@ def task_hours_per_day(request):
 	for day, free_hours in enumerate(free_hours_list):
 		task_hours_list.insert(day, free_hours * task_time_day_ratio)
 		print(str(day) + " " + str(task_hours_list[day]))
+
+
+	for task in user_tasks:
+		task_hour_ratio = ( task.percent_to_complete * task.estimated_time * (1 - task.percent_distributed) ) / total_task_hours
+		task.mon_task_time = task_hour_ratio * task_hours_list[0]
+		task.tues_task_time = task_hour_ratio * task_hours_list[1]
+		task.wed_task_time = task_hour_ratio * task_hours_list[2]
+		task.thurs_task_time = task_hour_ratio * task_hours_list[3]
+		task.fri_task_time = task_hour_ratio * task_hours_list[4]
+		task.sat_task_time = task_hour_ratio * task_hours_list[5]
+		task.sun_task_time = task_hour_ratio * task_hours_list[6]
+
+		task.save()
+
+		print("Intial times")
+		print(task.task_name)
+		print(task.mon_task_time)
+		print(task.tues_task_time)
+		print(task.wed_task_time)
+		print(task.thurs_task_time)
+		print(task.fri_task_time)
+		print(task.sat_task_time)
+		print(task.sun_task_time)
 
 
 	#Need to account for no break tasks at some point
@@ -844,31 +873,78 @@ def task_hours_per_day(request):
 
 		task_time_dictionary = {0: early_task.mon_task_time, 1: early_task.tues_task_time, 2: early_task.wed_task_time, 3: early_task.thurs_task_time, 4: early_task.fri_task_time, 5: early_task.sat_task_time, 6: early_task.sun_task_time}
 
-		print("Hours:" + str(early_task.percent_to_complete/100 * float(early_task.estimated_time)))
+		print("Hours:" + str(early_task.percent_to_complete * early_task.estimated_time))
 		print("Total free time: " + str(total_free_hours))
 		print("Hours of free time after day it's due: " + str(sum(free_hours_list[early_task.day_num:])))
 
 		#1) (Task_time)/(Total free time in week) * Hours of free time after day it's due
-		hours_allocated_after_due = early_task.percent_to_complete/100 * float(early_task.estimated_time) / total_free_hours * sum(free_hours_list[early_task.day_num:])
+		hours_allocated_after_due = early_task.percent_to_complete * early_task.estimated_time / total_free_hours * sum(free_hours_list[early_task.day_num:])
 		print("Step 1: " + str(hours_allocated_after_due))
 
 		#2) For each day before day due: task time for day + task time for day(#1/total hours of free time before day due)
 		for index, value in enumerate(free_hours_list):
 			if (index < early_task.day_num): # if we want the assignment to be completed a day before it's due then we can remove the = sign?!
 				print("Step 2: " + str(index) + " " + str(sum(free_hours_list[:early_task.day_num])) + " " + str(value))
-				task_hours_list_final[index] += (value * (hours_allocated_after_due/sum(free_hours_list[:early_task.day_num])))
+				
+				value_to_change = (value * (hours_allocated_after_due/sum(free_hours_list[:early_task.day_num])))
+				task_hours_list_final[index] += value_to_change
 
-				task_time_dictionary[index] +=  (value * (hours_allocated_after_due/sum(free_hours_list[:early_task.day_num])))
+				if(index == 0):
+					early_task.mon_task_time += value_to_change
+				elif(index == 1):
+					early_task.tues_task_time += value_to_change
+				elif(index == 2):
+					early_task.wed_task_time += value_to_change
+				elif(index == 3):
+					early_task.thurs_task_time += value_to_change
+				elif(index == 4):
+					early_task.fri_task_time += value_to_change
+				elif(index == 5):
+					early_task.sat_task_time += value_to_change
+				elif(index == 6):
+					early_task.sun_task_time += value_to_change
+
+				#task_time_dictionary[index] +=  (value * (hours_allocated_after_due/sum(free_hours_list[:early_task.day_num])))
 				early_task.save()
 
 			#3) For each day after day due: task time for day - task time for day(#1/total hours of free time after day due)
 			if (index >= early_task.day_num): 
 				print("Step 3: " + str(index) + " " + str(sum(free_hours_list[early_task.day_num:])) + " " + str(value))
-				task_hours_list_final[index] -= (value * (hours_allocated_after_due/sum(free_hours_list[early_task.day_num:])))
+				
+				value_to_change = (value * (hours_allocated_after_due/sum(free_hours_list[early_task.day_num:])))
+				task_hours_list_final[index] -= value_to_change
 
-				task_time_dictionary[index] -=  (value * (hours_allocated_after_due/sum(free_hours_list[:early_task.day_num])))
+				if(index == 0):
+					early_task.mon_task_time -= value_to_change
+				elif(index == 1):
+					early_task.tues_task_time -= value_to_change
+				elif(index == 2):
+					early_task.wed_task_time -= value_to_change
+				elif(index == 3):
+					early_task.thurs_task_time -= value_to_change
+				elif(index == 4):
+					early_task.fri_task_time -= value_to_change
+				elif(index == 5):
+					early_task.sat_task_time -= value_to_change
+				elif(index == 6):
+					early_task.sun_task_time -= value_to_change
+
+				#task_time_dictionary[index] -=  (value * (hours_allocated_after_due/sum(free_hours_list[:early_task.day_num])))
 				early_task.save()
 
+		print("Modified times")
+		print(early_task.task_name)
+		print(early_task.mon_task_time)
+		print(early_task.tues_task_time)
+		print(early_task.wed_task_time)
+		print(early_task.thurs_task_time)
+		print(early_task.fri_task_time)
+		print(early_task.sat_task_time)
+		print(early_task.sun_task_time)
+
+
+	
+	#NEED TO CONSIDER IF TASK IS ADDED THE DAY IT IS DUE!!!!!!! Because then sum of free time will be affected...idk
 
 	print("Final work times for week")
 	for index, value in enumerate(task_hours_list_final):
@@ -923,6 +999,38 @@ def available_tasks(request):
 	return avail_tasks
 
 
+
+
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+Keep tasks before time new task is added and reset the ones that are 
+after the day added
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+def task_reset(request):
+ 
+ 	#Get the currently logged in user
+	current_user = User.objects.get(username=request.user.username)
+
+	#get current time
+	current_time = datetime.datetime.today()
+
+	#Get the initial and end date for the current week that we are in
+	start_week_range = get_current_week_range(request)[0]
+	end_week_range = get_current_week_range(request)[1]
+
+	#get mini tasks after current time
+	mini_tasks_after_current_time = BreakdownUserTask.objects.filter(parent_task__authenticated_user=request.user, start_time__range=[current_time, parse(end_week_range) + datetime.timedelta(days=1)])
+
+	for mini_task in mini_tasks_after_current_time:
+
+		#calculate their duration and subtact from percent distributed from parent task
+		task_duration = (parse(mini_task.start_time) - parse(mini_task.end_time)).total_seconds() / 3600
+		mini_task.parent_task.percent_distributed -= task_duration / (mini_task.parent_task.estimated_time * mini_task.parent_task.percent_to_complete)
+
+		#delete mini task
+		mini_task.delete()
+
+
+
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 Allocate tasks
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -935,6 +1043,9 @@ def allocate_tasks(request):
 	start_week_range = get_current_week_range(request)[0]
 	end_week_range = get_current_week_range(request)[1]
 
+	#Keep tasks before time new task is added and clear/reset the ones that are after the day added
+	task_reset(request)
+
 	#Call this function to assign priorities
 	prioritize_and_cluster(request)
 	
@@ -944,82 +1055,80 @@ def allocate_tasks(request):
 	#Get number of hours that can be spent on tasks per day (array)
 	task_hours = task_hours_per_day(request)
 
+	# #Loop through each of the days inside of the dictionary
+	# for x in range(0,7):	
 
+	# 	task_hours_for_day = task_hours[x]
+	# 	#task_hours_for_day = math.ceil(task_hours_for_day)
+	# 	task_hours_for_day = task_hours_for_day
+	# 	#DON'T KNOW HOW TO ROUND UP TO NEAREST .5
 
-	#Loop through each of the days inside of the dictionary
-	for x in range(0,7):	
+	# 	for time in free_blocks[str(x)]:
 
-		task_hours_for_day = task_hours[x]
-		#task_hours_for_day = math.ceil(task_hours_for_day)
-		task_hours_for_day = task_hours_for_day
-		#DON'T KNOW HOW TO ROUND UP TO NEAREST .5
+	# 		start_time = time[0]
+	# 		print(start_time)
+	# 		end_time = time[1]
+	# 		print(end_time)
 
-		for time in free_blocks[str(x)]:
+	# 		print("Task hours for day %.2f" %(task_hours_for_day))
 
-			start_time = time[0]
-			print(start_time)
-			end_time = time[1]
-			print(end_time)
-
-			print("Task hours for day %.2f" %(task_hours_for_day))
-
-			available_hours_in_block = (parse(time[1]) - parse(time[0])).total_seconds() / 3600
-			print(available_hours_in_block)
+	# 		available_hours_in_block = (parse(time[1]) - parse(time[0])).total_seconds() / 3600
+	# 		print(available_hours_in_block)
 			
-			while(task_hours_for_day > .1 and available_hours_in_block > .25):
+	# 		while(task_hours_for_day > .1 and available_hours_in_block > .25):
 
-				random_task_index = randint(0, len(available_tasks(request)) - 1)
-				random_task = available_tasks(request)[random_task_index]
+	# 			random_task_index = randint(0, len(available_tasks(request)) - 1)
+	# 			random_task = available_tasks(request)[random_task_index]
 
-				#number of hours that still need to be distributed
-				task_hours_to_distribute = random_task.estimated_time * (random_task.percent_to_complete/100) * (Decimal(100 - random_task.percent_distributed)/100)
-				#if(random_task.estimated_time * (random_task.percent_to_complete/100) * (Decimal(100 - random_task.percent_distributed)/100) <= available_hours_in_block):
-				if(task_hours_for_day <= available_hours_in_block):
+	# 			#number of hours that still need to be distributed
+	# 			task_hours_to_distribute = random_task.estimated_time * random_task.percent_to_complete * (1 - random_task.percent_distributed)
+	# 			#if(random_task.estimated_time * (random_task.percent_to_complete/100) * (Decimal(100 - random_task.percent_distributed)/100) <= available_hours_in_block):
+	# 			if(task_hours_for_day <= available_hours_in_block):
 
-					temp_mini_task = BreakdownUserTask.objects.create(
-						parent_task = random_task,
-						start_time = parse(start_time),
-						end_time = parse(start_time) + datetime.timedelta(hours = float(task_hours_for_day)),
-						current_day = parse(start_time).weekday()
-					)
+	# 				temp_mini_task = BreakdownUserTask.objects.create(
+	# 					parent_task = random_task,
+	# 					start_time = parse(start_time),
+	# 					end_time = parse(start_time) + datetime.timedelta(hours = float(task_hours_for_day)),
+	# 					current_day = parse(start_time).weekday()
+	# 				)
 
-					if( task_hours_to_distribute < task_hours_for_day):
-						temp_mini_task.end_time = parse(start_time) + datetime.timedelta(hours = float(task_hours_to_distribute))
+	# 				if( task_hours_to_distribute < task_hours_for_day):
+	# 					temp_mini_task.end_time = parse(start_time) + datetime.timedelta(hours = float(task_hours_to_distribute))
 
-					temp_mini_task.save()
+	# 				temp_mini_task.save()
 
-					print("Hours distributed %.2f" %((((temp_mini_task.end_time) - (temp_mini_task.start_time)).total_seconds() / 3600)))
-					start_time = str(temp_mini_task.end_time + datetime.timedelta(minutes = 15))
-					available_hours_in_block -= ((temp_mini_task.end_time - temp_mini_task.start_time).total_seconds()) / 3600
-					print("If block: Available hours in block %.2f" %(available_hours_in_block))
-					task_hours_for_day -= (((temp_mini_task.end_time) - (temp_mini_task.start_time)).total_seconds() / 3600)
-					print("If block: Task hours for day %.2f" %(task_hours_for_day))
+	# 				print("Hours distributed %.2f" %((((temp_mini_task.end_time) - (temp_mini_task.start_time)).total_seconds() / 3600)))
+	# 				start_time = str(temp_mini_task.end_time + datetime.timedelta(minutes = 15))
+	# 				available_hours_in_block -= ((temp_mini_task.end_time - temp_mini_task.start_time).total_seconds()) / 3600
+	# 				print("If block: Available hours in block %.2f" %(available_hours_in_block))
+	# 				task_hours_for_day -= (((temp_mini_task.end_time) - (temp_mini_task.start_time)).total_seconds() / 3600)
+	# 				print("If block: Task hours for day %.2f" %(task_hours_for_day))
 
-					random_task.percent_distributed += float((((temp_mini_task.end_time) - (temp_mini_task.start_time)).total_seconds() / 3600) / float(random_task.estimated_time * (random_task.percent_to_complete/100))) * 100
-					random_task.save()
+	# 				random_task.percent_distributed += float((((temp_mini_task.end_time) - (temp_mini_task.start_time)).total_seconds() / 3600) / float(random_task.estimated_time * random_task.percent_to_complete)) 
+	# 				random_task.save()
 
 
-				else:
-					temp_mini_task = BreakdownUserTask.objects.create(
-						parent_task = random_task,
-						start_time = parse(start_time),
-						end_time = parse(start_time) + datetime.timedelta(hours = available_hours_in_block),
-						current_day = parse(start_time).weekday()
-					)
+	# 			else:
+	# 				temp_mini_task = BreakdownUserTask.objects.create(
+	# 					parent_task = random_task,
+	# 					start_time = parse(start_time),
+	# 					end_time = parse(start_time) + datetime.timedelta(hours = available_hours_in_block),
+	# 					current_day = parse(start_time).weekday()
+	# 				)
 
-					if( task_hours_to_distribute < available_hours_in_block):
-						temp_mini_task.end_time = parse(start_time) + datetime.timedelta(hours = float(task_hours_to_distribute))
+	# 				if( task_hours_to_distribute < available_hours_in_block):
+	# 					temp_mini_task.end_time = parse(start_time) + datetime.timedelta(hours = float(task_hours_to_distribute))
 
-					temp_mini_task.save()
+	# 				temp_mini_task.save()
 
-					available_hours_in_block = 0
-					print(temp_mini_task.end_time)
-					task_hours_for_day -= (((temp_mini_task.end_time) - (temp_mini_task.start_time)).total_seconds() / 3600)
-					print("Else block: Hours distributed %.2f" %((temp_mini_task.end_time - temp_mini_task.start_time).total_seconds()/3600))
-					print("Else block: Task hours for day %.2f" %(task_hours_for_day))
-					# print("If block: Available hours in block %d" %(available_hours_in_block))
-					random_task.percent_distributed += float((((temp_mini_task.end_time) - (temp_mini_task.start_time)).total_seconds() / 3600) / float(random_task.estimated_time * (random_task.percent_to_complete/100))) * 100
-					random_task.save()
+	# 				available_hours_in_block = 0
+	# 				print(temp_mini_task.end_time)
+	# 				task_hours_for_day -= (((temp_mini_task.end_time) - (temp_mini_task.start_time)).total_seconds() / 3600)
+	# 				print("Else block: Hours distributed %.2f" %((temp_mini_task.end_time - temp_mini_task.start_time).total_seconds()/3600))
+	# 				print("Else block: Task hours for day %.2f" %(task_hours_for_day))
+	# 				# print("If block: Available hours in block %d" %(available_hours_in_block))
+	# 				random_task.percent_distributed += float((((temp_mini_task.end_time) - (temp_mini_task.start_time)).total_seconds() / 3600) / float(random_task.estimated_time * random_task.percent_to_complete)) 
+	# 				random_task.save()
 
 
 
