@@ -8,6 +8,7 @@ from .models import UserTask as Task
 from app_account_management.models import UserExtended
 from dateutil.parser import parse
 from app_task_redistribution.views import allocate_tasks
+from app_task_redistribution.views import task_conflict_analysis
 
 # Create your views here.
 
@@ -46,11 +47,17 @@ def create_task(request):
         	temp_model.pomodoro = True
 
         temp_model.save()
-        allocate_tasks(request)
-        context = {}
-        return render(request, 'DASHBOARD_PAGE/index.html', context)
+
+        if(task_conflict_analysis(request, temp_model) == 1):
+            temp_model.delete()
+            print("CONFLICT")
+            #RETURN NECESSARY INFO TO MODAL WINDOW
+
+        else:
+            allocate_tasks(request)
+
         print("created task")
-        #return HttpResponse("none")
+        return HttpResponse("none")
 
 
 
