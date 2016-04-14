@@ -67,6 +67,9 @@ urlpatterns = [
     url(r'^get_distance', get_travel_time, name='get_travel_time'),
     url(r'^allocate_test', allocate_tasks, name='allocate_tasks'),
 
+    #remove this
+    url(r'^check_free_hrs', getHoursLeft, name='getHoursLeft'),
+
 
 ]
 

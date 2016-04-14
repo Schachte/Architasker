@@ -221,7 +221,10 @@
 					});
 					return true;
 				};
-
+				// scheduler.config.separate_short_events = true;
+				scheduler.config.hour_size_px = 100;
+				scheduler.config.scroll_hour = 6;
+				scheduler.config.mark_now = true;
                 scheduler.config.icons_select = ['icon_details', 'icon_delete', 'i1', 'i2', 'i3', 'i4', 'i5', 'i6', 'i7', 'i8', 'i9', 'i10', 'i11'];
 
         		scheduler.locale.labels.i1 = "i_1";
@@ -976,10 +979,7 @@
                 <a href="/dashboard" class="simple-text">
                     Architasker
                     <h6>Welcome back, {{first_name}}!</h6>
-                    
-                    {% for items in mon_TASK %}
-                    	{{items.start_time}}
-                    {% endfor %}
+
                 </a>
             </div>
 
@@ -1533,15 +1533,34 @@
 						task_day_num: Date.getDayNumberFromName(document.getElementById('task_day_of_week').value),
 						task_transit_mode: document.getElementById("hidden_transit").text
 					},
-					success: function() {
-						succeed = true;
-						location.href = "/dashboard";
+					success: function(json) {
+
+						if (json[0] == 1) {
+							succeed = true;
+							console.log(json)
+
+							var needed_available_hours = parseFloat(json['needed_available_hours']);
+							var available_hours = parseFloat(json['available_hours']);
+
+							var lower_hours = needed_available_hours - available_hours;
+							lower_hours = lower_hours.toFixed(2);
+
+							console.log("The task " + json['task_name'] + " has a conflict.");
+							console.log("You need " + json['needed_available_hours'] + " hours, but only have " + json['available_hours'] + " hours");
+							console.log("This task is only possible if you decrease the required hours by "  + lower_hours);
+
+						}
+						else {
+
+							console.log("there is no conflict!");
+							location.href = "/dashboard";
+						}
 					},
 
 					error: function() {
 
 						console.log("did i get here?");
-						location.href = "/dashboard";
+						// location.href = "/dashboard";
 					}
 
 
@@ -1794,6 +1813,37 @@ function fill_transit(trans_type) {
 	trans_text = document.getElementById("hidden_transit");
 	trans_text.text = trans_type;
 }
+
+
+		function getFreeHours() {
+
+                $('.ajaxProgress').show();
+				$.ajax({
+					type: "POST",
+					url: "check_free_hrs/",
+					dataType: "json",
+					data: {
+						csrfmiddlewaretoken: '{{ csrf_token }}',
+					},
+					success: function(json) {
+						succeed = true;
+						console.log(json);
+					},
+
+					error: function() {
+
+						console.log("did i get here?");
+				
+					}
+
+
+				});
+
+		}
+
+
+
+
 
 
 	</script>

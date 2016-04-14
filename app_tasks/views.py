@@ -10,6 +10,10 @@ from dateutil.parser import parse
 from app_task_redistribution.views import allocate_tasks
 from app_task_redistribution.views import task_conflict_analysis
 
+import json
+from django.core import serializers
+# from django.utils import simplejson
+
 # Create your views here.
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -48,16 +52,35 @@ def create_task(request):
 
         temp_model.save()
 
-        if(task_conflict_analysis(request, temp_model) == 1):
+        return_conflict_data = task_conflict_analysis(request, temp_model)
+
+        ## return array with 0/1, free hours, and task hours
+        if(return_conflict_data[0] == 1):
             temp_model.delete()
             print("CONFLICT")
+
+            #taskname, available_hours, needed_available_hours
+            try:
+
+                json_list_return = json.dumps({'conflict_bool' : 1, 'task_name' : return_conflict_data[1], 'available_hours' : return_conflict_data[2], 'needed_available_hours' : return_conflict_data[3]})
+
+            except Exception as e:
+                print(e)
+
+            print("created task")
+
+            return HttpResponse(json_list_return)
+
+
+
             #RETURN NECESSARY INFO TO MODAL WINDOW
 
         else:
             allocate_tasks(request)
 
-        print("created task")
-        return HttpResponse("none")
+            json_list_return = json.dumps({'conflict_bool' : 0})
+
+            return HttpResponse(json_list_return)
 
 
 
