@@ -131,8 +131,8 @@ class FreeBlocksTestCase(TestCase):
 		# 					('2016-04-15T8:00:00Z', '2016-04-15T20:00:00Z'), 
 		# 					('2016-04-16T8:00:00Z', '2016-04-16T20:00:00Z'), 
 		# 					('2016-04-17T8:00:00Z', '2016-04-17T20:00:00Z')]
-		print expected_list
-		print free_time
+		# print expected_list
+		# print free_time
 
 		self.assertEqual(expected_list, free_time)
 

@@ -282,7 +282,7 @@ def task_distribution(request):
 							sleep_time = event[0][0]
 							wakeup_time = parse_conversions(wakeup_time).encode('utf-8')
 							sleep_time = parse_conversions(sleep_time).encode('utf-8')
-							
+
 							all_free_times[int(key)].append((wakeup_time, sleep_time))
 
 						break
@@ -303,11 +303,8 @@ def task_distribution(request):
 				temp_sleep_time = sleep_time
 				sleep_time = wakeup_time[0:11] + temp_sleep_time + ':00Z'
 
-				wakeup_time = wakeup_time.replace(' ', 'T')
-				sleep_time = sleep_time.replace(' ', 'T')
-
-				wakeup_time = wakeup_time.encode('utf-8')
-				sleep_time = sleep_time.encode('utf-8')
+				wakeup_time = (wakeup_time.replace(' ', 'T')).encode('utf-8')
+				sleep_time = (sleep_time.replace(' ', 'T')).encode('utf-8')
 
 				all_free_times[int(key)].append((wakeup_time, sleep_time))
 
@@ -360,10 +357,9 @@ def task_distribution(request):
 									#Check if key exists inside of the dictionary
 									if (event_end_time, str(start_end[0][0])) not in all_free_times[int(key)]:
 										wakeup_time = parse_conversions(str(event_end_time).encode('utf-8'))
-										sleep_time = parse_conversions(start_end[0][0]).encode('utf-8'))
+										sleep_time = parse_conversions((start_end[0][0]).encode('utf-8'))
 
 										all_free_times[int(key)].append((wakeup_time, sleep_time))
-
 
 					elif len(event_start_end) == 1 and parse(start_end[0][0]) > parse(beginning_wakeup_time_comparison):
 						event_end_time = (event_start_end[0][0][1]).encode('utf-8')
@@ -391,13 +387,18 @@ def task_distribution(request):
 					if (parse(each_list_tuple[0][1]) > temp_bed_time and parse(each_list_tuple[0][0]) > temp_bed_time):
 						continue
 					end_time_data.append(each_list_tuple[0][1])
+				
+				count_ends = 0
+				for time in end_time_data:
+					time = parse_conversions(str(parse(time))).encode('utf-8')
+					end_time_data[count_ends] = time
+					count_ends += 1
+				end_time_data.sort()
 
 				#Sort and string format the data
-				temp_bed_time = sorted(end_time_data)[len(end_time_data)-1][0:11] + current_user_ext.sleepy_time + ":00Z"
-
+				temp_bed_time = end_time_data[len(end_time_data)-1][0:11] + current_user_ext.sleepy_time + ":00Z"
 				#Convert to date time object
-				current_day_end_time = parse(sorted(end_time_data)[len(end_time_data)-1])
-
+				current_day_end_time = parse(end_time_data[len(end_time_data)-1])
 				if (current_day_end_time + datetime.timedelta(minutes=current_user_ext.min_task_time) <= parse(temp_bed_time)):
 					try:
 						current_day_end_time = parse_conversions(str(current_day_end_time)).encode('utf-8')
