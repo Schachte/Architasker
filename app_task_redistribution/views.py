@@ -444,10 +444,10 @@ def task_distribution(request):
 	# 	''')
 	
 	#Uncomment when running free block algorithm tests
-	return final_free_time_tuples
+	#return final_free_time_tuples
 
 	#Comment out when running free block algorithm tests
-	# return HttpResponse("The user has been queried successfully!")
+	return HttpResponse("The user has been queried successfully!")
 
 def free_day_calc(request, days_in_current_week, wakeup_check, sleepy_check, key):
 	
