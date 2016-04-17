@@ -35,8 +35,11 @@ from app_calendar.models import UserEvent as SNE
 from app_calendar.models import CredentialsModel
 from procrastinate import settings
 from app_account_management.models import UserExtended
+from app_tasks.models import UserTask
 
 from operator import itemgetter
+
+import urllib, json
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 Function to convert unicode dictionaries into str dictionaries
@@ -50,6 +53,93 @@ def convert(data):
 		return type(data)(map(convert, data))
 	else:
 		return data
+
+def format_addresses(address_input):
+	new_address = ''
+	list_convert = address_input.split(' ')
+	new_address += list_convert[0]
+	for each_element in list_convert[1:]:
+		new_address+='+' + each_element
+	new_address = new_address.strip()
+	return new_address
+
+def get_transit_mode(task_obj):
+	return task_obj.transit_mode
+
+def get_transit_type(type_int):
+	if (type_int == '1'):
+		return 'walking'
+	elif (type_int == '2'):
+		return 'biking'
+	elif (type_int == '3'):
+		return 'driving'
+	else:
+		return 'Error'
+
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+Build a geolocation function to get the lat and long from addresses
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+def geoencoder(request, task1_object, task2_object, primary_mode_of_travel):
+
+	a_1 = format_addresses(task1_object.location)
+	a_2 = format_addresses(task2_object.location)
+
+	location_1_lat = ''
+	location_1_long = ''
+
+	location_2_lat = ''
+	location_2_long = ''
+
+	url = "https://maps.googleapis.com/maps/api/geocode/json?address=%s&key=AIzaSyBuEDTHE8gFHtbIOf4tcNfQGZxRlyqqKY8"%(a_1)
+	response = urllib.urlopen(url)
+	data = json.loads(response.read())
+	data = convert(data)
+	print('Location 1 coordinates: ')
+	print(str(data['results'][0]['geometry']['location']['lat']) + ', ' + str(data['results'][0]['geometry']['location']['lng']))
+
+	location_1_lat 	= str(data['results'][0]['geometry']['location']['lat'])
+	location_1_long = str(data['results'][0]['geometry']['location']['lng'])
+
+	url = "https://maps.googleapis.com/maps/api/geocode/json?address=%s&key=AIzaSyBuEDTHE8gFHtbIOf4tcNfQGZxRlyqqKY8"%(a_2)
+	response = urllib.urlopen(url)
+	data = json.loads(response.read())
+	data = convert(data)
+	print(str(data['results'][0]['geometry']['location']['lat']) + ', ' + str(data['results'][0]['geometry']['location']['lng']))
+
+	location_2_lat 	= str(data['results'][0]['geometry']['location']['lat'])
+	location_2_long = str(data['results'][0]['geometry']['location']['lng'])
+
+	travel_time_url = 'https://maps.googleapis.com/maps/api/distancematrix/json?origins=%s,%s&destinations=%s,%s&mode=%s&key=AIzaSyCdyoZAV_lsXz8nV54SKIGgtZ45Auhwnss'%(location_1_lat, location_1_long, location_2_lat, location_2_long, primary_mode_of_travel)
+	response = urllib.urlopen(travel_time_url)
+	data = json.loads(response.read())
+	data = convert(data)
+	print(data['rows'][0]['elements'][0]['duration']['text'])
+
+	return data['rows'][0]['elements'][0]['duration']['text']
+
+def get_primary_mode_of_travel(t1, t2):
+	print(t1.transit_mode)
+	print('^ is transit mode')
+	if (t1.transit_mode == 1 or t2.transit_mode == 1):
+		return 'driving'
+	elif (t1.transit_mode == 2 or t2.transit_mode == 2):
+		return 'bicycling'
+	else:
+		return 'walking'
+
+def get_travel_time(request):
+	current_user = User.objects.filter(username=request.user.username)
+	all_user_tasks = UserTask.objects.all()
+
+	a_1 = all_user_tasks[0]
+	a_2 = all_user_tasks[1]
+
+	primary_transit = get_primary_mode_of_travel(a_1, a_2)
+	print("primary transit is %s"%(primary_transit))
+
+	total_time = geoencoder(request, a_1, a_2, primary_transit)
+	
+	return HttpResponse('<b><center><h2>It will take %s minutes to get from %s to %s by mode of %s</h2></center></b>'%(total_time, a_1.location, a_2.location, primary_transit))
 
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -425,26 +515,51 @@ def task_distribution(request):
 			if (not each_tuple in final_free_time_tuples):
 				final_free_time_tuples.append(each_tuple)
 
-	# 	print('''
+# 	print('''
+#  ___ ___ ___ ___ _  _   ___ ___ ___ ___   ___ _    ___   ___ _  _____ 
+# | _ ) __/ __|_ _| \| | | __| _ \ __| __| | _ ) |  / _ \ / __| |/ / __|
+# | _ \ _| (_ || || .` | | _||   / _|| _|  | _ \ |_| (_) | (__| ' <\__ |
+# |___/___\___|___|_|\_| |_| |_|_\___|___| |___/____\___/ \___|_|\_\___/
+                                                                      
+# 		''')
 
-	#  ___ ___ ___ ___ _  _   ___ ___ ___ ___   ___ _    ___   ___ _  _____ 
-	# | _ ) __/ __|_ _| \| | | __| _ \ __| __| | _ ) |  / _ \ / __| |/ / __|
-	# | _ \ _| (_ || || .` | | _||   / _|| _|  | _ \ |_| (_) | (__| ' <\__ |
-	# |___/___\___|___|_|\_| |_| |_|_\___|___| |___/____\___/ \___|_|\_\___/
-	                                                                      
-	# 		''')
-	# 	for data in final_free_time_tuples:
-	# 		print(data)
+	#Take all the data in this list and convert it to a tuple
+	mon 	= []
+	tues 	= []
+	wed 	= []
+	thurs 	= []
+	fri 	= []
+	sat 	= []
+	sun 	= []
 
-	# 	print('''
-	#  ___ _  _ ___    ___ ___ ___ ___   ___ _    ___   ___ _  _____ 
-	# | __| \| |   \  | __| _ \ __| __| | _ ) |  / _ \ / __| |/ / __|
-	# | _|| .` | |) | | _||   / _|| _|  | _ \ |_| (_) | (__| ' <\__ |
-	# |___|_|\_|___/  |_| |_|_\___|___| |___/____\___/ \___|_|\_\___/                                                           
-	# 	''')
+	for data in final_free_time_tuples:
+		# print(parse(data[0]).weekday())
+		if (parse(data[0]).weekday() == 0):
+			mon.append(data)
+		elif (parse(data[0]).weekday() == 1):
+			tues.append(data)
+		elif (parse(data[0]).weekday() == 2):
+			wed.append(data)
+		elif (parse(data[0]).weekday() == 3):
+			thurs.append(data)
+		elif (parse(data[0]).weekday() == 4):
+			fri.append(data)
+		elif (parse(data[0]).weekday() == 5):
+			sat.append(data)
+		elif (parse(data[0]).weekday() == 6):
+			sun.append(data)
+
+	dictionary_free_blocks = {'0': mon, '1': tues, '2': wed, '3': thurs, '4': fri, '5':sat, '6': sun}
+
+# 	print('''
+#  ___ _  _ ___    ___ ___ ___ ___   ___ _    ___   ___ _  _____ 
+# | __| \| |   \  | __| _ \ __| __| | _ ) |  / _ \ / __| |/ / __|
+# | _|| .` | |) | | _||   / _|| _|  | _ \ |_| (_) | (__| ' <\__ |
+# |___|_|\_|___/  |_| |_|_\___|___| |___/____\___/ \___|_|\_\___/                                                           
+# 	''')
 	
 	#Uncomment when running free block algorithm tests
-	#return final_free_time_tuples
+	# return final_free_time_tuples
 
 	#Comment out when running free block algorithm tests
 	return HttpResponse("The user has been queried successfully!")

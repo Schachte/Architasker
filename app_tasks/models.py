@@ -2,6 +2,12 @@ from django.contrib import admin
 from django.db import models
 from django.contrib.auth.models import User
 
+TRANSIT_CHOICES = (
+    (1, 'driving'),
+    (2, 'biking'),
+    (3, 'walking'),
+)
+
 class UserTask(models.Model):
 	authenticated_user = models.ForeignKey(User, unique=False, null=False, default=None)
 	task_name = models.CharField(max_length=300, unique=False, default='None')
@@ -20,6 +26,13 @@ class UserTask(models.Model):
 	comments = models.CharField(max_length=800, default='None')
 	priority = models.IntegerField(default=0)
 	percentile = models.IntegerField(default=0)
+	transit_mode = models.IntegerField(choices=TRANSIT_CHOICES, default=1)
+
+class BreakdownUserTask(models.Model):
+	parent_task = models.ForeignKey(UserTask, unique=False, null=False, default=None)
+	# task_name = models.ForeignKey(UserTask.task_name, unique=False, null=False, default=None)
+
+
 
 
 
