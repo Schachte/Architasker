@@ -236,7 +236,6 @@ def task_distribution(request):
 
 					if (len(temp_max) > 0 and event_start_object <= temp_max[len(temp_max)-1]):
 						temp_min.append(event_start_object)
-						temp_max.append(event_end_object)
 
 					#Checking if event times overlap with the wakeup time
 					if (event_start_object <=  new_wakeup_time <= event_end_object):
@@ -261,7 +260,7 @@ def task_distribution(request):
 		temp_sleep_time = sleep_time
 
 		for key, event_start_end in week_day_cluster.iteritems():
-
+			event_start_end.sort()
 			if len(event_start_end) > 0:
 				if int(key) in min_day_start_times and int(key) in max_day_start_times:
 					wakeup_time = str(max_day_start_times[int(key)]).replace(' ', 'T')[0:19] + 'Z'
@@ -273,15 +272,13 @@ def task_distribution(request):
 					if (parse(wakeup_time) < parse(event[0][0])):
 
 						wakeup_time = wakeup_time.encode('utf-8')
-						beginning_wakeup_time_comparison = event[0][0][0:11]
-						beginning_wakeup_time_comparison += current_user_ext.wakeup_time + ':00Z'
+						beginning_wakeup_time_comparison = event[0][0][0:11] + current_user_ext.wakeup_time + ':00Z'
 
 						if (((parse(event[0][0]) - parse(wakeup_time)).seconds)/60 >= (current_user_ext.min_task_time)):
 
-							wakeup_time = str(parse(wakeup_time))
-							sleep_time = event[0][0]
-							wakeup_time = parse_conversions(wakeup_time).encode('utf-8')
-							sleep_time = parse_conversions(sleep_time).encode('utf-8')
+							wakeup_time = parse_conversions(str(parse(wakeup_time))).encode('utf-8')
+							sleep_time = parse_conversions(event[0][0]).encode('utf-8')
+
 
 							all_free_times[int(key)].append((wakeup_time, sleep_time))
 
@@ -294,7 +291,7 @@ def task_distribution(request):
 						
 						wakeup_time = parse_conversions(wakeup_time).encode('utf-8')
 						sleep_time = parse_conversions(sleep_time).encode('utf-8')
-						all_free_times[int(key)].append((wakeup_time, sleep_time))
+						all_free_times[int(key)].append((wakeup_time, sleep_time))			
 			else:
 
 				wakeup_time = (str(parse(start_week_range) + datetime.timedelta(days=int(key)))[0:11]) + temp_wakeup_time + ':00Z' 
@@ -326,10 +323,9 @@ def task_distribution(request):
 				beginning_wakeup_time_comparison = start_end[0][0][0:11] + current_user_ext.wakeup_time + ':00Z'
 
 				event_start_time = event_start_end[int(index)][0][0]
-				sleep_time = current_user_ext.sleepy_time #21:00
+				sleep_time = current_user_ext.sleepy_time
 				temp_sleep_time = sleep_time
-				sleep_time = event_start_time[0:11]
-				sleep_time = sleep_time + temp_sleep_time + ':00Z'
+				sleep_time = event_start_time[0:11] + temp_sleep_time + ':00Z'
 				temp_tuple = (event_start_time, sleep_time)
 
 				if (not parse(event_start_time) > parse(sleep_time)):
@@ -358,10 +354,10 @@ def task_distribution(request):
 									if (event_end_time, str(start_end[0][0])) not in all_free_times[int(key)]:
 										wakeup_time = parse_conversions(str(event_end_time).encode('utf-8'))
 										sleep_time = parse_conversions((start_end[0][0]).encode('utf-8'))
+										if not wakeup_time == sleep_time:
+											all_free_times[int(key)].append((wakeup_time, sleep_time))
 
-										all_free_times[int(key)].append((wakeup_time, sleep_time))
-
-					elif len(event_start_end) == 1 and parse(start_end[0][0]) > parse(beginning_wakeup_time_comparison):
+					elif len(event_start_end) == 1 and parse(start_end[0][0]) > parse(beginning_wakeup_time_comparison) and parse(start_end[0][1]) < sleepy_check:
 						event_end_time = (event_start_end[0][0][1]).encode('utf-8')
 						sleep_time = current_user_ext.sleepy_time 
 						temp_sleep_time = sleep_time
@@ -384,7 +380,7 @@ def task_distribution(request):
 				#add each end time
 				for each_list_tuple in event_start_end:
 
-					if (parse(each_list_tuple[0][1]) > temp_bed_time and parse(each_list_tuple[0][0]) > temp_bed_time):
+					if (parse(each_list_tuple[0][1]) > temp_bed_time or parse(each_list_tuple[0][0]) > temp_bed_time):
 						continue
 					end_time_data.append(each_list_tuple[0][1])
 				
@@ -395,17 +391,19 @@ def task_distribution(request):
 					count_ends += 1
 				end_time_data.sort()
 
-				#Sort and string format the data
-				temp_bed_time = end_time_data[len(end_time_data)-1][0:11] + current_user_ext.sleepy_time + ":00Z"
-				#Convert to date time object
-				current_day_end_time = parse(end_time_data[len(end_time_data)-1])
-				if (current_day_end_time + datetime.timedelta(minutes=current_user_ext.min_task_time) <= parse(temp_bed_time)):
-					try:
-						current_day_end_time = parse_conversions(str(current_day_end_time)).encode('utf-8')
-						temp_bed_time = parse_conversions(temp_bed_time).encode('utf-8')
-						all_free_times[int(key)].append((str(current_day_end_time), temp_bed_time))
-					except:
-						pass
+				if len(end_time_data) > 0:
+					#Sort and string format the data
+					temp_bed_time = end_time_data[len(end_time_data)-1][0:11] + current_user_ext.sleepy_time + ":00Z"
+					#Convert to date time object
+					current_day_end_time = parse(end_time_data[len(end_time_data)-1])
+					if (current_day_end_time + datetime.timedelta(minutes=current_user_ext.min_task_time) <= parse(temp_bed_time)):
+						try:
+							current_day_end_time = parse_conversions(str(current_day_end_time)).encode('utf-8')
+							temp_bed_time = parse_conversions(temp_bed_time).encode('utf-8')
+							if not str(current_day_end_time) == temp_bed_time:
+								all_free_times[int(key)].append((str(current_day_end_time), temp_bed_time))
+						except:
+							pass
 			
 			#Entire day is free
 			else:
