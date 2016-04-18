@@ -2103,10 +2103,9 @@ $("#custom").spectrum({
 	}
 
 
-
 	
 		function create_new_event_form() {
-		    console.log("create post is working!") // sanity check
+
 		    var hex_color = myFunction();
 		    var weekDay = getWeekDay();
 		    var eventName = getEventName();
@@ -2138,14 +2137,16 @@ $("#custom").spectrum({
 		    });
 		};
 
-
-
 		//This is an ajax call that will help display event and mini task conflict analysis in modal
 		function checkEventConflictAnalysis() {
 
+			//Get an array of the start and end times for the event
 			var allTimes = getStartEndTimes();
+
+			//Get the week day to pass into the backend for proper conversion
 			var weekDay = getWeekDay();
 
+			//Ajax call into the backend
 			$('.ajaxProgress').show();
 			$.ajax({
 				type: "POST",
@@ -2159,13 +2160,14 @@ $("#custom").spectrum({
 				},
 		        success : function(my_json) {
 
-		            console.log("Success"); // another sanity check
+		        	//Auto hide the modal window for add-event
 		            $('#addEventModal').modal('hide');
-		            console.log(my_json);
 
 		            var count = Object.keys(my_json).length;
 
 		            if (count > 0) {
+
+		            	//Count represents the number of json objects returned in the dump from the backend
 		            	console.log("There are " + count + " conflicts");
 
 		            	//Get the event name with conflicts
@@ -2178,10 +2180,12 @@ $("#custom").spectrum({
 		            	//Set the list by looping through JSON elements
 		            	conflict_list_HTML = document.getElementById("event_name_list");
 
+		            	//Loop through each conflict and append it to the html list
+		            	//RIGHT HERE WE NEED TO ENSURE TO ADD TIMES AS WELL TO BE MORE EXPLANATORY WITH THE ERROR MESSAGES
 						for (i = 0; i < count; i++) {
 						    conflict_list_HTML.innerHTML += "<li>" + my_json[i]['fields']['bdt_name'] +"</li>";
 						}
-
+						//Show all the conflicts within the modal window
 		            	$('#conflictmodal').modal('show');
 		        	}
 		        	else {
@@ -2204,10 +2208,12 @@ $("#custom").spectrum({
 
 		        	if (event_can_add == true)
 			        {
-			        	console.log("asuh");
+
+			        	//If there is no conflicting event, then the global variable will set to addTrue and call the eventAdder function
 			        	ajaxAddEventCaller();
 			        }
 			        else {
+			        	//There will be no additional add event because there is an event conflict within the backend
 			        	console.log("busy!");
 			        }
 		        }
@@ -2215,17 +2221,16 @@ $("#custom").spectrum({
 			});
 		};
 
-
 		function refresher() {
 
-			// location.href = '/dashboard';
+			//This will not refresh the page, but the following functions reset to NULL values on the frontend for add event form
 			setWeekDay();
 			setEventName();
 			setStartEndTimes();
 		};
 
 		function ajaxAddEventCaller() {
-			console.log("here");
+			//Function that calls the add event form oncomplete after the conflict analysis AJAX call
 			create_new_event_form();
 		};
 

@@ -818,6 +818,8 @@ def pull_user_event_data(request):
 
             except:
                 pass
+
+    #Need to make the return of this response into an ajax calls and a json dump to dump a request var for success message
     return HttpResponseRedirect('/dashboard')
 
 
