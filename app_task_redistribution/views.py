@@ -1272,12 +1272,6 @@ def allocate_tasks(request):
 	current_time = datetime.datetime.now(current_user_time_zone)
 	current_date = str(current_time)[0:10]
 
-	print("Current time is:")
-	print(current_time)
-
-	print("current date is:")
-	print(current_date)
-
 
 	#Looping through the current day of the week to the end of the week
 	for int_day_of_week in range(parse(current_date).weekday(), 7):

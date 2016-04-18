@@ -251,9 +251,23 @@
 							color: scheduler.getEvent(event_id).color
 
 						},
+						success: function() {
+
+							console.log("Got here on success!")
+							var targetText = "custom calendar event";
+							showGoogleSyncFeedback(targetText);
+							setTimeout( function() { hideGoogleSyncFeedback(); location.href = "/dashboard"; }, 3000);	
+						},
+
+						error: function() {
+							console.log("did i get here?1");
+							var targetText = "custom calendar event";
+							showGoogleSyncFeedback(targetText);
+							setTimeout( function() { hideGoogleSyncFeedback();}, 3000);	
+						}
+
 					});
 				};
-
 
                 var update_event = function(id, ev, color) {
                     event_text = stringEscape(ev.text);
@@ -270,6 +284,18 @@
         							text: event_text,
         							id: id
         						},
+						success: function() {
+
+							console.log("Got here on success!")
+							showGoogleSyncFeedback();
+							setTimeout( function() { hideGoogleSyncFeedback(); location.href = "/dashboard"; }, 3000);	
+						},
+
+						error: function() {
+							console.log("did i get here?1");
+							showGoogleSyncFeedback();
+							setTimeout( function() { hideGoogleSyncFeedback();}, 3000);	
+						}
         					});
         		    		return true;
                     }
@@ -289,6 +315,18 @@
     							id: id,
                                 color: color
     						},
+						success: function() {
+
+							console.log("Got here on success!")
+							showGoogleSyncFeedback();
+							setTimeout( function() { hideGoogleSyncFeedback(); location.href = "/dashboard"; }, 3000);	
+						},
+
+						error: function() {
+							console.log("did i get here?1");
+							showGoogleSyncFeedback();
+							setTimeout( function() { hideGoogleSyncFeedback();}, 3000);	
+						}
     					});
     		    		return true;
                     };
@@ -1394,7 +1432,7 @@
 					</div><!-- morph-button -->
 
 					
-					<div class="alert alert-success" visible=false>Success! Your Google Information Was Synced. Please wait 5 seconds to populate...</div>
+					<div class="alert alert-success" visible=false>Success! Your <span id="updateType"></span> Was Synced. Please wait 5 seconds to populate...</div>
 
 			
 				<div id="scheduler_here" class="dhx_cal_container card col-md-12" style='width:100%; height:70%'>
@@ -2215,7 +2253,6 @@ $("#custom").spectrum({
 
 		        	if (event_can_add == true)
 			        {
-
 			        	//If there is no conflicting event, then the global variable will set to addTrue and call the eventAdder function
 			        	ajaxAddEventCaller();
 			        }
@@ -2227,9 +2264,6 @@ $("#custom").spectrum({
 
 			});
 		};
-
-
-
 
 		//AJAX call that will do a call to the sync google function on the backend instead of doing a hard page refresh
 		function syncGoogleCalendar() {
@@ -2245,20 +2279,17 @@ $("#custom").spectrum({
 					success: function() {
 
 						console.log("Got here on success!")
-						showGoogleSyncFeedback();
-						setTimeout( function() { hideGoogleSyncFeedback(); location.href = "/dashboard"; }, 3000);
 						
+						var targetText = "Google Sync Information";
+						showGoogleSyncFeedback(targetText);
+						setTimeout( function() { hideGoogleSyncFeedback(); location.href = "/dashboard"; }, 3000);	
 					},
 
 					error: function() {
-
 						console.log("did i get here?");
-						// location.href = "/dashboard";
 					}
 				});
 			}
-
-
 
 		function refresher() {
 
@@ -2273,13 +2304,18 @@ $("#custom").spectrum({
 			create_new_event_form();
 		};
 
-		function showGoogleSyncFeedback() {
+		//Pass in a string so the alerts can be dynamic for events, tasks, google events, etc
+		function showGoogleSyncFeedback(targetText) {
+			var alertMessageType = document.getElementById("updateType");
+			alertMessageType.innerHTML = targetText;
 
 			$(".alert-success").css("width", "75%");
 			$(".alert-success").css("margin", "auto");
 			$(".alert-success").css("margin-top", "50px");
 			$(".alert-success").css("margin-bottom", "20px");
 			$(".alert-success").css("visibility", "visible");
+
+
 		}
 		function hideGoogleSyncFeedback() {
 
