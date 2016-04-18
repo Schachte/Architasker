@@ -24,6 +24,9 @@ from oauth2client.client import flow_from_clientsecrets
 from oauth2client.django_orm import Storage
 from apiclient import discovery
 
+import json
+from django.core import serializers
+
 from django.template import loader, Context
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
@@ -135,6 +138,7 @@ Custom function to parse out the user events and store them on-click
 def pull_user_event_data(request):
     user_is_authenticated = False
 
+    print("Successfully got here doing a POST via ajax!")
 
     #Send request to pull data from the calendar API
     current_user = User.objects.get(id=request.user.id)
@@ -820,7 +824,12 @@ def pull_user_event_data(request):
                 pass
 
     #Need to make the return of this response into an ajax calls and a json dump to dump a request var for success message
-    return HttpResponseRedirect('/dashboard')
+    # return HttpResponseRedirect('/dashboard')
+    data = []
+    data = serializers.serialize("json", data)
+    json.dumps(data)
+
+    return HttpResponse(data)
 
 
 

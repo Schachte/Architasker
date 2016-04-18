@@ -148,6 +148,12 @@
 	.show {display:block;}
 
 
+	@import url('//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css');
+	 
+
+
+
+
 
 .time_pick {
 	position: relative;
@@ -1074,6 +1080,44 @@
 				margin: 15px 5px 5px;
 				width: 70px;
 			}
+
+
+			.alert {
+			padding: 8px 35px 8px 14px;
+			margin-bottom: 18px;
+			color: #c09853;
+			text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+			background-color: #fcf8e3;
+			border: 1px solid #fbeed5;
+			-webkit-border-radius: 4px;
+			-moz-border-radius: 4px;
+			border-radius: 4px;
+			visibility: hidden;
+
+			}
+
+			.alert-heading {
+			color: inherit;
+			}
+
+			.alert .close {
+			position: relative;
+			top: -2px;
+			right: -21px;
+			line-height: 18px;
+			}
+
+			.alert-success {
+			color: #468847;
+			background-color: #dff0d8;
+			border-color: #d6e9c6;
+/*			width: 75%;
+			margin: auto;
+			margin-top: 50px;
+			margin-bottom: 20px;*/
+			visibility: hidden;
+			}
+
 		</style>
 
             <link href='https://fonts.googleapis.com/css?family=Comfortaa:700' rel='stylesheet' type='text/css'>
@@ -1120,10 +1164,6 @@
                     </a>
                 </li>
 
-                <!-- Trigger the modal with a button -->
-
-
-
                 <li>
                     <a href="/dashboard">
                         <i class="pe-7s-plus"></i>
@@ -1156,13 +1196,9 @@
                 </li>
 
 
-
-
-
             </ul>
     	</div>
     </div>
-
 
 
 
@@ -1187,25 +1223,7 @@
                                 <i class="fa fa-dashboard"></i>
                             </a>
                         </li>
-                        <!-- <li class="dropdown">
-                              <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                                    <i class="fa fa-globe"></i>
-                                    <b class="caret"></b>
-                                    <span class="notification">5</span>
-                              </a>
-                              <ul class="dropdown-menu">
-                                <li><a href="#">Notification 1</a></li>
-                                <li><a href="#">Notification 2</a></li>
-                                <li><a href="#">Notification 3</a></li>
-                                <li><a href="#">Notification 4</a></li>
-                                <li><a href="#">Another notification</a></li>
-                              </ul>
-                        </li> -->
-                        <!-- <li>
-                           <a href="">
-                                <i class="fa fa-search"></i>
-                            </a>
-                        </li> -->
+
                     </ul>
 
                     <ul class="nav navbar-nav navbar-right">
@@ -1231,9 +1249,10 @@
 
                 {% if google_auth_complete == True %}
 
-                <a href="/sync">
-                    <div class='button -border center' style="float: right;">Sync Google Calendar</div>
-                </a>
+
+                <!-- DIV onclick may not be good practice tbqh -->
+                <div onclick="syncGoogleCalendar();" class='button -border center' id = "syncGoogle" style="float: right;">Sync Google Calendar</div>
+
 
 
                 {% else %}
@@ -1259,7 +1278,6 @@
 										        <input type="text" id="datepicker" name="dueDate" class="required">
 
 											    <label for="location">Location</label>
-<!-- 											    <input id="location" name="location" type="text" placeholder="Primary address this location will be completed in."> -->
 
 											    <div id="locationField">
 										      	<input id="autocomplete" name="autocomplete" placeholder="Enter your address"
@@ -1374,6 +1392,10 @@
 							</div>
 						</div>
 					</div><!-- morph-button -->
+
+					
+					<div class="alert alert-success" visible=false>Success! Your Google Information Was Synced. Please wait 5 seconds to populate...</div>
+
 			
 				<div id="scheduler_here" class="dhx_cal_container card col-md-12" style='width:100%; height:70%'>
 
@@ -1391,27 +1413,11 @@
 					 </div>
 				</div>
 
-				 <script>
-				// $(document).ready(function(){
-				//   $("#demoTask").on("hide.bs.collapse", function(){
-				//     $(".btn").html('<span class="glyphicon glyphicon-collapse-down"></span> Add Task');
-				//   });
-				//   $("#demoTask").on("show.bs.collapse", function(){
-				//     $(".btn").html('<span class="glyphicon glyphicon-collapse-up"></span> Close');
-				//   });
-				// });
-
-				
-				// </script>
-
-
 				{% else %}
-
 
 				<iframe id="encoder_iframe" height=75% width="100%" src="{% url 'screen_setup_module' %}"></iframe>
 
 				{% endif %}
-
 
 
         <footer id="footerID" class="footer">
@@ -1456,6 +1462,7 @@
     </div><!-- /.modal-content -->
   </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
+
 
 <script>
 		//-----------MORPHING BUTTON/MODAL WINDOW JS---------------------------------
@@ -2221,6 +2228,38 @@ $("#custom").spectrum({
 			});
 		};
 
+
+
+
+		//AJAX call that will do a call to the sync google function on the backend instead of doing a hard page refresh
+		function syncGoogleCalendar() {
+
+                $('.ajaxProgress').show();
+				$.ajax({
+					type: "POST",
+					url: "sync/",
+					dataType: "json",
+					data: {
+						csrfmiddlewaretoken: '{{ csrf_token }}',
+					},
+					success: function() {
+
+						console.log("Got here on success!")
+						showGoogleSyncFeedback();
+						setTimeout( function() { hideGoogleSyncFeedback(); location.href = "/dashboard"; }, 3000);
+						
+					},
+
+					error: function() {
+
+						console.log("did i get here?");
+						// location.href = "/dashboard";
+					}
+				});
+			}
+
+
+
 		function refresher() {
 
 			//This will not refresh the page, but the following functions reset to NULL values on the frontend for add event form
@@ -2234,8 +2273,30 @@ $("#custom").spectrum({
 			create_new_event_form();
 		};
 
+		function showGoogleSyncFeedback() {
+
+			$(".alert-success").css("width", "75%");
+			$(".alert-success").css("margin", "auto");
+			$(".alert-success").css("margin-top", "50px");
+			$(".alert-success").css("margin-bottom", "20px");
+			$(".alert-success").css("visibility", "visible");
+		}
+		function hideGoogleSyncFeedback() {
+
+
+			$(".alert-success").css("width", "");
+			$(".alert-success").css("margin", "");
+			$(".alert-success").css("margin-top", "");
+			$(".alert-success").css("margin-bottom", "");
+			$(".alert-success").css("visibility", "hidden");
+		}
+
+
 
 </script>
+
+
+
 
 
 </html>
