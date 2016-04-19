@@ -50,6 +50,19 @@
 	<link rel='stylesheet' href='http://bgrins.github.io/spectrum/spectrum.css' />
 
 
+
+
+	  <script type="text/javascript" src="http://jonthornton.github.io/jquery-timepicker/jquery.timepicker.js"></script>
+	  <link rel="stylesheet" type="text/css" href="http://jonthornton.github.io/jquery-timepicker/jquery.timepicker.css" />
+
+<!-- 	  <script type="text/javascript" src="http://jonthornton.github.io/jquery-timepicker/lib/bootstrap-datepicker.js"></script> -->
+	  <link rel="stylesheet" type="text/css" href="http://jonthornton.github.io/jquery-timepicker/lib/bootstrap-datepicker.css" />
+
+	  <script type="text/javascript" src="http://jonthornton.github.io/jquery-timepicker/lib/site.js"></script>
+	  <link rel="stylesheet" type="text/css" href="http://jonthornton.github.io/jquery-timepicker/lib/site.css" />
+
+
+
 	<link type="text/css" rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500">
     <style>
       #locationField, #controls {
@@ -153,8 +166,6 @@
 
 
 
-
-
 .time_pick {
 	position: relative;
 	width: 500px;
@@ -225,6 +236,10 @@
 
 				scheduler.config.xml_date="%Y-%m-%d %H:%i";
 
+				// scheduler.skin = "classic"; //valid values are classic, glossy, terrace
+				scheduler.skin = "flat"; //valid values are classic, glossy, terrace
+				scheduler.config.separate_short_events = true;
+
 				scheduler.config.default_date = "%j %M %Y";
 
 				var formatDateFunc = scheduler.date.date_to_str("%Y-%m-%dT%H:%i:%s");
@@ -254,14 +269,14 @@
 						success: function() {
 
 							console.log("Got here on success!")
-							var targetText = "custom calendar event";
+							var targetText = "Event Successfully Generated and Synced!";
 							showGoogleSyncFeedback(targetText);
-							setTimeout( function() { hideGoogleSyncFeedback(); location.href = "/dashboard"; }, 3000);	
+							setTimeout( function() { hideGoogleSyncFeedback();}, 3000);
 						},
 
 						error: function() {
 							console.log("did i get here?1");
-							var targetText = "custom calendar event";
+							var targetText = "Event Successfully Generated and Synced!";
 							showGoogleSyncFeedback(targetText);
 							setTimeout( function() { hideGoogleSyncFeedback();}, 3000);	
 						}
@@ -286,14 +301,14 @@
         						},
 						success: function() {
 
-							console.log("Got here on success!")
-							showGoogleSyncFeedback();
-							setTimeout( function() { hideGoogleSyncFeedback(); location.href = "/dashboard"; }, 3000);	
+							var targetText = "Event Successfully Updated!";
+							showGoogleSyncFeedback(targetText);
+							setTimeout( function() { hideGoogleSyncFeedback();}, 3000);	
 						},
 
 						error: function() {
-							console.log("did i get here?1");
-							showGoogleSyncFeedback();
+							var targetText = "Event Successfully Updated!"
+							showGoogleSyncFeedback(targetText);
 							setTimeout( function() { hideGoogleSyncFeedback();}, 3000);	
 						}
         					});
@@ -317,14 +332,14 @@
     						},
 						success: function() {
 
-							console.log("Got here on success!")
-							showGoogleSyncFeedback();
-							setTimeout( function() { hideGoogleSyncFeedback(); location.href = "/dashboard"; }, 3000);	
+							var targetText = "Event Successfully Updated!";
+							showGoogleSyncFeedback(targetText);
+							setTimeout( function() { hideGoogleSyncFeedback();}, 3000);	
 						},
 
 						error: function() {
-							console.log("did i get here?1");
-							showGoogleSyncFeedback();
+							var targetText = "Event Successfully Updated!";
+							showGoogleSyncFeedback(targetText);
 							setTimeout( function() { hideGoogleSyncFeedback();}, 3000);	
 						}
     					});
@@ -343,6 +358,20 @@
 							csrfmiddlewaretoken: '{{ csrf_token }}',
 							id: event_id
 						},
+
+						success: function() {
+
+							var targetText = "Event Successfully Removed!";
+							showGoogleSyncFeedback(targetText);
+							setTimeout( function() { hideGoogleSyncFeedback();}, 3000);	
+						},
+
+						error: function() {
+							var targetText = "Event Successfully Removed!"
+							showGoogleSyncFeedback(targetText);
+							setTimeout( function() { hideGoogleSyncFeedback();}, 3000);	
+						}
+
 					});
 					return true;
 				};
@@ -756,10 +785,7 @@
 
 			$(function() {
 			    $( "#datepicker" ).datepicker({
-			      // showOn: "button",
-			      // buttonImage: "{% static 'datepicker/images/calendar.gif' %}",
-			      // buttonImageOnly: true,
-			      // buttonText: "Select date",
+
 			      minDate: 0,
 			      showAnim: "blind",
 			      duration: "slow"
@@ -1156,6 +1182,143 @@
 			visibility: hidden;
 			}
 
+
+
+			a#spaghett{
+			  display:block;
+			  color:#ad5482;  
+			  text-decoration:none;
+			  font-weight:bold;
+			  margin-top:40px;
+			  text-align:center;
+			}
+
+			#bg_spaghett{
+			  position:relative;
+			  height:600px;
+			  width:100%;
+			  background-size:cover;
+			  margin-left:auto;
+			  margin-right:auto; 
+			  border:#fff 15px solid;
+			}
+
+			.module#spaghett{
+			  position:relative;
+			  /*top:15%;    */
+			  height:100%;
+			  width:100%;
+			  margin:auto;
+			  border-radius:0px;
+			  background:RGBA(255,255,255,1);
+			    
+			  -webkit-box-shadow:  0px 0px 2px 0px rgba(0, 0, 0, .45);        
+			  box-shadow:  0px 0px 100px 0px rgba(0, 0, 0, .15);
+			  
+			}
+
+			.module ul#spaghett{
+			  list-style-type:none;
+			  margin:0;
+			}
+
+			.tab#spaghett{
+			  float:left;
+			  height:60px;
+			  width:25%;
+			  padding-top:20px;
+			  box-sizing:border-box;
+			  background:#eeeeee;  
+			  text-align:center;
+			  cursor:pointer;
+			  transition:background .4s;
+			}
+
+			.tab:first-child#spaghett{  
+			  -webkit-border-radius: 5px 0px 0px 0px;
+			  border-radius: 5px 0px 0px 0px;
+			}
+
+			.tab:last-child#spaghett{  
+			  -webkit-border-radius: 0px 5px 0px 0px;
+			  border-radius: 0px 5px 0px 0px;
+			}
+
+			.tab:hover#spaghett{  
+			  background-color:rgba(0,0,0,.1);
+			}
+
+			.activeTab#spaghett{
+			  background:#fff;
+			}
+
+			.activeTab .icon#spaghett{
+			  opacity:1;
+			}
+
+			.icon#spaghett{
+			  height:24px;
+			  width:24px;
+			  opacity:.2;
+			}
+
+			.form#spaghett{
+			  float:left;
+			  height:86%;
+			  width:100%;
+			  box-sizing:border-box;
+			  padding:40px;
+			}
+
+			.textbox#spaghett{
+			  height:50px;
+			  width:100%;
+			  border-radius:3px;
+			  border:rgba(0,0,0,.3) 2px solid;
+			  box-sizing:border-box;
+			  padding:10px;
+			  margin-bottom:30px;
+			}
+
+			.textbox:focus#spaghett{
+			  outline:none;
+			   border:rgba(24,149,215,1) 2px solid;
+			   color:rgba(24,149,215,1);
+			}
+
+			.button#spaghett{
+			  height:50px;
+			  width:100%;
+			  border-radius:3px;
+			  border:rgba(0,0,0,.3) 0px solid;
+			  box-sizing:border-box;
+			  padding:10px;
+			  margin-bottom:30px;
+			  background:#90c843;
+			  color:#FFF;
+			  font-weight:bold;
+			  font-size: 12pt;
+			  transition:background .4s;
+			  margin: auto;
+			  cursor:pointer;
+			}
+
+			.button:hover#spaghett{
+			  background:#80b438;
+			  
+			}
+
+
+			#button_width {
+				width: 100%;
+			}
+
+			#dropdown_width {
+				width: 100%;
+				margin-bottom: 15px;
+				margin-top: -5px;
+			}
+
 		</style>
 
             <link href='https://fonts.googleapis.com/css?family=Comfortaa:700' rel='stylesheet' type='text/css'>
@@ -1432,7 +1595,7 @@
 					</div><!-- morph-button -->
 
 					
-					<div class="alert alert-success" visible=false>Success! Your <span id="updateType"></span> Was Synced. Please wait 5 seconds to populate...</div>
+					<div class="alert alert-success" visible=false>Success! <span id="updateType"></span></div>
 
 			
 				<div id="scheduler_here" class="dhx_cal_container card col-md-12" style='width:100%; height:70%'>
@@ -1967,9 +2130,6 @@ function fill_transit(trans_type) {
 	trans_text.text = trans_type;
 }
 
-
-
-
 	</script>
 
 
@@ -1986,67 +2146,71 @@ function fill_transit(trans_type) {
         <h4 class="modal-title">Add Customized Event</h4>
       </div>
       <div class="modal-body">
-        <p>An event is something that is a planned and continuous.</p>
-        <h1>I WILL MAKE THIS LOOK GOOD LATER</h1>
-        <hr>
-        <form>
-
-				<table>
-				  <tr>
-				    <td id=""><label for='name'>Event Name:</label></td>
-				    <td id=""><input type='text' id='addEventName'></input></td>
-				 </tr>
 
 
-				  <tr>
-				    <td id=""><label for='name'>Select Day Due:</label></td>
-				    <td>
-					<select id="addEventForm">
-					  <option value="Monday">Monday</option>
-					  <option value="Tuesday">Tuesday</option>
-					  <option value="Wednesday">Wednesday</option>
-					  <option value="Thursday">Thursday</option>
-					  <option value="Friday">Friday</option>
-					  <option value="Saturday">Saturday</option>
-					  <option value="Sunday">Sunday</option>
-					</select>
-					</td>
-				 </tr>
+
+		<div id="bg_spaghett">
+		  <div class="module" id="spaghett">
+		    
+		    <form class="form" id="spaghett">
+		    <tr>
+			    <td id=""><label for='name'>Event Name:</label></td>
+			    <td>
+			    	<input type="text" id="spaghett" placeholder="Insert Event Name Here..." class="textbox event_name_text" />
+			    </td>
+		    </tr>
+
+		    <tr>
+			    <td id="pull_me_up"><label for='name'>Event Day Due:</label></td>
+			    <td>
+					<div class="dropdown" id="dropdown_width">
+					  <button class="btn dropdown-toggle" id="button_width" type="button" data-toggle="dropdown"><span id ="replacement_day">Select Day Due</span>
+					  <span class="caret"></span></button>
+					  <ul class="dropdown-menu">
+					    <li onclick="changeDayVal('Monday');" id="day_lab"><a href="#">Monday</a></li>
+					    <li onclick="changeDayVal('Tuesday');" id="day_lab"><a href="#">Tuesday</a></li>
+					    <li onclick="changeDayVal('Wednesday');" id="day_lab"><a href="#">Wednesday</a></li>
+					    <li onclick="changeDayVal('Thursday');" id="day_lab"><a href="#">Thursday</a></li>
+					    <li onclick="changeDayVal('Friday');" id="day_lab"><a href="#">Friday</a></li>
+					    <li onclick="changeDayVal('Saturday');" id="day_lab"><a href="#">Saturday</a></li>
+					    <li onclick="changeDayVal('Sunday');" id="day_lab"><a href="#">Sunday</a></li>
+					  </ul>
+					</div> 
+
+			    </td>
+
+		    </tr><br>
+
+		    <tr>
+			    <td id=""><label for='name'>Start Time:</label></td>
+			    <td>
+			    	<input type="text" id="spaghett" placeholder="Insert the start time..." class="textbox starter_time" />
+			    </td>
+		    </tr>
+
+		    <tr>
+			    <td id=""><label for='name'>End Time:</label></td>
+			    <td>
+			    	<input type="text" id="spaghett" placeholder="Insert the end time..." class="textbox ender_time" />
+			    </td>
+		    </tr>
 
 
-				  <tr>
-				    <td id=""><label for='name'>Event Start Time:</label></td>
-				    <td id="">
-
-					 <input id="timepicker1" type="text" name="timepicker1"/>
-
-				    </td>
-				 </tr>
-
-
-				  <tr>
-				    <td id=""><label for='name'>Event End Time:</label></td>
-				    <td id="">
-
-					 <input id="timepicker2" type="text" name="timepicker2"/>
-
-				    </td>
-				 </tr>
+		    <tr>
+			    <td id=""><label for='name'>Event Color:</label></td><br>
+			    <td>
+			    	<input type='text' id="custom" />
+			    </td>
+		    </tr>
+		    <br>
+		    
+		      <!-- <input type='text' id= "spaghett" id="custom" /> -->
+		      <input type="button" onclick="checkEventConflictAnalysis();" id="spaghett" value="Add Event" class="button" />
+		    </form>
+		  </div>
+		</div>
 
 
-				 <tr>
-
-				 	<td><label for='name'>Event Color:</label></td>
-				 	<td>
-					 	<input type='text' id="custom" />
-					 </td>
-				 </tr>
-
-				</table>
-
-				<button onclick="checkEventConflictAnalysis();return false;">Add Event</button>
-
-        </form>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -2072,6 +2236,8 @@ function fill_transit(trans_type) {
         </ul>
       </div>
       <div class="modal-footer">
+      	<button onclick="add_event_and_reallocate()" type="button" class="btn btn-default" data-dismiss="modal">Add and Re-Allocate</button>
+      	<button onclick="ajaxAddEventCaller()" type="button" class="btn btn-default" data-dismiss="modal">Add Overlap</button>
         <button onclick="refresher()" type="button" class="btn btn-default" data-dismiss="modal">Close</button>
         <!-- <button type="button" class="btn btn-primary">Save changes</button> -->
       </div>
@@ -2108,24 +2274,23 @@ $("#custom").spectrum({
 <script>
 	function myFunction() {
 		var color_val = $("#custom").spectrum('get').toHexString();
-		return color_val;
-	    
+		return color_val;   
 	}
 
 	function getWeekDay() {
-		var weekDay = $('#addEventForm').val();
+		var weekDay = $('#replacement_day').text();
 		return weekDay;
 	}
 
 	function getEventName() {
-		var eventName = $('#addEventName').val();
+		var eventName = $('.event_name_text').val();
 		return eventName;
 	}
 
 	function getStartEndTimes() {
 
-		var startTime = $('#timepicker1').val();
-		var endTime = $('#timepicker2').val();
+		var startTime = $('.starter_time').val();
+		var endTime = $('.ender_time').val();
 
 		var totalTimes = [startTime, endTime];
 		return totalTimes;
@@ -2133,21 +2298,19 @@ $("#custom").spectrum({
 
 
 	function setWeekDay() {
-		$('#addEventForm').val('');
+		$('#replacement_day').val('');
 	}
 
 	function setEventName() {
-		$('#addEventName').val('');
+		$('.event_name_text').val('');
 	}
 
 	function setStartEndTimes() {
 
-		$('#timepicker1').val('0:00:00');
-		$('#timepicker2').val('0:00:00');
+		$('.starter_time').val('0:00:00');
+		$('.ender_time').val('0:00:00');
 
 	}
-
-
 	
 		function create_new_event_form() {
 
@@ -2155,6 +2318,11 @@ $("#custom").spectrum({
 		    var weekDay = getWeekDay();
 		    var eventName = getEventName();
 		    var allTimes = getStartEndTimes();
+
+		    console.log(hex_color);
+		    console.log(weekDay);
+		    console.log(eventName);
+		    console.log(allTimes);
 
 		    $.ajax({
 		        url : "create_event/", // the endpoint
@@ -2172,7 +2340,7 @@ $("#custom").spectrum({
 		        success : function(json) {
 
 		            console.log("success"); // another sanity check
-		            location.reload();
+		            location.href = "/dashboard";
 		        },
 
 		        // handle a non-successful response
@@ -2181,6 +2349,74 @@ $("#custom").spectrum({
 		        }
 		    });
 		};
+
+
+		function add_event_and_reallocate() {
+
+		    var hex_color = myFunction();
+		    var weekDay = getWeekDay();
+		    var eventName = getEventName();
+		    var allTimes = getStartEndTimes();
+
+		    console.log(hex_color);
+		    console.log(weekDay);
+		    console.log(eventName);
+		    console.log(allTimes);
+
+		    $.ajax({
+		        url : "create_event/", // the endpoint
+		        type : "POST", // http method
+				data: {
+					csrfmiddlewaretoken: '{{ csrf_token }}',
+					start: allTimes[0],
+					end: allTimes[1],
+					text: eventName,
+					id: "123123",
+					current_day: weekDay, //what if the event was a multi-day event?!?!
+					color: hex_color
+
+				},
+		        success : function(json) {
+
+		            console.log("success"); // another sanity check
+		            run_allocate_test();
+		            location.href = "/dashboard";
+		            
+		        },
+
+		        // handle a non-successful response
+		        error : function(xhr,errmsg,err) {
+		        	console.log("didn't work");
+		        }
+		    });
+		};
+
+
+
+		function run_allocate_test() {
+
+		    $.ajax({
+		        url : "allocate_test/", // the endpoint
+		        type : "POST", // http method
+				data: {
+					csrfmiddlewaretoken: '{{ csrf_token }}',
+
+				},
+		        success : function() {
+
+		            console.log("success"); // another sanity check
+		            
+		        },
+
+		        // handle a non-successful response
+		        error : function(xhr,errmsg,err) {
+		        	console.log("didn't work allocate test");
+		        }
+		    });
+		};
+
+
+
 
 		//This is an ajax call that will help display event and mini task conflict analysis in modal
 		function checkEventConflictAnalysis() {
@@ -2259,9 +2495,8 @@ $("#custom").spectrum({
 			        else {
 			        	//There will be no additional add event because there is an event conflict within the backend
 			        	console.log("busy!");
-			        }
+			       }
 		        }
-
 			});
 		};
 
@@ -2280,7 +2515,7 @@ $("#custom").spectrum({
 
 						console.log("Got here on success!")
 						
-						var targetText = "Google Sync Information";
+						var targetText = "Your Google Sync Information is Syncing.... Please Wait 3 seconds..";
 						showGoogleSyncFeedback(targetText);
 						setTimeout( function() { hideGoogleSyncFeedback(); location.href = "/dashboard"; }, 3000);	
 					},
@@ -2297,6 +2532,7 @@ $("#custom").spectrum({
 			setWeekDay();
 			setEventName();
 			setStartEndTimes();
+			$("#event_name_list").text("");
 		};
 
 		function ajaxAddEventCaller() {
@@ -2328,11 +2564,23 @@ $("#custom").spectrum({
 		}
 
 
+		function changeDayVal(day_name) {
+
+			var day_object = document.getElementById("replacement_day");
+			day_object.innerHTML = day_name;
+
+		}
+
+		$('.starter_time').timepicker();
+		$('.ender_time').timepicker();
+		$(".sp-replacer").css("width", "100%");
+		$(".sp-replacer").css("margin-bottom", "10px");
+		$(".sp-preview").css("width", "100%");
+		$(".sp-preview-inner").css("width", "100%");
+		$(".sp-dd").remove();
+		// sp-replacer sp-light
+
 
 </script>
-
-
-
-
 
 </html>

@@ -1096,6 +1096,7 @@ def task_reset(request):
 		add_hours_for_task_reset(mini_task.parent_task, day_of_task, task_duration)
 
 		#delete mini task
+		print("deleting %s"%(mini_task.parent_task))
 		mini_task.delete()
 
 
@@ -1364,6 +1365,17 @@ def allocate_tasks(request):
 					break
 
 
+	#Insert a query set to get all mini tasks, find times that are the same, and remove one of them.
+
+	all_mini_tasks = BreakdownUserTask.objects.all()
+	print(all_mini_tasks)
+
+	for each_mini_parent in all_mini_tasks:
+		for each_mini_child in all_mini_tasks:
+			if (each_mini_parent != each_mini_child and each_mini_parent.start_time == each_mini_child.start_time and each_mini_parent.end_time == each_mini_child.end_time):
+				each_mini_child.delete()
+				print("duplicate removed!")
+
 	return HttpResponse("Allocated tasks successfully!")
 
 
@@ -1392,11 +1404,12 @@ def get_correct_date_time_format(request, day_num, clock_str):
     print("clock str after space replace is %s"%(clock_str))
 
     #Provide the appropriate offset for the conversion
-    if 'A' in clock_str:
-        clock_str = clock_str[0:5] + ' ' + 'AM'
+    if 'am' in clock_str:
+        clock_str = clock_str[0:4] + ' ' + 'AM'
         print("THIS IS AM!")
-    elif 'P' in clock_str:
-        clock_str = clock_str[0:5] + ' ' + 'PM' 
+        print(clock_str)
+    elif 'pm' in clock_str:
+        clock_str = clock_str[0:4] + ' ' + 'PM' 
         print("THIS IS PM!")
 
     clock_str = datetime.datetime.strptime(clock_str, '%I:%M %p')
@@ -1407,31 +1420,31 @@ def get_correct_date_time_format(request, day_num, clock_str):
 
 
     if (day_num == 'Monday'):
-        date_portion = parse(ranges[0]) + datetime.timedelta(days=1)
+        date_portion = parse(ranges[0]) + datetime.timedelta(days=0)
         date_portion = str(date_portion)
         date_portion = date_portion[0:10] #This is just the date now 2016-04-13 .
     elif (day_num == 'Tuesday'):
-        date_portion = parse(ranges[0]) + datetime.timedelta(days=2)
+        date_portion = parse(ranges[0]) + datetime.timedelta(days=1)
         date_portion = str(date_portion)
         date_portion = date_portion[0:10] #This is just the date now 2016-04-13 .
     elif (day_num == 'Wednesday'):
-        date_portion = parse(ranges[0]) + datetime.timedelta(days=3)
+        date_portion = parse(ranges[0]) + datetime.timedelta(days=2)
         date_portion = str(date_portion)
         date_portion = date_portion[0:10] #This is just the date now 2016-04-13 .
     elif (day_num == 'Thursday'):
-        date_portion = parse(ranges[0]) + datetime.timedelta(days=4)
+        date_portion = parse(ranges[0]) + datetime.timedelta(days=3)
         date_portion = str(date_portion)
         date_portion = date_portion[0:10] #This is just the date now 2016-04-13 .
     elif (day_num == 'Friday'):
-        date_portion = parse(ranges[0]) + datetime.timedelta(days=5)
+        date_portion = parse(ranges[0]) + datetime.timedelta(days=4)
         date_portion = str(date_portion)
         date_portion = date_portion[0:10] #This is just the date now 2016-04-13 .
     elif (day_num == 'Saturday'):
-        date_portion = parse(ranges[0]) + datetime.timedelta(days=6)
+        date_portion = parse(ranges[0]) + datetime.timedelta(days=5)
         date_portion = str(date_portion)
         date_portion = date_portion[0:10] #This is just the date now 2016-04-13 .
     elif (day_num == 'Sunday'):
-        date_portion = parse(ranges[0]) + datetime.timedelta(days=7)
+        date_portion = parse(ranges[0]) + datetime.timedelta(days=6)
         date_portion = str(date_portion)
         date_portion = date_portion[0:10] #This is just the date now 2016-04-13 .
 
@@ -1451,6 +1464,7 @@ Check Event Conflict Analysis With Other Tasks
 def event_conflict_analysis(request):
 
 	if request.method == 'POST':
+		print("checking event conflict analysis")
 		
 		#Get the post variable for the day
 		day_to_check = request.POST.get('current_day')

@@ -845,6 +845,7 @@ def get_correct_date_time_format(request, day_num, clock_str):
     INSERT MILITARY TIME CONVERSION ALGORITHM HERE
     '''''''''''''''''''''''''''''''''''''''''''''
 
+    print("IN APP_CALENDAR NOW.... CREATING THE EVENT")
 
     print("Day num is %s"%(day_num))
 
@@ -861,16 +862,20 @@ def get_correct_date_time_format(request, day_num, clock_str):
     print("clock str after space replace is %s"%(clock_str))
 
     #Provide the appropriate offset for the conversion
-    if 'A' in clock_str:
-        clock_str = clock_str[0:5] + ' ' + 'AM'
+    if 'am' in clock_str:
+        clock_str = clock_str[0:4] + ' ' + 'AM'
         print("THIS IS AM!")
-    elif 'P' in clock_str:
-        clock_str = clock_str[0:5] + ' ' + 'PM' 
+    elif 'pm' in clock_str:
+        clock_str = clock_str[0:4] + ' ' + 'PM' 
         print("THIS IS PM!")
 
+    # try:
     clock_str = datetime.datetime.strptime(clock_str, '%I:%M %p')
     clock_str = str(clock_str)
     clock_str = 'T'+clock_str[11:]
+    # except Exception as e: 
+    #     print(e)
+
 
     print("Final clock_str is %s"%(clock_str))
 
@@ -971,7 +976,11 @@ def create_event(request):
             temp_model.current_day = "Sunday"
 
         temp_model.save()
-    return HttpResponse("none")
+    data = []
+    data = serializers.serialize("json", data)
+    json.dumps(data)
+
+    return HttpResponse(data)
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 Function to delete event from database
