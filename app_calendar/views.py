@@ -1105,6 +1105,7 @@ def get_calendar_data(request):
         'user_initial_setup' : user_initial_setup,
         'google_auth_complete' : google_auth_complete,
         'breakdown_tasks':user_breakdown_mini_tasks,
+        'user_wakeup_time': extended_user.wakeup_time[0:2],
     }
 
     if (not current_user_time_zone == 'None'):

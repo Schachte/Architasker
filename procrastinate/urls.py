@@ -69,6 +69,7 @@ urlpatterns = [
     url(r'^event_conflict', event_conflict_analysis, name='event_conflict_analysis'),
 
 
+
 ]
 
 admin.site.site_header = 'Architasker'

@@ -47,7 +47,7 @@ class UserTask(models.Model):
 	sat_task_time = models.FloatField(blank=True, null=True, default=0)
 	sun_task_time = models.FloatField(blank=True, null=True, default=0)
 
-	def __unicode__(self):
+	def __str__(self):
 		return self.task_name
 
 

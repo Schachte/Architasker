@@ -238,6 +238,7 @@
 
 				// scheduler.skin = "classic"; //valid values are classic, glossy, terrace
 				scheduler.skin = "flat"; //valid values are classic, glossy, terrace
+
 				scheduler.config.separate_short_events = true;
 
 				scheduler.config.default_date = "%j %M %Y";
@@ -378,10 +379,10 @@
 					return true;
 				};
 
-
-
-
-
+				// scheduler.config.separate_short_events = true;
+				scheduler.config.hour_size_px = 100;
+				scheduler.config.scroll_hour = {{user_wakeup_time}};
+				scheduler.config.mark_now = true;
 
                 scheduler.config.icons_select = ['icon_details', 'icon_delete', 'i1', 'i2', 'i3', 'i4', 'i5', 'i6', 'i7', 'i8', 'i9', 'i10', 'i11'];
 
@@ -1345,10 +1346,7 @@
                 <a href="/dashboard" class="simple-text">
                     Architasker
                     <h6>Welcome back, {{first_name}}!</h6>
-                    
-                    {% for items in mon_TASK %}
-                    	{{items.start_time}}
-                    {% endfor %}
+
                 </a>
             </div>
 
@@ -1865,15 +1863,43 @@
 						task_day_num: Date.getDayNumberFromName(document.getElementById('task_day_of_week').value),
 						task_transit_mode: document.getElementById("hidden_transit").text
 					},
-					success: function() {
-						succeed = true;
-						location.href = "/dashboard";
+					success: function(json) {
+
+						if (json['conflict_bool'] == 1) {
+							succeed = true;
+							console.log(json)
+
+							var needed_available_hours = parseFloat(json['needed_available_hours']);
+							var available_hours = parseFloat(json['available_hours']);
+
+							var lower_hours = needed_available_hours - available_hours;
+							lower_hours = lower_hours.toFixed(2);
+
+							console.log("The task " + json['task_name'] + " has a conflict.");
+							console.log("You need " + json['needed_available_hours'] + " hours, but only have " + json['available_hours'] + " hours");
+							console.log("This task is only possible if you decrease the required hours by "  + lower_hours);
+
+							$('#conf_task_name').text(json['task_name']);
+							$('#conf_hours_needed').text(json['needed_available_hours']);
+							$('#conf_current_avail_hours').text(json['available_hours']);
+							$('#conf_decrease_by').text(lower_hours);
+
+							$('#taskconflictmodal').modal('show');
+
+
+
+						}
+						else {
+
+							console.log("there is no conflict!");
+							location.href = "/dashboard";
+						}
 					},
 
 					error: function() {
 
 						console.log("did i get here?");
-						location.href = "/dashboard";
+						// location.href = "/dashboard";
 					}
 
 
@@ -2212,6 +2238,7 @@ function fill_transit(trans_type) {
 		  </div>
 		</div>
 
+<<<<<<< HEAD
 
       </div>
       <div class="modal-footer">
@@ -2248,6 +2275,30 @@ function fill_transit(trans_type) {
 </div>
 
 
+
+<div class="modal fade" id="taskconflictmodal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Hold on! There are Task Allocation Conflicts!</h4>
+      </div>
+      <div class="modal-body">
+        Conflicting Task: <b><span id="conf_task_name"></span><br></b>
+        Hours Needed For Task: <b><span id="conf_hours_needed"></span><br></b>
+        Current Available Hours: <b><span id="conf_current_avail_hours"></span><br></b>
+        Decrease Your Task Hours By: <b><span id="conf_decrease_by"></span><br></b>
+
+      </div>
+      <div class="modal-footer">
+        <button onclick="refresher()" type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <!-- <button type="button" class="btn btn-primary">Save changes</button> -->
+      </div>
+    </div>
+  </div>
+</div>
+
+
     <script>
 		$('#timepicker1').timepicki();
 		$('#timepicker2').timepicki();
@@ -2267,16 +2318,11 @@ $("#custom").spectrum({
     	["#d35400", "#bdc3c7", "#7D1424", "#4CD4B0", "#462446", "#B05F6D", "#47B39D", "#0E9AA7"]
 
 
-        // ["#000","#444","#666","#999","#ccc","#eee","#f3f3f3","#fff"],
-        // ["#f00","#f90","#ff0","#0f0","#0ff","#00f","#90f","#f0f"],
-        // ["#f4cccc","#fce5cd","#fff2cc","#d9ead3","#d0e0e3","#cfe2f3","#d9d2e9","#ead1dc"],
-        // ["#ea9999","#f9cb9c","#ffe599","#b6d7a8","#a2c4c9","#9fc5e8","#b4a7d6","#d5a6bd"],
-        // ["#e06666","#f6b26b","#ffd966","#93c47d","#76a5af","#6fa8dc","#8e7cc3","#c27ba0"],
-        // ["#c00","#e69138","#f1c232","#6aa84f","#45818e","#3d85c6","#674ea7","#a64d79"],
-        // ["#900","#b45f06","#bf9000","#38761d","#134f5c","#0b5394","#351c75","#741b47"],
-        // ["#600","#783f04","#7f6000","#274e13","#0c343d","#073763","#20124d","#4c1130"]
     ]
 });
+
+
+
 	</script>
 
 <script>
@@ -2400,7 +2446,6 @@ $("#custom").spectrum({
 		};
 
 
-
 		function run_allocate_test() {
 
 		    $.ajax({
@@ -2476,6 +2521,8 @@ $("#custom").spectrum({
 						}
 						//Show all the conflicts within the modal window
 		            	$('#conflictmodal').modal('show');
+		          
+		            	
 		        	}
 		        	else {
 		        		console.log("There are no conflicts!");
