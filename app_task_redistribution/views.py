@@ -1540,7 +1540,6 @@ def event_conflict_analysis(request):
 				print(current_day_max)
 				print("IS CURRENT DAY MIN!")
 
-
 				if ((e_start > current_day_min and e_end < current_day_max) and (e_start < b_start and e_end < b_start and e_start < b_end and e_end < b_end) or (e_start > b_start and e_end > b_start and e_start > b_end and e_end > b_end)):
 					continue
 				else:

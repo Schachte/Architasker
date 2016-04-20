@@ -951,7 +951,7 @@ def create_event(request):
                 start_time = request.POST.get('start') + 'Z',
                 end_time = request.POST.get('end') + 'Z',
                 special_event_id = request.POST.get('id'),
-                color = '#34495e'
+                color = '#5B9BE0'
             )
 
         if (request.POST.get('weekday') == "Mon" ):
