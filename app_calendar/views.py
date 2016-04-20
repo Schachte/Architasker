@@ -24,6 +24,9 @@ from oauth2client.client import flow_from_clientsecrets
 from oauth2client.django_orm import Storage
 from apiclient import discovery
 
+import json
+from django.core import serializers
+
 from django.template import loader, Context
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
@@ -40,11 +43,16 @@ from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseRedire
 from django.contrib.auth.decorators import login_required
 
 from .models import UserEvent as SNE
+from app_tasks.models import BreakdownUserTask as BUT
 from .models import CredentialsModel
 from procrastinate import settings
 from app_account_management.models import UserExtended
 
 from operator import itemgetter
+
+
+from random import choice
+from string import ascii_uppercase
 
 #Load the API key
 CLIENT_SECRETS = os.path.join(os.path.dirname(__file__), '..', 'client_secrets.json')
@@ -130,6 +138,7 @@ Custom function to parse out the user events and store them on-click
 def pull_user_event_data(request):
     user_is_authenticated = False
 
+    print("Successfully got here doing a POST via ajax!")
 
     #Send request to pull data from the calendar API
     current_user = User.objects.get(id=request.user.id)
@@ -813,7 +822,97 @@ def pull_user_event_data(request):
 
             except:
                 pass
-    return HttpResponseRedirect('/dashboard')
+
+    #Need to make the return of this response into an ajax calls and a json dump to dump a request var for success message
+    # return HttpResponseRedirect('/dashboard')
+    data = []
+    data = serializers.serialize("json", data)
+    json.dumps(data)
+
+    return HttpResponse(data)
+
+
+
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+Function to get army time and date format for create event
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+def get_correct_date_time_format(request, day_num, clock_str):
+
+
+    #Here what we need to do is parse out the day of and append the correct military time to match the UTC time conversion for the start and end time
+
+    '''''''''''''''''''''''''''''''''''''''''''''
+    INSERT MILITARY TIME CONVERSION ALGORITHM HERE
+    '''''''''''''''''''''''''''''''''''''''''''''
+
+    print("IN APP_CALENDAR NOW.... CREATING THE EVENT")
+
+    print("Day num is %s"%(day_num))
+
+    ranges = get_current_week_range(request)
+
+    print("ranges are "),
+    print(ranges)
+
+    #time inputs as 04 : 15 : PMZ
+
+    #Get rid of the spaces within the string
+    clock_str = clock_str.replace(' ', '')
+
+    print("clock str after space replace is %s"%(clock_str))
+
+    #Provide the appropriate offset for the conversion
+    if 'am' in clock_str:
+        clock_str = clock_str[0:4] + ' ' + 'AM'
+        print("THIS IS AM!")
+    elif 'pm' in clock_str:
+        clock_str = clock_str[0:4] + ' ' + 'PM' 
+        print("THIS IS PM!")
+
+    # try:
+    clock_str = datetime.datetime.strptime(clock_str, '%I:%M %p')
+    clock_str = str(clock_str)
+    clock_str = 'T'+clock_str[11:]
+    # except Exception as e: 
+    #     print(e)
+
+
+    print("Final clock_str is %s"%(clock_str))
+
+
+    if (day_num == 'Monday'):
+        date_portion = parse(ranges[0]) + datetime.timedelta(days=0)
+        date_portion = str(date_portion)
+        date_portion = date_portion[0:10] #This is just the date now 2016-04-13 .
+    elif (day_num == 'Tuesday'):
+        date_portion = parse(ranges[0]) + datetime.timedelta(days=1)
+        date_portion = str(date_portion)
+        date_portion = date_portion[0:10] #This is just the date now 2016-04-13 .
+    elif (day_num == 'Wednesday'):
+        date_portion = parse(ranges[0]) + datetime.timedelta(days=2)
+        date_portion = str(date_portion)
+        date_portion = date_portion[0:10] #This is just the date now 2016-04-13 .
+    elif (day_num == 'Thursday'):
+        date_portion = parse(ranges[0]) + datetime.timedelta(days=3)
+        date_portion = str(date_portion)
+        date_portion = date_portion[0:10] #This is just the date now 2016-04-13 .
+    elif (day_num == 'Friday'):
+        date_portion = parse(ranges[0]) + datetime.timedelta(days=4)
+        date_portion = str(date_portion)
+        date_portion = date_portion[0:10] #This is just the date now 2016-04-13 .
+    elif (day_num == 'Saturday'):
+        date_portion = parse(ranges[0]) + datetime.timedelta(days=5)
+        date_portion = str(date_portion)
+        date_portion = date_portion[0:10] #This is just the date now 2016-04-13 .
+    elif (day_num == 'Sunday'):
+        date_portion = parse(ranges[0]) + datetime.timedelta(days=6)
+        date_portion = str(date_portion)
+        date_portion = date_portion[0:10] #This is just the date now 2016-04-13 .
+
+    completed_date_time = date_portion + clock_str
+    print(completed_date_time)
+
+    return completed_date_time + 'Z'
 
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -821,17 +920,39 @@ Function to store new event created on calendar into database
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 @login_required(login_url='/login')
 def create_event(request):
+
     if request.method == 'POST':
 
-        current_user = User.objects.get(id=request.user.id)
-        temp_model = SNE.objects.create(
-            authenticated_user = current_user,
-            task_name = request.POST.get('text'),
-            start_time = request.POST.get('start') + 'Z',
-            end_time = request.POST.get('end') + 'Z',
-            special_event_id = request.POST.get('id'),
-            color = '#34495e'
-        )
+        if 'current_day' in request.POST:
+
+
+            converted_start_time = get_correct_date_time_format(request, request.POST.get('current_day'), request.POST.get('start'))
+            converted_end_time = get_correct_date_time_format(request, request.POST.get('current_day'), request.POST.get('end'))
+            random_event_id = ''.join(choice(ascii_uppercase) for i in range(15))
+
+
+            current_user = User.objects.get(id=request.user.id)
+            temp_model = SNE.objects.create(
+                authenticated_user = current_user,
+                task_name = request.POST.get('text'),
+                start_time = converted_start_time,
+                end_time = converted_end_time,
+                special_event_id = random_event_id,
+                color = request.POST.get('color'),
+                current_day = request.POST.get('current_day')
+            )
+        else:
+            print("NOT IN CURRENT DAY")
+
+            current_user = User.objects.get(id=request.user.id)
+            temp_model = SNE.objects.create(
+                authenticated_user = current_user,
+                task_name = request.POST.get('text'),
+                start_time = request.POST.get('start') + 'Z',
+                end_time = request.POST.get('end') + 'Z',
+                special_event_id = request.POST.get('id'),
+                color = '#5B9BE0'
+            )
 
         if (request.POST.get('weekday') == "Mon" ):
             temp_model.current_day = "Monday"
@@ -855,7 +976,11 @@ def create_event(request):
             temp_model.current_day = "Sunday"
 
         temp_model.save()
-    return HttpResponse("none")
+    data = []
+    data = serializers.serialize("json", data)
+    json.dumps(data)
+
+    return HttpResponse(data)
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 Function to delete event from database
@@ -868,7 +993,6 @@ def delete_event(request):
         SNE.objects.get(special_event_id=request.POST.get('id')).delete()
         print("deleted")
         return HttpResponse("deleted")
-
 
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -954,6 +1078,8 @@ def get_calendar_data(request):
     else:
         event_length = 0
 
+    user_breakdown_mini_tasks = BUT.objects.filter(parent_task__authenticated_user = request.user)
+
     context = {
 
         'user_is_authenticated' : user_is_authenticated,
@@ -964,6 +1090,13 @@ def get_calendar_data(request):
         'fri' : SNE.objects.filter(current_day = 'Friday'),
         'sat' : SNE.objects.filter(current_day = 'Saturday'),
         'sun' : SNE.objects.filter(current_day = 'Sunday'),
+        'mon_TASK' : BUT.objects.filter(current_day = 0, parent_task__authenticated_user = request.user),
+        'tues_TASK' : BUT.objects.filter(current_day = 1, parent_task__authenticated_user = request.user),
+        'wed_TASK' : BUT.objects.filter(current_day = 2, parent_task__authenticated_user = request.user),
+        'thurs_TASK' : BUT.objects.filter(current_day = 3, parent_task__authenticated_user = request.user),
+        'fri_TASK' : BUT.objects.filter(current_day = 4, parent_task__authenticated_user = request.user),
+        'sat_TASK' : BUT.objects.filter(current_day = 5, parent_task__authenticated_user = request.user),
+        'sun_TASK' : BUT.objects.filter(current_day = 6, parent_task__authenticated_user = request.user),
         'event_length' : event_length,
         'current_user' : request.user.username,
         'first_name' : request.user.first_name,
@@ -971,6 +1104,8 @@ def get_calendar_data(request):
         'user_login_count' : user_login_count,
         'user_initial_setup' : user_initial_setup,
         'google_auth_complete' : google_auth_complete,
+        'breakdown_tasks':user_breakdown_mini_tasks,
+        'user_wakeup_time': extended_user.wakeup_time[0:2],
     }
 
     if (not current_user_time_zone == 'None'):

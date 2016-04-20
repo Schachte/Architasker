@@ -1,9 +1,18 @@
 import datetime
+import pytz
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseRedirect
 from django.contrib.auth.models import User
 from procrastinate import settings
 from .models import UserTask as Task
+from app_account_management.models import UserExtended
+from dateutil.parser import parse
+from app_task_redistribution.views import allocate_tasks
+from app_task_redistribution.views import task_conflict_analysis
+
+import json
+from django.core import serializers
+# from django.utils import simplejson
 
 # Create your views here.
 
@@ -20,7 +29,7 @@ def create_task(request):
             authenticated_user = current_user,
             task_name = request.POST.get('task_name'),
             due_date = request.POST.get('task_due_date'),
-            percent_to_complete = int(request.POST.get('task_percent')),
+            percent_to_complete = float(request.POST.get('task_percent'))/100,
             estimated_time = float(request.POST.get('task_time')),
             difficulty = int(request.POST.get('task_priority')),
             # color = request.POST.get('color'),
@@ -42,48 +51,39 @@ def create_task(request):
         	temp_model.pomodoro = True
 
         temp_model.save()
-        print("created task")
-        return HttpResponse("none")
+
+        return_conflict_data = task_conflict_analysis(request, temp_model)
+
+        ## return array with 0/1, free hours, and task hours
+        if(return_conflict_data[0] == 1):
+            temp_model.delete()
+            print("CONFLICT")
+
+            #taskname, available_hours, needed_available_hours
+            try:
+
+                json_list_return = json.dumps({'conflict_bool' : 1, 'task_name' : return_conflict_data[1], 'available_hours' : return_conflict_data[2], 'needed_available_hours' : return_conflict_data[3]})
+
+            except Exception as e:
+                print(e)
+
+            print("created task")
+
+            return HttpResponse(json_list_return)
 
 
-'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-Calculate overall priority and percentile for each task
-'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-def prioritize_and_cluster(request):
 
-	current_user = User.objects.get(username=request.user.username)
-	user_tasks = Task.objects.filter(authenticated_user=current_user)
+            #RETURN NECESSARY INFO TO MODAL WINDOW
 
-	'''
-	Calculate and Store Priority
-	'''
+        else:
+            allocate_tasks(request)
 
-	for task in user_tasks:
-		priority = task.estimated_time / (task.day_num - datetime.datetime.today().weekday()) + task.difficulty
-		print(task.task_name + " " + str(priority))
-		#Check output of current day tomorrow
-		print("Current Day: " + str(datetime.datetime.today().weekday()))
-		task.priority = priority
-		task.save()
+            json_list_return = json.dumps({'conflict_bool' : 0})
 
-	'''
-	Calculate and Store Percentile
-	'''
+            return HttpResponse(json_list_return)
 
-	equation_N = user_tasks.count()
 
-	for task in user_tasks:
 
-		equation_L = Task.objects.filter(authenticated_user=current_user, priority__lt=task.priority).count()
-		equation_S = Task.objects.filter(authenticated_user=current_user, priority=task.priority).count()
-		
-		pr_percent = ((equation_L + (0.5*equation_S)) / equation_N)*100
-		print(task.task_name + " " + str(pr_percent))
-
-		task.percentile = pr_percent
-		task.save()
-
-	return HttpResponse("The user has been queried successfully!")
 
 
 

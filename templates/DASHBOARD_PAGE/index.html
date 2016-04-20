@@ -36,13 +36,34 @@
     <link href="{% static 'css/DASHBOARD_CSS/demo.css' %}" rel="stylesheet" />
 
 
+    <link rel="stylesheet" href="http://ericjgagnon.github.io/wickedpicker/wickedpicker/wickedpicker.min.css">
+    <script type="text/javascript" src="http://ericjgagnon.github.io/wickedpicker/wickedpicker/wickedpicker.min.js"></script>
+
     <!--     Fonts and icons     -->
     <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
     <link href='http://fonts.googleapis.com/css?family=Roboto:400,700,300' rel='stylesheet' type='text/css'>
     <link href="{% static 'css/DASHBOARD_CSS/pe-icon-7-stroke.css' %}" rel="stylesheet" />
 
+    <link href="http://senthilraj.github.io/TimePicki/css/timepicki.css" rel="stylesheet">
 
-<link type="text/css" rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500">
+	<script src='http://bgrins.github.io/spectrum/spectrum.js'></script>
+	<link rel='stylesheet' href='http://bgrins.github.io/spectrum/spectrum.css' />
+
+
+
+
+	  <script type="text/javascript" src="http://jonthornton.github.io/jquery-timepicker/jquery.timepicker.js"></script>
+	  <link rel="stylesheet" type="text/css" href="http://jonthornton.github.io/jquery-timepicker/jquery.timepicker.css" />
+
+<!-- 	  <script type="text/javascript" src="http://jonthornton.github.io/jquery-timepicker/lib/bootstrap-datepicker.js"></script> -->
+	  <link rel="stylesheet" type="text/css" href="http://jonthornton.github.io/jquery-timepicker/lib/bootstrap-datepicker.css" />
+
+	  <script type="text/javascript" src="http://jonthornton.github.io/jquery-timepicker/lib/site.js"></script>
+	  <link rel="stylesheet" type="text/css" href="http://jonthornton.github.io/jquery-timepicker/lib/site.css" />
+
+
+
+	<link type="text/css" rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500">
     <style>
       #locationField, #controls {
         position: relative;
@@ -82,10 +103,79 @@
         height: 20px;
         margin-bottom: 2px;
       }
+
+	td#addEventForm{
+		border-right:1px solid #F1F1F1;
+		border-top:1px solid #F1F1F1;
+		border-bottom:1px solid #F1F1F1;
+		border-left:0px solid #F1F1F1;
+		padding:5px;
+		margin:0;
+	    vertical-align: middle;
+	    width: 400x;
+	 }
+
+
+	/* Dropdown Button */
+	.dropbtn {
+	    background-color: #4CAF50;
+	    color: white;
+	    padding: 16px;
+	    font-size: 16px;
+	    border: none;
+	    cursor: pointer;
+	}
+
+	/* Dropdown button on hover & focus */
+	.dropbtn:hover, .dropbtn:focus {
+	    background-color: #3e8e41;
+	}
+
+	/* The container <div> - needed to position the dropdown content */
+	.dropdown {
+	    position: relative;
+	    display: inline-block;
+	}
+
+	/* Dropdown Content (Hidden by Default) */
+	.dropdown-content {
+	    display: none;
+	    position: absolute;
+	    background-color: #f9f9f9;
+	    min-width: 160px;
+	    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+	}
+
+	/* Links inside the dropdown */
+	.dropdown-content a {
+	    color: black;
+	    padding: 12px 16px;
+	    text-decoration: none;
+	    display: block;
+	}
+
+	/* Change color of dropdown links on hover */
+	.dropdown-content a:hover {background-color: #f1f1f1}
+
+	/* Show the dropdown menu (use JS to add this class to the .dropdown-content container when the user clicks on the dropdown button) */
+	.show {display:block;}
+
+
+	@import url('//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css');
+	 
+
+
+
+.time_pick {
+	position: relative;
+	width: 500px;
+}
+
     </style>
 
 		<script type="text/javascript" charset="utf-8">
 
+		var event_can_add = false;
 
             function stringEscape(s) {
                 return s ? s.replace(/\\/g,'\\\\').replace(/\n/g,'\\n').replace(/\t/g,'\\t').replace(/\v/g,'\\v').replace(/'/g,"\\'").replace(/"/g,'\\"').replace(/[\x00-\x1F\x80-\x9F]/g,hex) : s;
@@ -100,6 +190,14 @@
                     $("#end_time").html("End Time: <b>" + end + "</b>");
                     $('#mymodal').modal('show');
                 }
+
+                var open_modal_breakdown_tasks = function(id, event_color, start, end) {
+                    $("#modal_title").html("Breakdown Task Name: <font color=\"" + "black" +"\"><b>" + scheduler.getEvent(id).text + "</b></font>");
+                    $("#start_time").html("Start Time: <b>" + start + "</b>");
+                    $("#end_time").html("End Time: <b>" + end + "</b>");
+                    $('#mymodal').modal('show');
+                }
+
 
 				google_ids = [];
 
@@ -138,9 +236,16 @@
 
 				scheduler.config.xml_date="%Y-%m-%d %H:%i";
 
+				// scheduler.skin = "classic"; //valid values are classic, glossy, terrace
+				scheduler.skin = "flat"; //valid values are classic, glossy, terrace
+
+				scheduler.config.separate_short_events = true;
+
 				scheduler.config.default_date = "%j %M %Y";
 
 				var formatDateFunc = scheduler.date.date_to_str("%Y-%m-%dT%H:%i:%s");
+
+				// scheduler.config.hour_date=""%h:%i %A"";
 
 				var weekDay = scheduler.date.date_to_str("%D")
 
@@ -164,9 +269,23 @@
 							color: scheduler.getEvent(event_id).color
 
 						},
+						success: function() {
+
+							console.log("Got here on success!")
+							var targetText = "Event Successfully Generated and Synced!";
+							showGoogleSyncFeedback(targetText);
+							setTimeout( function() { hideGoogleSyncFeedback();}, 3000);
+						},
+
+						error: function() {
+							console.log("did i get here?1");
+							var targetText = "Event Successfully Generated and Synced!";
+							showGoogleSyncFeedback(targetText);
+							setTimeout( function() { hideGoogleSyncFeedback();}, 3000);	
+						}
+
 					});
 				};
-
 
                 var update_event = function(id, ev, color) {
                     event_text = stringEscape(ev.text);
@@ -183,6 +302,18 @@
         							text: event_text,
         							id: id
         						},
+						success: function() {
+
+							var targetText = "Event Successfully Updated!";
+							showGoogleSyncFeedback(targetText);
+							setTimeout( function() { hideGoogleSyncFeedback();}, 3000);	
+						},
+
+						error: function() {
+							var targetText = "Event Successfully Updated!"
+							showGoogleSyncFeedback(targetText);
+							setTimeout( function() { hideGoogleSyncFeedback();}, 3000);	
+						}
         					});
         		    		return true;
                     }
@@ -202,6 +333,18 @@
     							id: id,
                                 color: color
     						},
+						success: function() {
+
+							var targetText = "Event Successfully Updated!";
+							showGoogleSyncFeedback(targetText);
+							setTimeout( function() { hideGoogleSyncFeedback();}, 3000);	
+						},
+
+						error: function() {
+							var targetText = "Event Successfully Updated!";
+							showGoogleSyncFeedback(targetText);
+							setTimeout( function() { hideGoogleSyncFeedback();}, 3000);	
+						}
     					});
     		    		return true;
                     };
@@ -218,9 +361,28 @@
 							csrfmiddlewaretoken: '{{ csrf_token }}',
 							id: event_id
 						},
+
+						success: function() {
+
+							var targetText = "Event Successfully Removed!";
+							showGoogleSyncFeedback(targetText);
+							setTimeout( function() { hideGoogleSyncFeedback();}, 3000);	
+						},
+
+						error: function() {
+							var targetText = "Event Successfully Removed!"
+							showGoogleSyncFeedback(targetText);
+							setTimeout( function() { hideGoogleSyncFeedback();}, 3000);	
+						}
+
 					});
 					return true;
 				};
+
+				// scheduler.config.separate_short_events = true;
+				scheduler.config.hour_size_px = 100;
+				scheduler.config.scroll_hour = {{user_wakeup_time}};
+				scheduler.config.mark_now = true;
 
                 scheduler.config.icons_select = ['icon_details', 'icon_delete', 'i1', 'i2', 'i3', 'i4', 'i5', 'i6', 'i7', 'i8', 'i9', 'i10', 'i11'];
 
@@ -358,6 +520,85 @@
 				scheduler.init('scheduler_here',new Date(calendar_year,calendar_month,calendar_day),"week");
 
 				scheduler.parse( [
+
+						{% for mon_tasks in mon_TASK %}
+
+							{
+								text: "{{mon_tasks}}",
+								id: '{{ mon_tasks.UID }}',
+								start_date: '{{ mon_tasks.start_time }}'.substring(0, 10)+" "+'{{ mon_tasks.start_time }}'.substring(11, 16),
+								end_date: '{{ mon_tasks.end_time }}'.substring(0, 10)+" "+'{{ mon_tasks.end_time }}'.substring(11, 16),
+							},
+
+						{% endfor %}
+
+						{% for tues_tasks in tues_TASK %}
+
+							{
+								text: "{{tues_tasks}}",
+								id: '{{ tues_tasks.UID }}',
+								start_date: '{{ tues_tasks.start_time }}'.substring(0, 10)+" "+'{{ tues_tasks.start_time }}'.substring(11, 16),
+								end_date: '{{ tues_tasks.end_time }}'.substring(0, 10)+" "+'{{ tues_tasks.end_time }}'.substring(11, 16),
+							},
+
+						{% endfor %}
+
+						{% for wed_tasks in wed_TASK %}
+
+							{
+								text: "{{wed_tasks}}",
+								id: '{{ wed_tasks.UID }}',
+								start_date: '{{ wed_tasks.start_time }}'.substring(0, 10)+" "+'{{ wed_tasks.start_time }}'.substring(11, 16),
+								end_date: '{{ wed_tasks.end_time }}'.substring(0, 10)+" "+'{{ wed_tasks.end_time }}'.substring(11, 16),
+							},
+
+						{% endfor %}
+
+						{% for thurs_tasks in thurs_TASK %}
+
+							{
+								text: "{{thurs_tasks}}",
+								id: '{{ thurs_tasks.UID }}',
+								start_date: '{{ thurs_tasks.start_time }}'.substring(0, 10)+" "+'{{ thurs_tasks.start_time }}'.substring(11, 16),
+								end_date: '{{ thurs_tasks.end_time }}'.substring(0, 10)+" "+'{{ thurs_tasks.end_time }}'.substring(11, 16),
+							},
+
+						{% endfor %}
+						{% for fri_tasks in fri_TASK %}
+
+							{
+								text: "{{fri_tasks}}",
+								id: '{{ fri_tasks.UID }}',
+								start_date: '{{ fri_tasks.start_time }}'.substring(0, 10)+" "+'{{ fri_tasks.start_time }}'.substring(11, 16),
+								end_date: '{{ fri_tasks.end_time }}'.substring(0, 10)+" "+'{{ fri_tasks.end_time }}'.substring(11, 16),
+							},
+
+						{% endfor %}
+
+						{% for sat_tasks in sat_TASK %}
+
+							{
+								text: "{{sat_tasks}}",
+								id: '{{ sat_tasks.UID }}',
+								start_date: '{{ sat_tasks.start_time }}'.substring(0, 10)+" "+'{{ sat_tasks.start_time }}'.substring(11, 16),
+								end_date: '{{ sat_tasks.end_time }}'.substring(0, 10)+" "+'{{ sat_tasks.end_time }}'.substring(11, 16),
+							},
+
+						{% endfor %}
+
+						{% for sun_tasks in sun_TASK %}
+
+							{
+								text: "{{sun_tasks}}",
+								id: '{{ sun_tasks.UID }}',
+								start_date: '{{ sun_tasks.start_time }}'.substring(0, 10)+" "+'{{ sun_tasks.start_time }}'.substring(11, 16),
+								end_date: '{{ sun_tasks.end_time }}'.substring(0, 10)+" "+'{{ sun_tasks.end_time }}'.substring(11, 16),
+							},
+
+						{% endfor %}
+
+
+
 						{% for monday_tasks in mon %}
 						{% if monday_tasks.authenticated_user.username == current_user %}
 							{
@@ -435,6 +676,7 @@
 							},
 							{% endif %}
 						{% endfor %}
+
 				], "json");
 
 				//Array to store all the currently gathered google events for the user on the calendar
@@ -476,16 +718,37 @@
 					{% endif %}
 				{% endfor %}
 
+
+				var breakdown_mini_tasks = []
+
+				//Storing all the google events to enable ability to make read-only
+				{% for BDMT in breakdown_tasks %}
+					breakdown_mini_tasks.push('{{ BDMT.UID }}');
+				{% endfor %}
+
+
+
 				//Function to deal with making google tasks read only
 				function readonly_check(id) {
 
+
 					var found_google_task = false;
+					var found_mini_task = false;
 
 					for (i = 0; i < google_ids.length; i++) {
 						if (google_ids[i] == id) {
 							found_google_task = true;
 						}
 					}
+
+					//Search through the breakdown mini tasks
+					for (i = 0; i < breakdown_mini_tasks.length; i++) {
+						if (breakdown_mini_tasks[i] == id) {
+							found_mini_task = true;
+						}
+					}
+
+
 					if (found_google_task) {
 						var readOnly = scheduler.getEvent(id).readonly;
 						scheduler.config.drag_move = true;
@@ -493,7 +756,16 @@
                         open_modal_google(scheduler.getEvent(id).id, scheduler.getEvent(id).color, formatDateFunc(scheduler.getEvent(id).start_date), formatDateFunc(scheduler.getEvent(id).end_date));
 						return false;
 					}
-					else {
+
+					else if (found_mini_task) {
+						var readOnly = scheduler.getEvent(id).readonly;
+						scheduler.config.drag_move = true;
+						scheduler.config.drag_resize = readOnly;
+                        open_modal_breakdown_tasks(scheduler.getEvent(id).id, scheduler.getEvent(id).color, formatDateFunc(scheduler.getEvent(id).start_date), formatDateFunc(scheduler.getEvent(id).end_date));
+						return false;
+					}
+
+					else {9
 						return true;
 					}
 				}
@@ -516,10 +788,7 @@
 
 			$(function() {
 			    $( "#datepicker" ).datepicker({
-			      // showOn: "button",
-			      // buttonImage: "{% static 'datepicker/images/calendar.gif' %}",
-			      // buttonImageOnly: true,
-			      // buttonText: "Select date",
+
 			      minDate: 0,
 			      showAnim: "blind",
 			      duration: "slow"
@@ -528,7 +797,6 @@
 			});
 
 			
-
 		</script>
 
 
@@ -824,24 +1092,7 @@
 			border-width: 1px;
 			box-shadow: 0 1px 1px rgba(0, 0, 0, 0.09);
 		}
-		/*.countryFlag:before {*/
-		    /*-moz-border-bottom-colors: none;*/
-		    /*-moz-border-left-colors: none;*/
-		    /*-moz-border-right-colors: none;*/
-		    /*-moz-border-top-colors: none;*/
-		    /*background: linear-gradient(to bottom, #FFFFFF 0%, #EEEEEE 100%) repeat scroll 0 0 transparent;*/
-		    /*border-color: #BFBFC1 #B6B6B6 #969696;*/
-		    /*border-image: none;*/
-		    /*border-radius: 2px 2px 2px 2px;*/
-		    /*border-style: solid;*/
-		    /*border-width: 1px;*/
-		    /*box-shadow: 0 1px 1px rgba(0, 0, 0, 0.09);*/
-		    /*display: block;*/
-		    /*overflow: hidden;*/
-		    /*padding-right: 20px;*/
-		    /*position: relative;*/
-		    /*width: 25px;*/
-		/*}*/
+
 
 		.wrumper {
 			width:383px;
@@ -896,6 +1147,181 @@
 				margin: 15px 5px 5px;
 				width: 70px;
 			}
+
+
+			.alert {
+			padding: 8px 35px 8px 14px;
+			margin-bottom: 18px;
+			color: #c09853;
+			text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+			background-color: #fcf8e3;
+			border: 1px solid #fbeed5;
+			-webkit-border-radius: 4px;
+			-moz-border-radius: 4px;
+			border-radius: 4px;
+			visibility: hidden;
+
+			}
+
+			.alert-heading {
+			color: inherit;
+			}
+
+			.alert .close {
+			position: relative;
+			top: -2px;
+			right: -21px;
+			line-height: 18px;
+			}
+
+			.alert-success {
+			color: #468847;
+			background-color: #dff0d8;
+			border-color: #d6e9c6;
+/*			width: 75%;
+			margin: auto;
+			margin-top: 50px;
+			margin-bottom: 20px;*/
+			visibility: hidden;
+			}
+
+
+
+			a#spaghett{
+			  display:block;
+			  color:#ad5482;  
+			  text-decoration:none;
+			  font-weight:bold;
+			  margin-top:40px;
+			  text-align:center;
+			}
+
+			#bg_spaghett{
+			  position:relative;
+			  height:600px;
+			  width:100%;
+			  background-size:cover;
+			  margin-left:auto;
+			  margin-right:auto; 
+			  border:#fff 15px solid;
+			}
+
+			.module#spaghett{
+			  position:relative;
+			  /*top:15%;    */
+			  height:100%;
+			  width:100%;
+			  margin:auto;
+			  border-radius:0px;
+			  background:RGBA(255,255,255,1);
+			    
+			  -webkit-box-shadow:  0px 0px 2px 0px rgba(0, 0, 0, .45);        
+			  box-shadow:  0px 0px 100px 0px rgba(0, 0, 0, .15);
+			  
+			}
+
+			.module ul#spaghett{
+			  list-style-type:none;
+			  margin:0;
+			}
+
+			.tab#spaghett{
+			  float:left;
+			  height:60px;
+			  width:25%;
+			  padding-top:20px;
+			  box-sizing:border-box;
+			  background:#eeeeee;  
+			  text-align:center;
+			  cursor:pointer;
+			  transition:background .4s;
+			}
+
+			.tab:first-child#spaghett{  
+			  -webkit-border-radius: 5px 0px 0px 0px;
+			  border-radius: 5px 0px 0px 0px;
+			}
+
+			.tab:last-child#spaghett{  
+			  -webkit-border-radius: 0px 5px 0px 0px;
+			  border-radius: 0px 5px 0px 0px;
+			}
+
+			.tab:hover#spaghett{  
+			  background-color:rgba(0,0,0,.1);
+			}
+
+			.activeTab#spaghett{
+			  background:#fff;
+			}
+
+			.activeTab .icon#spaghett{
+			  opacity:1;
+			}
+
+			.icon#spaghett{
+			  height:24px;
+			  width:24px;
+			  opacity:.2;
+			}
+
+			.form#spaghett{
+			  float:left;
+			  height:86%;
+			  width:100%;
+			  box-sizing:border-box;
+			  padding:40px;
+			}
+
+			.textbox#spaghett{
+			  height:50px;
+			  width:100%;
+			  border-radius:3px;
+			  border:rgba(0,0,0,.3) 2px solid;
+			  box-sizing:border-box;
+			  padding:10px;
+			  margin-bottom:30px;
+			}
+
+			.textbox:focus#spaghett{
+			  outline:none;
+			   border:rgba(24,149,215,1) 2px solid;
+			   color:rgba(24,149,215,1);
+			}
+
+			.button#spaghett{
+			  height:50px;
+			  width:100%;
+			  border-radius:3px;
+			  border:rgba(0,0,0,.3) 0px solid;
+			  box-sizing:border-box;
+			  padding:10px;
+			  margin-bottom:30px;
+			  background:#90c843;
+			  color:#FFF;
+			  font-weight:bold;
+			  font-size: 12pt;
+			  transition:background .4s;
+			  margin: auto;
+			  cursor:pointer;
+			}
+
+			.button:hover#spaghett{
+			  background:#80b438;
+			  
+			}
+
+
+			#button_width {
+				width: 100%;
+			}
+
+			#dropdown_width {
+				width: 100%;
+				margin-bottom: 15px;
+				margin-top: -5px;
+			}
+
 		</style>
 
             <link href='https://fonts.googleapis.com/css?family=Comfortaa:700' rel='stylesheet' type='text/css'>
@@ -920,6 +1346,7 @@
                 <a href="/dashboard" class="simple-text">
                     Architasker
                     <h6>Welcome back, {{first_name}}!</h6>
+
                 </a>
             </div>
 
@@ -928,6 +1355,13 @@
                     <a href="/dashboard">
                         <i class="pe-7s-news-paper"></i>
                         <p>Dashboard</p>
+                    </a>
+                </li>
+
+                <li data-toggle="modal" data-target="#addEventModal">
+                    <a href="#">
+                        <i class="pe-7s-note"></i>
+                        <p>Add Event</p>
                     </a>
                 </li>
 
@@ -963,12 +1397,13 @@
                 </li>
 
 
-
-
-
             </ul>
     	</div>
     </div>
+
+
+
+
 
     <div class="main-panel">
         <nav class="navbar navbar-default navbar-fixed">
@@ -989,25 +1424,7 @@
                                 <i class="fa fa-dashboard"></i>
                             </a>
                         </li>
-                        <!-- <li class="dropdown">
-                              <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                                    <i class="fa fa-globe"></i>
-                                    <b class="caret"></b>
-                                    <span class="notification">5</span>
-                              </a>
-                              <ul class="dropdown-menu">
-                                <li><a href="#">Notification 1</a></li>
-                                <li><a href="#">Notification 2</a></li>
-                                <li><a href="#">Notification 3</a></li>
-                                <li><a href="#">Notification 4</a></li>
-                                <li><a href="#">Another notification</a></li>
-                              </ul>
-                        </li> -->
-                        <!-- <li>
-                           <a href="">
-                                <i class="fa fa-search"></i>
-                            </a>
-                        </li> -->
+
                     </ul>
 
                     <ul class="nav navbar-nav navbar-right">
@@ -1016,21 +1433,7 @@
                                Account
                             </a>
                         </li>
-                        <!-- <li class="dropdown">
-                              <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                                    Dropdown
-                                    <b class="caret"></b>
-                              </a>
-                              <ul class="dropdown-menu">
-                                <li><a href="#">Action</a></li>
-                                <li><a href="#">Another action</a></li>
-                                <li><a href="#">Something</a></li>
-                                <li><a href="#">Another action</a></li>
-                                <li><a href="#">Something</a></li>
-                                <li class="divider"></li>
-                                <li><a href="#">Separated link</a></li>
-                              </ul>
-                        </li> -->
+
                         <li>
                             <a href="/logout">
                                 Log out
@@ -1044,14 +1447,13 @@
 				{% if user_initial_setup == True %}
 
 
-				<center><h3 class="title" id="header_text">{{first_name | title}} {{last_name | title}}'s Weekly To-Do</h3></center>
-
 
                 {% if google_auth_complete == True %}
 
-                <a href="/sync">
-                    <div class='button -border center' style="float: right;">Sync Google Calendar</div>
-                </a>
+
+                <!-- DIV onclick may not be good practice tbqh -->
+                <div onclick="syncGoogleCalendar();" class='button -border center' id = "syncGoogle" style="float: right;">Sync Google Calendar</div>
+
 
 
                 {% else %}
@@ -1077,7 +1479,6 @@
 										        <input type="text" id="datepicker" name="dueDate" class="required">
 
 											    <label for="location">Location</label>
-<!-- 											    <input id="location" name="location" type="text" placeholder="Primary address this location will be completed in."> -->
 
 											    <div id="locationField">
 										      	<input id="autocomplete" name="autocomplete" placeholder="Enter your address"
@@ -1192,6 +1593,10 @@
 							</div>
 						</div>
 					</div><!-- morph-button -->
+
+					
+					<div class="alert alert-success" visible=false>Success! <span id="updateType"></span></div>
+
 			
 				<div id="scheduler_here" class="dhx_cal_container card col-md-12" style='width:100%; height:70%'>
 
@@ -1209,27 +1614,11 @@
 					 </div>
 				</div>
 
-				 <script>
-				// $(document).ready(function(){
-				//   $("#demoTask").on("hide.bs.collapse", function(){
-				//     $(".btn").html('<span class="glyphicon glyphicon-collapse-down"></span> Add Task');
-				//   });
-				//   $("#demoTask").on("show.bs.collapse", function(){
-				//     $(".btn").html('<span class="glyphicon glyphicon-collapse-up"></span> Close');
-				//   });
-				// });
-
-				
-				// </script>
-
-
 				{% else %}
-
 
 				<iframe id="encoder_iframe" height=75% width="100%" src="{% url 'screen_setup_module' %}"></iframe>
 
 				{% endif %}
-
 
 
         <footer id="footerID" class="footer">
@@ -1274,6 +1663,7 @@
     </div><!-- /.modal-content -->
   </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
+
 
 <script>
 		//-----------MORPHING BUTTON/MODAL WINDOW JS---------------------------------
@@ -1436,7 +1826,7 @@
     				mm='0'+mm;
 				} 
 
-				task_day_date = mm+'/'+dd+'/'+yyyy;
+				task_day_date = yyyy+'-'+mm+'-'+dd;
 
                 console.log("Task name:" + document.getElementById("taskName-2").value);
                 console.log("Date:" + document.getElementById("datepicker").value);
@@ -1473,15 +1863,52 @@
 						task_day_num: Date.getDayNumberFromName(document.getElementById('task_day_of_week').value),
 						task_transit_mode: document.getElementById("hidden_transit").text
 					},
-					success: function() {
-						succeed = true;
+					success: function(json) {
+
+						if (json['conflict_bool'] == 1) {
+							succeed = true;
+							console.log(json)
+
+							var needed_available_hours = parseFloat(json['needed_available_hours']);
+							var available_hours = parseFloat(json['available_hours']);
+
+							var lower_hours = needed_available_hours - available_hours;
+							lower_hours = lower_hours.toFixed(2);
+
+							console.log("The task " + json['task_name'] + " has a conflict.");
+							console.log("You need " + json['needed_available_hours'] + " hours, but only have " + json['available_hours'] + " hours");
+							console.log("This task is only possible if you decrease the required hours by "  + lower_hours);
+
+							$('#conf_task_name').text(json['task_name']);
+							$('#conf_hours_needed').text(json['needed_available_hours']);
+							$('#conf_current_avail_hours').text(json['available_hours']);
+							$('#conf_decrease_by').text(lower_hours);
+
+							$('#taskconflictmodal').modal('show');
+
+
+
+						}
+						else {
+
+							console.log("there is no conflict!");
+							location.href = "/dashboard";
+						}
+					},
+
+					error: function() {
+
+						console.log("did i get here?");
+						// location.href = "/dashboard";
 					}
+
 
 				});
 				
 				UIBtnn.toggle();
 
 				resetTaskForm();
+
 
 				return succeed;
 
@@ -1556,10 +1983,15 @@
 		});
 	</script>
 
+
+    <!-- <script src="http://senthilraj.github.io/TimePicki/js/jquery.min.js"></script> -->
+    <script src="http://senthilraj.github.io/TimePicki/js/timepicki.js"></script>
+
+
 </body>
 <div class="se-pre-con"></div>
 
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha256-KXn5puMvxCw+dAYznun+drMdG1IFl3agK0p/pqT9KAo= sha512-2e8qq0ETcfWRI4HJBzQiA3UoyFk6tbNyG+qSaIBZLyW9Xf3sWZHN/lxe9fTh1U45DpPf07yj94KsUHHWe4Yk1A==" crossorigin="anonymous"></script>
+<!-- <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha256-KXn5puMvxCw+dAYznun+drMdG1IFl3agK0p/pqT9KAo= sha512-2e8qq0ETcfWRI4HJBzQiA3UoyFk6tbNyG+qSaIBZLyW9Xf3sWZHN/lxe9fTh1U45DpPf07yj94KsUHHWe4Yk1A==" crossorigin="anonymous"></script> -->
 
 <!--   Core JS Files   -->
 <!-- <script src="{% static 'js/DASHBOARD_JAVASCRIPT/jquery-1.10.2.js'%}" type="text/javascript"></script> -->
@@ -1726,8 +2158,484 @@ function fill_transit(trans_type) {
 	trans_text.text = trans_type;
 }
 
+	</script>
+
+
+
+
+<!-- Modal -->
+<div id="addEventModal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Add Customized Event</h4>
+      </div>
+      <div class="modal-body">
+
+
+
+		<div id="bg_spaghett">
+		  <div class="module" id="spaghett">
+		    
+		    <form class="form" id="spaghett">
+		    <tr>
+			    <td id=""><label for='name'>Event Name:</label></td>
+			    <td>
+			    	<input type="text" id="spaghett" placeholder="Insert Event Name Here..." class="textbox event_name_text" />
+			    </td>
+		    </tr>
+
+		    <tr>
+			    <td id="pull_me_up"><label for='name'>Event Day Due:</label></td>
+			    <td>
+					<div class="dropdown" id="dropdown_width">
+					  <button class="btn dropdown-toggle" id="button_width" type="button" data-toggle="dropdown"><span id ="replacement_day">Select Day Due</span>
+					  <span class="caret"></span></button>
+					  <ul class="dropdown-menu">
+					    <li onclick="changeDayVal('Monday');" id="day_lab"><a href="#">Monday</a></li>
+					    <li onclick="changeDayVal('Tuesday');" id="day_lab"><a href="#">Tuesday</a></li>
+					    <li onclick="changeDayVal('Wednesday');" id="day_lab"><a href="#">Wednesday</a></li>
+					    <li onclick="changeDayVal('Thursday');" id="day_lab"><a href="#">Thursday</a></li>
+					    <li onclick="changeDayVal('Friday');" id="day_lab"><a href="#">Friday</a></li>
+					    <li onclick="changeDayVal('Saturday');" id="day_lab"><a href="#">Saturday</a></li>
+					    <li onclick="changeDayVal('Sunday');" id="day_lab"><a href="#">Sunday</a></li>
+					  </ul>
+					</div> 
+
+			    </td>
+
+		    </tr><br>
+
+		    <tr>
+			    <td id=""><label for='name'>Start Time:</label></td>
+			    <td>
+			    	<input type="text" id="spaghett" placeholder="Insert the start time..." class="textbox starter_time" />
+			    </td>
+		    </tr>
+
+		    <tr>
+			    <td id=""><label for='name'>End Time:</label></td>
+			    <td>
+			    	<input type="text" id="spaghett" placeholder="Insert the end time..." class="textbox ender_time" />
+			    </td>
+		    </tr>
+
+
+		    <tr>
+			    <td id=""><label for='name'>Event Color:</label></td><br>
+			    <td>
+			    	<input type='text' id="custom" />
+			    </td>
+		    </tr>
+		    <br>
+		    
+		      <!-- <input type='text' id= "spaghett" id="custom" /> -->
+		      <input type="button" onclick="checkEventConflictAnalysis();" id="spaghett" value="Add Event" class="button" />
+		    </form>
+		  </div>
+		</div>
+
+<<<<<<< HEAD
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+
+<div class="modal fade" id="conflictmodal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Hold on! There are event and task conflicts!</h4>
+      </div>
+      <div class="modal-body">
+        The event <b><span id="event_name_list_1"></p></b> conflicts with the following tasks:<br>
+        <ul id = "event_name_list">
+
+        </ul>
+      </div>
+      <div class="modal-footer">
+      	<button onclick="add_event_and_reallocate()" type="button" class="btn btn-default" data-dismiss="modal">Add and Re-Allocate</button>
+      	<button onclick="ajaxAddEventCaller()" type="button" class="btn btn-default" data-dismiss="modal">Add Overlap</button>
+        <button onclick="refresher()" type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <!-- <button type="button" class="btn btn-primary">Save changes</button> -->
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<div class="modal fade" id="taskconflictmodal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Hold on! There are Task Allocation Conflicts!</h4>
+      </div>
+      <div class="modal-body">
+        Conflicting Task: <b><span id="conf_task_name"></span><br></b>
+        Hours Needed For Task: <b><span id="conf_hours_needed"></span><br></b>
+        Current Available Hours: <b><span id="conf_current_avail_hours"></span><br></b>
+        Decrease Your Task Hours By: <b><span id="conf_decrease_by"></span><br></b>
+
+      </div>
+      <div class="modal-footer">
+        <button onclick="refresher()" type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <!-- <button type="button" class="btn btn-primary">Save changes</button> -->
+      </div>
+    </div>
+  </div>
+</div>
+
+
+    <script>
+		$('#timepicker1').timepicki();
+		$('#timepicker2').timepicki();
+    </script>
+
+    <script>
+$("#custom").spectrum({
+    showPaletteOnly: true,
+    togglePaletteOnly: true,
+    togglePaletteMoreText: 'more',
+    togglePaletteLessText: 'less',
+    color: '##3498db',
+    palette: [
+
+    	["#1abc9c", "#2ecc71", "#3498db", "#9b59b6", "#34495e", "#16a085", "#27ae60", "#2980b9"],
+    	["#8e44ad", "#2c3e50", "#f1c40f", "#e67e22", "#e74c3c", "#ecf0f1", "#95a5a6", "#f39c12"],
+    	["#d35400", "#bdc3c7", "#7D1424", "#4CD4B0", "#462446", "#B05F6D", "#47B39D", "#0E9AA7"]
+
+
+    ]
+});
+
+
 
 	</script>
 
+<script>
+	function myFunction() {
+		var color_val = $("#custom").spectrum('get').toHexString();
+		return color_val;   
+	}
+
+	function getWeekDay() {
+		var weekDay = $('#replacement_day').text();
+		return weekDay;
+	}
+
+	function getEventName() {
+		var eventName = $('.event_name_text').val();
+		return eventName;
+	}
+
+	function getStartEndTimes() {
+
+		var startTime = $('.starter_time').val();
+		var endTime = $('.ender_time').val();
+
+		var totalTimes = [startTime, endTime];
+		return totalTimes;
+	}
+
+
+	function setWeekDay() {
+		$('#replacement_day').val('');
+	}
+
+	function setEventName() {
+		$('.event_name_text').val('');
+	}
+
+	function setStartEndTimes() {
+
+		$('.starter_time').val('0:00:00');
+		$('.ender_time').val('0:00:00');
+
+	}
+	
+		function create_new_event_form() {
+
+		    var hex_color = myFunction();
+		    var weekDay = getWeekDay();
+		    var eventName = getEventName();
+		    var allTimes = getStartEndTimes();
+
+		    console.log(hex_color);
+		    console.log(weekDay);
+		    console.log(eventName);
+		    console.log(allTimes);
+
+		    $.ajax({
+		        url : "create_event/", // the endpoint
+		        type : "POST", // http method
+				data: {
+					csrfmiddlewaretoken: '{{ csrf_token }}',
+					start: allTimes[0],
+					end: allTimes[1],
+					text: eventName,
+					id: "123123",
+					current_day: weekDay, //what if the event was a multi-day event?!?!
+					color: hex_color
+
+				},
+		        success : function(json) {
+
+		            console.log("success"); // another sanity check
+		            location.href = "/dashboard";
+		        },
+
+		        // handle a non-successful response
+		        error : function(xhr,errmsg,err) {
+		        	console.log("didn't work");
+		        }
+		    });
+		};
+
+
+		function add_event_and_reallocate() {
+
+		    var hex_color = myFunction();
+		    var weekDay = getWeekDay();
+		    var eventName = getEventName();
+		    var allTimes = getStartEndTimes();
+
+		    console.log(hex_color);
+		    console.log(weekDay);
+		    console.log(eventName);
+		    console.log(allTimes);
+
+		    $.ajax({
+		        url : "create_event/", // the endpoint
+		        type : "POST", // http method
+				data: {
+					csrfmiddlewaretoken: '{{ csrf_token }}',
+					start: allTimes[0],
+					end: allTimes[1],
+					text: eventName,
+					id: "123123",
+					current_day: weekDay, //what if the event was a multi-day event?!?!
+					color: hex_color
+
+				},
+		        success : function(json) {
+
+		            console.log("success"); // another sanity check
+		            run_allocate_test();
+		            location.href = "/dashboard";
+		            
+		        },
+
+		        // handle a non-successful response
+		        error : function(xhr,errmsg,err) {
+		        	console.log("didn't work");
+		        }
+		    });
+		};
+
+
+		function run_allocate_test() {
+
+		    $.ajax({
+		        url : "allocate_test/", // the endpoint
+		        type : "POST", // http method
+				data: {
+					csrfmiddlewaretoken: '{{ csrf_token }}',
+
+				},
+		        success : function() {
+
+		            console.log("success"); // another sanity check
+		            
+		        },
+
+		        // handle a non-successful response
+		        error : function(xhr,errmsg,err) {
+		        	console.log("didn't work allocate test");
+		        }
+		    });
+		};
+
+
+
+
+		//This is an ajax call that will help display event and mini task conflict analysis in modal
+		function checkEventConflictAnalysis() {
+
+			//Get an array of the start and end times for the event
+			var allTimes = getStartEndTimes();
+
+			//Get the week day to pass into the backend for proper conversion
+			var weekDay = getWeekDay();
+
+			//Ajax call into the backend
+			$('.ajaxProgress').show();
+			$.ajax({
+				type: "POST",
+				url: "event_conflict/",
+				dataType: "json",
+				data: {
+					csrfmiddlewaretoken: '{{ csrf_token }}',
+					start: allTimes[0],
+					end: allTimes[1],
+					current_day: weekDay,
+				},
+		        success : function(my_json) {
+
+		        	//Auto hide the modal window for add-event
+		            $('#addEventModal').modal('hide');
+
+		            var count = Object.keys(my_json).length;
+
+		            if (count > 0) {
+
+		            	//Count represents the number of json objects returned in the dump from the backend
+		            	console.log("There are " + count + " conflicts");
+
+		            	//Get the event name with conflicts
+		            	var eventName = getEventName();
+
+		            	//Set the html of the conflict analysis modal window with the event name
+		            	event_name_HTML = document.getElementById("event_name_list_1");
+		            	event_name_HTML.innerHTML = eventName;
+
+		            	//Set the list by looping through JSON elements
+		            	conflict_list_HTML = document.getElementById("event_name_list");
+
+		            	//Loop through each conflict and append it to the html list
+		            	//RIGHT HERE WE NEED TO ENSURE TO ADD TIMES AS WELL TO BE MORE EXPLANATORY WITH THE ERROR MESSAGES
+						for (i = 0; i < count; i++) {
+						    conflict_list_HTML.innerHTML += "<li>" + my_json[i]['fields']['bdt_name'] +"</li>";
+						}
+						//Show all the conflicts within the modal window
+		            	$('#conflictmodal').modal('show');
+		          
+		            	
+		        	}
+		        	else {
+		        		console.log("There are no conflicts!");
+		        		event_can_add = true;
+		  
+		        	}
+		        },
+
+		        // handle a non-successful response
+		        error : function(xhr,errmsg,err) {
+		        	console.log("didn't work2");
+		        },
+
+		        complete : function() {
+
+		        	// var event_can_add = false;
+
+		        	console.log(event_can_add);
+
+		        	if (event_can_add == true)
+			        {
+			        	//If there is no conflicting event, then the global variable will set to addTrue and call the eventAdder function
+			        	ajaxAddEventCaller();
+			        }
+			        else {
+			        	//There will be no additional add event because there is an event conflict within the backend
+			        	console.log("busy!");
+			       }
+		        }
+			});
+		};
+
+		//AJAX call that will do a call to the sync google function on the backend instead of doing a hard page refresh
+		function syncGoogleCalendar() {
+
+                $('.ajaxProgress').show();
+				$.ajax({
+					type: "POST",
+					url: "sync/",
+					dataType: "json",
+					data: {
+						csrfmiddlewaretoken: '{{ csrf_token }}',
+					},
+					success: function() {
+
+						console.log("Got here on success!")
+						
+						var targetText = "Your Google Sync Information is Syncing.... Please Wait 3 seconds..";
+						showGoogleSyncFeedback(targetText);
+						setTimeout( function() { hideGoogleSyncFeedback(); location.href = "/dashboard"; }, 3000);	
+					},
+
+					error: function() {
+						console.log("did i get here?");
+					}
+				});
+			}
+
+		function refresher() {
+
+			//This will not refresh the page, but the following functions reset to NULL values on the frontend for add event form
+			setWeekDay();
+			setEventName();
+			setStartEndTimes();
+			$("#event_name_list").text("");
+		};
+
+		function ajaxAddEventCaller() {
+			//Function that calls the add event form oncomplete after the conflict analysis AJAX call
+			create_new_event_form();
+		};
+
+		//Pass in a string so the alerts can be dynamic for events, tasks, google events, etc
+		function showGoogleSyncFeedback(targetText) {
+			var alertMessageType = document.getElementById("updateType");
+			alertMessageType.innerHTML = targetText;
+
+			$(".alert-success").css("width", "75%");
+			$(".alert-success").css("margin", "auto");
+			$(".alert-success").css("margin-top", "50px");
+			$(".alert-success").css("margin-bottom", "20px");
+			$(".alert-success").css("visibility", "visible");
+
+
+		}
+		function hideGoogleSyncFeedback() {
+
+
+			$(".alert-success").css("width", "");
+			$(".alert-success").css("margin", "");
+			$(".alert-success").css("margin-top", "");
+			$(".alert-success").css("margin-bottom", "");
+			$(".alert-success").css("visibility", "hidden");
+		}
+
+
+		function changeDayVal(day_name) {
+
+			var day_object = document.getElementById("replacement_day");
+			day_object.innerHTML = day_name;
+
+		}
+
+		$('.starter_time').timepicker();
+		$('.ender_time').timepicker();
+		$(".sp-replacer").css("width", "100%");
+		$(".sp-replacer").css("margin-bottom", "10px");
+		$(".sp-preview").css("width", "100%");
+		$(".sp-preview-inner").css("width", "100%");
+		$(".sp-dd").remove();
+		// sp-replacer sp-light
+
+
+</script>
 
 </html>
