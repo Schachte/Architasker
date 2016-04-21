@@ -44,7 +44,8 @@ INSTALLED_APPS = (
     'app_dashboard',
     'app_account_setup',
     'app_task_redistribution',
-    'app_tasks'
+    'app_tasks',
+    'app_review'
 )
 
 MIDDLEWARE_CLASSES = (
