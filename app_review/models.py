@@ -14,4 +14,6 @@ import jsonfield
 class ReviewModel(models.Model):
     authenticated_user = models.ForeignKey(User, unique=False, null=False, default=None)
     last_day_reviewed = models.CharField(max_length="255", default=None)
+
+    #To Store 
     task_event_completion_per_day = jsonfield.JSONField(default = {})
