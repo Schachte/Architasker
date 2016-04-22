@@ -8,16 +8,14 @@ from django.db import models
 from oauth2client.django_orm import FlowField
 from oauth2client.django_orm import CredentialsField
 
-import jsonfield
-
+from jsonfield import JSONField
 
 class ReviewModel(models.Model):
     authenticated_user = models.ForeignKey(User, unique=False, null=False, default=None)
     last_day_reviewed = models.CharField(max_length="255", default=None)
-
+    task_event_completion_per_day = JSONField()
     #To Store Below:
     #	-Date
     #	-Fraction for Task Hours Completed for Day
     #	-Fraction for Event Hours Completed for Day
     #	- '' Total for Day
-    task_event_completion_per_day = jsonfield.JSONField(default = {})

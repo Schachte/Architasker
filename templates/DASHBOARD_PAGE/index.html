@@ -2676,12 +2676,12 @@ $("#custom").spectrum({
 
 		        		for (var date_key in my_json){
 
-		        			insert_review.innerHTML += "<li>" + my_json[date_key][tasks] + "</li>";
+		        			var insert_review = document.getElementById("insert_review_here");
+		        			console.log(my_json);
 
 		        			for (var tasks in my_json[date_key]) {
 		        				console.log("FOR THE DATE OF ... " + date_key);
 		        				console.log(my_json[date_key][tasks]);
-		        				var insert_review = document.getElementById("insert_review_here");
 		        				insert_review.innerHTML += "<li>" + my_json[date_key][tasks] + "</li>";
 		        			}
 		        		}
