@@ -1113,6 +1113,8 @@ def get_calendar_data(request):
 
     return render(request, 'DASHBOARD_PAGE/index.html', context)
 
+    
+
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 Remove authorization manually (Oauth token removal)
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''

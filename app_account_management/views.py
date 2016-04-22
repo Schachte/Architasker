@@ -16,6 +16,8 @@ from app_calendar.models import UserEvent
 from django.template.loader import render_to_string
 import json
 
+from app_review.models import ReviewModel as Review
+
 
 def login_view(request):
     if not request.user.username:
@@ -136,6 +138,18 @@ def processor_register(request):
             dob = request.POST.get('dob'),
         )
         new_user_extended.save()
+
+        data = {}
+        json_data = json.dumps(data)
+
+        Review_Sys_Obj = Review.objects.create(
+            authenticated_user = new_user,
+            last_day_reviewed = "NEW_USER",
+            task_event_completion_per_day = json_data
+        )
+
+        Review_Sys_Obj.save()
+
 
         user = authenticate(username=request.POST.get('user_name'))
 

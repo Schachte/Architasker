@@ -26,6 +26,7 @@ from app_dashboard.views import *
 from app_account_setup.views import *
 from app_calendar.views import *
 from app_task_redistribution.views import *
+from app_review.views import *
 from app_tasks.views import *
 from .views import *
 from jet import *
@@ -67,6 +68,7 @@ urlpatterns = [
     url(r'^get_distance', get_travel_time, name='get_travel_time'),
     url(r'^allocate_test', allocate_tasks, name='allocate_tasks'),
     url(r'^event_conflict', event_conflict_analysis, name='event_conflict_analysis'),
+    url(r'^checkreviews', reviewal_check, name='reviewal_check'),
 
 
 

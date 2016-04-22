@@ -1336,7 +1336,7 @@
 
         </script>
 </head>
-<body onload="init();">
+<body onload="init(); check_for_review_AJAX();">
 
 <div class="wrapper">
     <div class="sidebar" data-color="azure" data-image="{% static 'img/DASHBOARD_IMAGES/sidebar-4.jpg' %}">
@@ -1656,6 +1656,26 @@
       <div class="modal-body">
          <p id="start_time"></p>
          <p id="end_time"></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+
+<div class="modal fade" id = "reviewal_modal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+        <h4 class="modal-title" id="modal_title">Review Your Productivity: </h4>
+      </div>
+      <div class="modal-body">
+      	<ul>
+      		<span id="insert_review_here"></span>
+      	</ul>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -2635,6 +2655,51 @@ $("#custom").spectrum({
 		$(".sp-dd").remove();
 		// sp-replacer sp-light
 
+
+		function check_for_review_AJAX() {
+
+			//Ajax call into the backend
+			$('.ajaxProgress').show();
+			$.ajax({
+				type: "POST",
+				url: "checkreviews/",
+				dataType: "json",
+				data: {
+					csrfmiddlewaretoken: '{{ csrf_token }}',
+				},
+		        success : function(my_json) {
+
+		        	var count = Object.keys(my_json).length;
+
+		        	if (count > 0) {
+		        		console.log("There are tasks to be reviewed!!!");
+
+		        		for (var date_key in my_json){
+
+		        			insert_review.innerHTML += "<li>" + my_json[date_key][tasks] + "</li>";
+
+		        			for (var tasks in my_json[date_key]) {
+		        				console.log("FOR THE DATE OF ... " + date_key);
+		        				console.log(my_json[date_key][tasks]);
+		        				var insert_review = document.getElementById("insert_review_here");
+		        				insert_review.innerHTML += "<li>" + my_json[date_key][tasks] + "</li>";
+		        			}
+		        		}
+		        		$("#reviewal_modal").modal('show');
+		        	}
+		        	else {
+		        		console.log("There is nothing that needs to be reviewed");
+		        	}
+
+		        },
+
+		        // handle a non-successful response
+		        error : function(xhr,errmsg,err) {
+		        	console.log("didn't work2");
+		        },
+
+			});
+		}
 
 </script>
 

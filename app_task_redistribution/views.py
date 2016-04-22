@@ -1675,7 +1675,7 @@ def allocate_tasks(request):
 	#Insert a query set to get all mini tasks, find times that are the same, and remove one of them.
 
 	all_mini_tasks = BreakdownUserTask.objects.all()
-	print(all_mini_tasks)
+	# print(all_mini_tasks)
 
 	for each_mini_parent in all_mini_tasks:
 		for each_mini_child in all_mini_tasks:

@@ -47,6 +47,15 @@ class UserTask(models.Model):
 	sat_task_time = models.FloatField(blank=True, null=True, default=0)
 	sun_task_time = models.FloatField(blank=True, null=True, default=0)
 
+	#Total breakdown task hours completed per day for reviewal system
+	review_mon_task_time = models.FloatField(blank=True, null=True, default=-1)
+	review_tues_task_time = models.FloatField(blank=True, null=True, default=-1)
+	review_wed_task_time = models.FloatField(blank=True, null=True, default=-1)
+	review_thurs_task_time = models.FloatField(blank=True, null=True, default=-1)
+	review_fri_task_time = models.FloatField(blank=True, null=True, default=-1)
+	review_sat_task_time = models.FloatField(blank=True, null=True, default=-1)
+	review_sun_task_time = models.FloatField(blank=True, null=True, default=-1)
+
 	def __str__(self):
 		return self.task_name
 
@@ -58,6 +67,7 @@ class BreakdownUserTask(models.Model):
 	end_time = models.CharField(max_length=255, default='None')
 	current_day = models.IntegerField(choices=DAY_CHOICES, default=0)
 	bdt_name = models.CharField(max_length=255, default='None')
+	reviewed = models.IntegerField(default=0)
 
 	def __str__(self):
 		return self.bdt_name
