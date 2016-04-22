@@ -1322,7 +1322,90 @@
 				margin-top: -5px;
 			}
 
+
+			input[type="checkbox"] {
+			    display:none
+			}
+			ul li.review {
+			    list-style:none;
+			    margin:10px auto;
+			    font-family:'Lato';
+			    position:relative;
+
+			}
+			 
+			ul li.review:after {
+			    content:'';
+			    position:absolute;
+			    width:35px;
+			    height:35px;
+			    border:4px solid #fff;
+			    border-radius:6px;
+			    left:-12px;
+			    z-index:-1
+			}
+
+
+			label.review {
+			    cursor:pointer;
+			    color:#c0392b;
+			    margin:5px 0;
+			    padding-left:40px;
+			    position:relative;
+			    font-size:30px;
+			    -webkit-transition:.2s linear;
+			    -moz-transition:.2s linear;
+			    -o-transition:.2s linear;
+			    transition:.2s linear
+			}
+
+
+			label.review:before,label.review:after {
+			    content:'';
+			    left:11px;
+			    width:3px;
+			    bottom:0;
+			    background:#2E4E71;
+			    position:absolute;
+			    top:0
+			}
+
+
+			label.review:before {
+			    transform:rotate(45deg);
+			    transform-origin:0 14px;
+			    height:0;
+			    -webkit-transition:.2s linear;
+			    -moz-transition:.2s linear;
+			    -o-transition:.2s linear;
+			    transition:.2s linear
+			}
+			 
+			label.review:after {
+			    transform:rotate(-45deg);
+			    transform-origin:0 20px;
+			    height:0;
+			    -webkit-transition:.2s linear .2s;
+			    -moz-transition:.2s linear .2s;
+			    -o-transition:.2s linear .2s;
+			    transition:.2s linear .2s
+			}
+
+			input[type="checkbox"].review:checked + label.review:after,input[type="checkbox"].review:checked + label.review:before {
+			    height:100%
+			}
+			 
+			input[type="checkbox"].review:checked + label.review {
+			    color:#000;
+			    text-decoration: line-through;
+			}
+
+
 		</style>
+
+
+
+
 
             <link href='https://fonts.googleapis.com/css?family=Comfortaa:700' rel='stylesheet' type='text/css'>
         <script>
@@ -1670,10 +1753,13 @@
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+
+
         <h4 class="modal-title" id="modal_title">Review Your Productivity: </h4>
       </div>
       <div class="modal-body">
-      	<ul>
+      	<ul id="item_date">
+      		
       		<span id="insert_review_here"></span>
       	</ul>
       </div>
@@ -2258,7 +2344,7 @@ function fill_transit(trans_type) {
 		  </div>
 		</div>
 
-<<<<<<< HEAD
+
 
       </div>
       <div class="modal-footer">
@@ -2279,6 +2365,8 @@ function fill_transit(trans_type) {
         <h4 class="modal-title" id="myModalLabel">Hold on! There are event and task conflicts!</h4>
       </div>
       <div class="modal-body">
+
+
         The event <b><span id="event_name_list_1"></p></b> conflicts with the following tasks:<br>
         <ul id = "event_name_list">
 
@@ -2670,19 +2758,32 @@ $("#custom").spectrum({
 		        success : function(my_json) {
 
 		        	var count = Object.keys(my_json).length;
+		        	var custom_id = 0;
 
 		        	if (count > 0) {
 		        		console.log("There are tasks to be reviewed!!!");
 
+
 		        		for (var date_key in my_json){
 
-		        			var insert_review = document.getElementById("insert_review_here");
+		        			var insert_review = document.getElementById("item_date");
+		        			var insert_date = document.getElementById("item_date");
 		        			console.log(my_json);
+		        			insert_date.innerHTML += "<h1>" + date_key + "</h1><hr>";
 
 		        			for (var tasks in my_json[date_key]) {
 		        				console.log("FOR THE DATE OF ... " + date_key);
 		        				console.log(my_json[date_key][tasks]);
-		        				insert_review.innerHTML += "<li>" + my_json[date_key][tasks] + "</li>";
+		        				var hour_fix = my_json[date_key][tasks][1];
+		        				hour_fix = hour_fix.toFixed(2);
+		        				insert_review.innerHTML += '\
+		        				\
+									<li class="review">	\
+									<h1>' + my_json[date_key][tasks][0] + '</h1>\
+									</li>';
+
+									insert_review.innerHTML += '<input type="text" style="width: 100%" placeholder="Hours completed out of '+ hour_fix +'"></input>'
+								custom_id +=1;
 		        			}
 		        		}
 		        		$("#reviewal_modal").modal('show');

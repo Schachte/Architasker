@@ -39,6 +39,7 @@ import json
 
 from app_account_management.models import UserExtended
 from app_calendar.views import convert
+from collections import OrderedDict
 
 
 def reviewal_check(request):
@@ -54,10 +55,13 @@ def reviewal_check(request):
 	current_time = str(current_time)
 	current_time = current_time[0:11] + "00:00:00+00:00"
 	current_time = parse(current_time)
-	data_to_review = BUT.objects.filter(reviewed=0, start_time__lt=current_time)
+	data_to_review = BUT.objects.filter(reviewed=0, start_time__lt=current_time).order_by('start_time')
 	tasks_to_review = {}
 
+	print(data_to_review[0].start_time)
+
 	for each_item in data_to_review:
+		print(each_item.start_time)
 		item_date = str(each_item.start_time)
 		already_exists = False
 		if item_date[0:10] not in tasks_to_review:
@@ -72,7 +76,8 @@ def reviewal_check(request):
 			if(already_exists == False):
 				tasks_to_review[item_date[0:10]].append([convert(each_item.parent_task.task_name), (parse(each_item.end_time)-parse(each_item.start_time)).total_seconds() / 3600])
 
-
-	json_list_return = json.dumps(tasks_to_review)
+	tasks_to_review = OrderedDict(sorted(tasks_to_review.items()))
+	print(tasks_to_review)
+	json_list_return = json.dumps(tasks_to_review, sort_keys=False)
 
 	return HttpResponse(json_list_return)
