@@ -48,6 +48,8 @@ from .models import CredentialsModel
 from procrastinate import settings
 from app_account_management.models import UserExtended
 
+from app_review.views import *
+
 from operator import itemgetter
 
 
@@ -1079,6 +1081,8 @@ def get_calendar_data(request):
         event_length = 0
 
     user_breakdown_mini_tasks = BUT.objects.filter(parent_task__authenticated_user = request.user)
+
+    data_for_charts(request)
 
     context = {
 

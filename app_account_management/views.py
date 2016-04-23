@@ -139,18 +139,6 @@ def processor_register(request):
         )
         new_user_extended.save()
 
-        data = {}
-        json_data = json.dumps(data)
-
-        Review_Sys_Obj = Review.objects.create(
-            authenticated_user = new_user,
-            last_day_reviewed = "NEW_USER",
-            task_event_completion_per_day = json_data
-        )
-
-        Review_Sys_Obj.save()
-
-
         user = authenticate(username=request.POST.get('user_name'))
 
         login(request, user)

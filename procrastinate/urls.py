@@ -69,6 +69,7 @@ urlpatterns = [
     url(r'^allocate_test', allocate_tasks, name='allocate_tasks'),
     url(r'^event_conflict', event_conflict_analysis, name='event_conflict_analysis'),
     url(r'^checkreviews', reviewal_check, name='reviewal_check'),
+    url(r'^submit_reviewal', submit_reviewal, name='submit_reviewal'),
 
 
 
