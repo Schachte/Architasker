@@ -7,8 +7,8 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8" />
-	{% include 'css.html' %}
-	{% include 'javascript.html' %}
+    {% include 'css.html' %}
+    {% include 'javascript.html' %}
 
 	<link rel="icon" type="image/png" href="assets/img/favicon.ico">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
@@ -65,8 +65,15 @@
 	  <link rel="stylesheet" type="text/css" href="http://jonthornton.github.io/jquery-timepicker/lib/site.css" />
 
 
+      <link rel="stylesheet" type="text/css" href="{% static 'review_slider/css/simple-slider.css' %}" />
+
+      <link rel="stylesheet" type="text/css" href="{% static 'review_slider/css/simple-slider-volume.css' %}" />
 
 	<link type="text/css" rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500">
+
+
+
+
     <style>
       #locationField, #controls {
         position: relative;
@@ -1485,9 +1492,13 @@ $(function () {
 			}
 
 
+
+            input.slide_width  {
+                width: 50% !important;
+                margin: auto;
+            }
+
 		</style>
-
-
 
 
 
@@ -1567,7 +1578,6 @@ $(function () {
             </ul>
     	</div>
     </div>
-
 
 
 
@@ -1797,6 +1807,8 @@ $(function () {
         </div><br><br>
     </center>
 
+    <!-- <a data-remodal-target="modal_test">Call the modal with data-remodal-id="modal"</a> -->
+
 
 <!--         <footer id="footerID" class="footer">
             <div class="container-fluid">
@@ -1842,28 +1854,24 @@ $(function () {
 </div><!-- /.modal -->
 
 
-<div class="modal fade" id = "reviewal_modal">
-  <div class="modal-dialog">
-    <div class="modal-content review_scroll">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+
+<div class="remodal" data-remodal-id="modal_test">
+  <button data-remodal-action="close" class="remodal-close"></button>
+  <h2 class="reviewtitle">Your Life In Review.</h2><hr>
+        <ul id="item_date">
+            
+
+        </ul>
 
 
-        <h4 class="modal-title" id="modal_title">Review Your Productivity: </h4>
-      </div>
-      <div class="modal-body">
-      	<ul id="item_date">
-      		
-      		<span id="insert_review_here"></span>
-      	</ul>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary" id="reviewal_submit" onclick="submit_reviewal();"> Submit </button>
-      </div>
-    </div><!-- /.modal-content -->
-  </div><!-- /.modal-dialog -->
-</div><!-- /.modal -->
+
+  <br>
+  <button data-remodal-action="confirm" onclick="submit_reviewal();" class="remodal-confirm">Submit Review</button>
+</div>
+
+
+
+
 
 
 <script>
@@ -2364,6 +2372,8 @@ function fill_transit(trans_type) {
 
 
 
+
+
 <!-- Modal -->
 <div id="addEventModal" class="modal fade" role="dialog">
   <div class="modal-dialog">
@@ -2764,6 +2774,7 @@ $("#custom").spectrum({
 						}
 						//Show all the conflicts within the modal window
 		            	$('#conflictmodal').modal('show');
+
 		          
 		            	
 		        	}
@@ -2879,6 +2890,60 @@ $("#custom").spectrum({
 		// sp-replacer sp-light
 
 
+
+
+        function convert_date_to_english(date_string) {
+
+
+
+            $(".modal-body").append('<p><input type="text" data-slider="true" data-slider-theme="volume" />');
+
+            curr_year = date_string.substr(0, 4);
+            curr_month = date_string.substr(5, 7);
+            curr_month = curr_month.substr(0,2)
+            current_day = date_string.substr(8, 10);
+
+            if (curr_month == "01"){
+                curr_month = "January";
+            }
+            else if (curr_month == "02"){
+                curr_month = "February";
+            }
+            else if (curr_month == "03"){
+                curr_month = "March";
+            }
+            else if (curr_month == "04"){
+                curr_month = "April";
+            }
+            else if (curr_month == "05"){
+                curr_month = "May";
+            }
+            else if (curr_month == "06"){
+                curr_month = "June";
+            }
+            else if (curr_month == "07"){
+                curr_month = "July";
+            }
+            else if (curr_month == "08"){
+                curr_month = "August";
+            }
+            else if (curr_month == "09"){
+                curr_month = "September";
+            }
+            else if (curr_month == "10"){
+                curr_month = "October";
+            }
+            else if (curr_month == "11"){
+                curr_month = "November";
+            }
+            else if (curr_month == "12"){
+                curr_month = "December";
+            }
+            return curr_month + " " + current_day + ", " + curr_year;
+
+
+        }
+
 		function check_for_review_AJAX() {
 
 			//Ajax call into the backend
@@ -2903,8 +2968,10 @@ $("#custom").spectrum({
 
 		        			var insert_review = document.getElementById("item_date");
 		        			var insert_date = document.getElementById("item_date");
+                            var slider_insertion = document.getElementById('productivity_slider');
 		        			console.log(my_json);
-		        			insert_date.innerHTML += '<h1 style="color:orange;">' + date_key + '</h1><hr>';
+                            english_date = convert_date_to_english(date_key);
+		        			insert_date.innerHTML += '<h3 class="reviewdates" style="margin-right: 20px; margin-bottom: 20px;">' + english_date + '</h3>';
 
 		        			for (var tasks in my_json[date_key]) {
 		        				console.log("FOR THE DATE OF ... " + date_key);
@@ -2914,14 +2981,26 @@ $("#custom").spectrum({
 		        				insert_review.innerHTML += '\
 		        				\
 									<li class="review">	\
-									<h5>' + my_json[date_key][tasks][0] + '</h5>\
+									<h5>Task: ' + my_json[date_key][tasks][0] + '</h5>\
+                                    <h5>Scheduled Hours: '+ hour_fix +' </h5>\
 									</li>';
 
-									insert_review.innerHTML += '<input type="text" style="width: 100%" task_date="'+ date_key +'" task_name= "'+ my_json[date_key][tasks][0] +'" task_hours="'+ hour_fix+'" task_hours_completed=0 placeholder="Hours completed out of '+ hour_fix +'"></input>'
+                                insert_review.innerHTML += '\
+                                <li class="review">\
+                                    <input type="range" class="slide_width" id="slider'+custom_id+'" />\
+                                    <div id="uno">&nbsp;</div>\
+                                    \
+                                </li>\
+                                ';
+
+
+									// insert_review.innerHTML += '<input type="text" style="width: 100%" task_date="'+ date_key +'" task_name= "'+ my_json[date_key][tasks][0] +'" task_hours="'+ hour_fix+'" task_hours_completed=0 placeholder="Hours completed out of '+ hour_fix +'"></input>'
+
 								custom_id +=1;
 		        			}
 		        		}
-		        		$("#reviewal_modal").modal('show');
+                        var inst = $('[data-remodal-id=modal_test]').remodal();
+                        inst.open();
 		        	}
 		        	else {
 		        		console.log("There is nothing that needs to be reviewed");

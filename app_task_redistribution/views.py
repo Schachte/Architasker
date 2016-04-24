@@ -1322,71 +1322,74 @@ def task_conflict_analysis(request, new_task):
 	current_date_beg = current_date + " 00:00:00"
 	current_date_end = current_date + " 23:59:00"
 
-	print("Inside task conflict analysis")
+	try:
+		print("Inside task conflict analysis")
 
-	conflict_exists = 0
+		conflict_exists = 0
 
-	#Get the currently logged in user
-	current_user = User.objects.get(username=request.user.username)
+		#Get the currently logged in user
+		current_user = User.objects.get(username=request.user.username)
 
-	#Get times of free blocks
-	free_blocks = free_hours_per_day(request)
-	print(free_blocks)
+		#Get times of free blocks
+		free_blocks = free_hours_per_day(request)
+		print(free_blocks)
 
-	#Get the initial and end date for the current week that we are in
-	start_week_range = get_current_week_range(request)[0]
-	end_week_range = get_current_week_range(request)[1]
+		#Get the initial and end date for the current week that we are in
+		start_week_range = get_current_week_range(request)[0]
+		end_week_range = get_current_week_range(request)[1]
 
-	print("Current weekday %d"%(parse(current_date).weekday()))
+		print("Current weekday %d"%(parse(current_date).weekday()))
 
-	#Need to test range
-	for weekday in range(parse(current_date).weekday(), 7):
+		#Need to test range
+		for weekday in range(parse(current_date).weekday(), 7):
 
-		print("Inside loop Weekday %d"%(weekday))
+			print("Inside loop Weekday %d"%(weekday))
 
-		user_tasks = Task.objects.filter(authenticated_user=current_user, day_date__range=[parse(current_date), parse(end_week_range) + datetime.timedelta(days=1)], day_num__lte=weekday+1)
-		print("User tasks Count %d"%(user_tasks.count()))
+			user_tasks = Task.objects.filter(authenticated_user=current_user, day_date__range=[parse(current_date), parse(end_week_range) + datetime.timedelta(days=1)], day_num__lte=weekday+1)
+			print("User tasks Count %d"%(user_tasks.count()))
 
-		total_task_hours = 0
-		total_free_hours = 0
+			total_task_hours = 0
+			total_free_hours = 0
 
-		if(weekday >= new_task.day_num-1):
-			total_task_hours = new_task.estimated_time * new_task.percent_to_complete
+			if(weekday >= new_task.day_num-1):
+				total_task_hours = new_task.estimated_time * new_task.percent_to_complete
 
-		try:
-			for each_task in user_tasks:
-				print(each_task)
-				weekday_delta = weekday - parse(current_date).weekday()
-				print("Weekdday_delta %d"%(weekday_delta))
-				#need to add up break down events with parent and day range from current time to weekday+1? and then comment out if stuff below
-				mini_tasks_for_parent_task = BreakdownUserTask.objects.filter(parent_task=each_task, start_time__range=[current_time, parse(current_date_end) + datetime.timedelta(days=weekday_delta)])
-				for mini_task in mini_tasks_for_parent_task:
-					total_task_hours += (parse(mini_task.end_time) - parse(mini_task.start_time)).total_seconds() / 3600
-		except Exception as e:
-			print(e)
+			try:
+				for each_task in user_tasks:
+					print(each_task)
+					weekday_delta = weekday - parse(current_date).weekday()
+					print("Weekdday_delta %d"%(weekday_delta))
+					#need to add up break down events with parent and day range from current time to weekday+1? and then comment out if stuff below
+					mini_tasks_for_parent_task = BreakdownUserTask.objects.filter(parent_task=each_task, start_time__range=[current_time, parse(current_date_end) + datetime.timedelta(days=weekday_delta)])
+					for mini_task in mini_tasks_for_parent_task:
+						total_task_hours += (parse(mini_task.end_time) - parse(mini_task.start_time)).total_seconds() / 3600
+			except Exception as e:
+				print(e)
 
-		print("Total task hours before %.2f"%(total_task_hours));
+			print("Total task hours before %.2f"%(total_task_hours));
 
-		# if(weekday == parse(current_date).weekday()):
-		# 	mini_tasks_already_allocated = BreakdownUserTask.objects.filter(parent_task__authenticated_user=request.user, start_time__range=[parse(current_date_beg), parse(current_date_end)])
-		# 	print("Num of mini tasks before %d"%(mini_tasks_already_allocated.count()))
+			# if(weekday == parse(current_date).weekday()):
+			# 	mini_tasks_already_allocated = BreakdownUserTask.objects.filter(parent_task__authenticated_user=request.user, start_time__range=[parse(current_date_beg), parse(current_date_end)])
+			# 	print("Num of mini tasks before %d"%(mini_tasks_already_allocated.count()))
 
-		# 	for mini_task in mini_tasks_already_allocated:
-		# 		mini_task_duration = (parse(mini_task.end_time) - parse(mini_task.start_time)).total_seconds() / 3600
-		# 		total_task_hours -= mini_task_duration
-		# 		# print("")
+			# 	for mini_task in mini_tasks_already_allocated:
+			# 		mini_task_duration = (parse(mini_task.end_time) - parse(mini_task.start_time)).total_seconds() / 3600
+			# 		total_task_hours -= mini_task_duration
+			# 		# print("")
 
-		print("Total task hours %.2f"%(total_task_hours))
+			print("Total task hours %.2f"%(total_task_hours))
 
-		for num in range(parse(current_date).weekday(), weekday+1):
-			print("Num for free hours %d" %(num))
-			total_free_hours += free_blocks[num]
+			for num in range(parse(current_date).weekday(), weekday+1):
+				print("Num for free hours %d" %(num))
+				total_free_hours += free_blocks[num]
 
-		print("Total free hours %.2f"%(total_free_hours))
+			print("Total free hours %.2f"%(total_free_hours))
 
-		if (total_task_hours > total_free_hours):
-			conflict_exists = 1
-			break
+			if (total_task_hours > total_free_hours):
+				conflict_exists = 1
+				break
+	except Exception as e:
+		print(e)
 
 
 	return [conflict_exists, new_task.task_name, total_free_hours, total_task_hours]
