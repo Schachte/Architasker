@@ -457,6 +457,9 @@
             jQuery('#hideshowcurrtz').on('click', function(event) {
                  jQuery('#currenttz').toggle(500);
             });
+            jQuery('#tzDrop').on('click', function(event) {
+                 jQuery('#tzDropdown').toggle(500);
+            });
         });
     </script>
 
@@ -569,10 +572,14 @@
                 datatype: "json",
                 data: {
                     csrfmiddlewaretoken: '{{ csrf_token }}',
-                    tz: $('#tz').val(),
+                    tz: selected_zone,
                 },
                 success: function(){
-                    $('#currenttz').text($('#tz').val());
+                    jQuery('#tzstuff').hide(500);
+                    jQuery('#currenttz').hide(500);
+                    jQuery('#tzDropdown').hide(500);
+                    $li.removeClass('selected');
+                    $('#currenttz').text(selected_zone);
                     jQuery('#tzsuccess').show();
                     setTimeout(function(){
                         $("#tzsuccess").fadeOut("slow", function () {
@@ -581,6 +588,12 @@
                     }, 3000);
                 },
             });
+        });
+
+        var $li = $('#tzDropdown li').click(function() {
+            selected_zone = $(this).text();
+            $li.removeClass('selected');
+            $(this).addClass('selected');
         });
 
     </script>
