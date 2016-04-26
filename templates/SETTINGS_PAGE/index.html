@@ -40,7 +40,7 @@
     <!--     Fonts and icons     -->
     <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
     <link href='http://fonts.googleapis.com/css?family=Roboto:400,700,300' rel='stylesheet' type='text/css'>
-    <link href="{% static 'css/DASHBOARD_CSS/pe-icon-7-stroke.css' %}" rel="stylesheet" />
+    <!-- <link href="{% static 'css/DASHBOARD_CSS/pe-icon-7-stroke.css' %}" rel="stylesheet" /> -->
 
     <style>
 
@@ -157,86 +157,86 @@
                 </div>
             </nav>
 
-            <center><div class="card">
-                <div class="box-header">
-                    <!-- <h1>Change Settings</h1> -->
-                </div>
-                    <div id='outer' class="content">
-                        <div class="inner">
-                            <button id='hideshowname' class="btn blue">Change Name</button>
-                            <div id='namestuff' style="display:none">
-                                <form id="savename" action="settingsavename" method="POST">
-                                    {% csrf_token %}
-                                    <label for="firstname">First Name</label>
-                                    <br/>
-                                    <input type="text" class="form-control" id="firstname" name="first_name">
-                                    <br/>
-                                    <label for="lastname">Last Name</label>
-                                    <br/>
-                                    <input type="text" class="form-control" id="lastname" name="last_name">
-                                    <br/>
-                                    <button type="submit" class="btn blue">Save</button>
-                                </form>
-                            </div>
-                            <div id='namesuccess' style="color: #008000; display:none"><p>Name Changed Successfully!</p></div>
+            <!-- <center><div class="card"> -->
+                <div id="tabs" class="tabbable tabs-left">
+                    <ul class="nav nav-tabs">
+                        <li class="active">
+                            <a data-toggle="tab" href="#namestuff">Change Name</a>
+                        </li>
+                        <li>
+                            <a data-toggle="tab" href="#passstuff">Change Password</a>
+                        </li>
+                        <li>
+                            <a data-toggle="tab" href="#emailstuff">Change Email</a>
+                        </li>
+                        <li>
+                            <a data-toggle="tab" href="#tzstuff">Change Time Zone</a>
+                        </li>
+                    </ul>
+                    <div class="tab-content col-md-10">
+                        <div id='namestuff' class="tab-pane fade in active">
+                            <form id="savename" action="settingsavename" method="POST">
+                                {% csrf_token %}
+                                <label for="firstname">First Name</label>
+                                <br/>
+                                <input type="text" class="form-control" id="firstname" name="first_name">
+                                <br/>
+                                <label for="lastname">Last Name</label>
+                                <br/>
+                                <input type="text" class="form-control" id="lastname" name="last_name">
+                                <br/>
+                                <button type="submit" class="btn blue">Save</button>
+                            </form>
                         </div>
-                        <div class="inner">
-                            <button id='hideshowpass' class="btn red" >Change Password</button>
-                            <div id='passstuff' style="display:none">
-                                <form id="savepass" action="settingsavepassword" method="POST">
-                                    {% csrf_token %}
-                                    <label for="oldpass">Old Password</label>
-                                    <br/>
-                                    <input type="password" class="form-control" id="oldpass"  name="old_pass">
-                                    <br/>
-                                    <label for="newpass">New Password</label>
-                                    <br/>
-                                    <input type="password" class="form-control" id="newpass" name="new_pass">
-                                    <br/>
-                                    <label for="newpass2">New Password(Again)</label>
-                                    <br/>
-                                    <input type="password" class="form-control" id="newpass2" name="new_pass2">
-                                    <br/>
-                                    <button type="submit" class="btn blue">Save</button>
-                                </form>
-                            </div>
-                            <div id='passsuccess' style="color: #008000; display:none"><p>Password Changed Successfully!</p></div>
+                        <div id='namesuccess' style="color: #008000; display:none"><p>Name Changed Successfully!</p></div>
+                        <div id='passstuff' class="tab-pane fade">
+                            <form id="savepass" action="settingsavepassword" method="POST">
+                                {% csrf_token %}
+                                <label for="oldpass">Old Password</label>
+                                <br/>
+                                <input type="password" class="form-control" id="oldpass"  name="old_pass">
+                                <br/>
+                                <label for="newpass">New Password</label>
+                                <br/>
+                                <input type="password" class="form-control" id="newpass" name="new_pass">
+                                <br/>
+                                <label for="newpass2">New Password(Again)</label>
+                                <br/>
+                                <input type="password" class="form-control" id="newpass2" name="new_pass2">
+                                <br/>
+                                <button type="submit" class="btn blue">Save</button>
+                            </form>
                         </div>
-                        <div class="inner">
-                            <button id='hideshowemail' class="btn green">Change Email</button>
-                            <div id='emailstuff' style="display:none">
-                                <button id='hideshowcurremail' class="btn orange small">Show Current Email</button>
-                                <div id='currentemail' style="display:none"><p>{{user.email}}</p></div>
-                                <form id="saveemail" action="settingsaveemail" method="POST">
-                                    {% csrf_token %}
-                                    <label for="email">Email</label>
-                                    <br/>
-                                    <input type="text" class="form-control" id="email"  name="email">
-                                    <br/>
-                                    <button type="submit" class="btn blue">Save</button>
-                                </form>
-                            </div>
-                            <div id='emailsuccess' style="color: #008000; display:none"><p>Email Changed Successfully!</p></div>
+                        <div id='passsuccess' style="color: #008000; display:none"><p>Password Changed Successfully!</p></div>
+                        <div id='emailstuff' class="tab-pane fade">
+                            <button id='hideshowcurremail' class="btn orange small">Show Current Email</button>
+                            <div id='currentemail' style="display:none"><p>{{user.email}}</p></div>
+                            <form id="saveemail" action="settingsaveemail" method="POST">
+                                {% csrf_token %}
+                                <label for="email">Email</label>
+                                <br/>
+                                <input type="text" class="form-control" id="email"  name="email">
+                                <br/>
+                                <button type="submit" class="btn blue">Save</button>
+                            </form>
                         </div>
-                        <div class="inner">
-                            <button id='hideshowtz' class="btn purple">Change Time Zone</button>
-                            <div id='tzstuff' style="display:none">
-                                <button id='hideshowcurrtz' class="btn orange small">Show Current Time Zone</button>
-                                <div id='currenttz' style="display:none"><p>{{time_zone}}</p></div>
-                                <form id="savetz" action="settingsavetz" method="POST">
-                                    {% csrf_token %}
-                                    <label for="tz">Time Zone</label>
-                                    <br/>
-                                    <input type="text" class="form-control" id="tz"  name="tz">
-                                    <br/>
-                                    <button type="submit" class="btn blue">Save</button>
-                                </form>
-                            </div>
-                            <div id='tzsuccess' style="color: #008000; display:none"><p>Time Zone Changed Successfully!</p></div>
+                        <div id='emailsuccess' style="color: #008000; display:none"><p>Email Changed Successfully!</p></div>
+                        <div id='tzstuff' class="tab-pane fade">
+                            <button id='hideshowcurrtz' class="btn orange small">Show Current Time Zone</button>
+                            <div id='currenttz' style="display:none"><p>{{time_zone}}</p></div>
+                            <form id="savetz" action="settingsavetz" method="POST">
+                                {% csrf_token %}
+                                <label for="tz">Time Zone</label>
+                                <br/>
+                                <input type="text" class="form-control" id="tz"  name="tz">
+                                <br/>
+                                <button type="submit" class="btn blue">Save</button>
+                            </form>
                         </div>
+                        <div id='tzsuccess' style="color: #008000; display:none"><p>Time Zone Changed Successfully!</p></div>
                     </div>
-                <br/>
-            </div></center>
+                </div>
+            <!-- </div></center> -->
 
 
             <div class="footer">
@@ -360,7 +360,6 @@
                     last_name: $('#lastname').val(),
                 },
                 success: function(){
-                    jQuery('#namestuff').hide(500);
                     jQuery('#namesuccess').show();
                     setTimeout(function(){
                         $("#namesuccess").fadeOut("slow", function () {
@@ -392,7 +391,6 @@
                     new_pass2: $('#newpass2').val(),
                 },
                 success: function(){
-                    jQuery('#passstuff').hide(500);
                     jQuery('#passsuccess').show();
                     setTimeout(function(){
                         $("#passsuccess").fadeOut("slow", function () {
@@ -423,7 +421,6 @@
                 },
                 success: function(){
                     $('#currentemail').text($('#email').val());
-                    jQuery('#emailstuff').hide(500);
                     jQuery('#emailsuccess').show();
                     setTimeout(function(){
                         $("#emailsuccess").fadeOut("slow", function () {
@@ -454,7 +451,6 @@
                 },
                 success: function(){
                     $('#currenttz').text($('#tz').val());
-                    jQuery('#tzstuff').hide(500);
                     jQuery('#tzsuccess').show();
                     setTimeout(function(){
                         $("#tzsuccess").fadeOut("slow", function () {
