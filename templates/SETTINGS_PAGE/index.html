@@ -161,20 +161,20 @@
                 <div id="tabs" class="tabbable tabs-left">
                     <ul class="nav nav-tabs">
                         <li class="active">
-                            <a data-toggle="tab" href="#namestuff">Change Name</a>
+                            <a data-toggle="tab" href="#nameinfo">Change Name</a>
                         </li>
                         <li>
-                            <a data-toggle="tab" href="#passstuff">Change Password</a>
+                            <a data-toggle="tab" href="#passinfo">Change Password</a>
                         </li>
                         <li>
-                            <a data-toggle="tab" href="#emailstuff">Change Email</a>
+                            <a data-toggle="tab" href="#emailinfo">Change Email</a>
                         </li>
                         <li>
-                            <a data-toggle="tab" href="#tzstuff">Change Time Zone</a>
+                            <a data-toggle="tab" href="#tzinfo">Change Time Zone</a>
                         </li>
                     </ul>
                     <div class="tab-content col-md-10">
-                        <div id='namestuff' class="tab-pane fade in active">
+                        <div id='nameinfo' class="tab-pane fade in active">
                             <form id="savename" action="settingsavename" method="POST">
                                 {% csrf_token %}
                                 <label for="firstname">First Name</label>
@@ -188,8 +188,8 @@
                                 <button type="submit" class="btn blue">Save</button>
                             </form>
                         </div>
-                        <div id='namesuccess' style="color: #008000; display:none"><p>Name Changed Successfully!</p></div>
-                        <div id='passstuff' class="tab-pane fade">
+                        <div id='namesuccess'><p>Name Changed Successfully!</p></div>
+                        <div id='passinfo' class="tab-pane fade">
                             <form id="savepass" action="settingsavepassword" method="POST">
                                 {% csrf_token %}
                                 <label for="oldpass">Old Password</label>
@@ -207,8 +207,8 @@
                                 <button type="submit" class="btn blue">Save</button>
                             </form>
                         </div>
-                        <div id='passsuccess' style="color: #008000; display:none"><p>Password Changed Successfully!</p></div>
-                        <div id='emailstuff' class="tab-pane fade">
+                        <div id='passsuccess'><p>Password Changed Successfully!</p></div>
+                        <div id='emailinfo' class="tab-pane fade">
                             <button id='hideshowcurremail' class="btn orange small">Show Current Email</button>
                             <div id='currentemail' style="display:none"><p>{{user.email}}</p></div>
                             <form id="saveemail" action="settingsaveemail" method="POST">
@@ -220,8 +220,8 @@
                                 <button type="submit" class="btn blue">Save</button>
                             </form>
                         </div>
-                        <div id='emailsuccess' style="color: #008000; display:none"><p>Email Changed Successfully!</p></div>
-                        <div id='tzstuff' class="form-group">
+                        <div id='emailsuccess'><p>Email Changed Successfully!</p></div>
+                        <div id='tzinfo' class="form-group tab-pane fade">
                             <div id="errormsgtz"><p style="color: #c0392b"></p></div> 
                             <button id='hideshowcurrtz' class="btn orange small">Show Current Time Zone</button></br>
                                 <div id='currenttz' style="display:none"><p>{{time_zone}}</p></div>
@@ -355,7 +355,7 @@
                                 <button type="submit" class="btn blue">Save</button>
                             </form>
                         </div>
-                        <div id='tzsuccess' style="display:none"><p>Time Zone Changed Successfully!</p></div>
+                        <div id='tzsuccess'><p>Time Zone Changed Successfully!</p></div>
                     </div>
                 </div>
             <!-- </div></center> -->
@@ -408,7 +408,10 @@
 <!-- Light Bootstrap Table DEMO methods, don't include it in your project! -->
 <script src="{% static 'js/DASHBOARD_JAVASCRIPT/demo.js' %}"></script>
 
-    <script type="text/javascript">
+<!-- Settings Page Javascript -->
+<script src="{% static 'js/SETTINGS_PAGE_JAVASCRIPT/settings_page.js' %}"></script>
+
+    <!--<script type="text/javascript">
             {% if user_login_count == False %}
         $(document).ready(function(){
 
@@ -427,32 +430,8 @@
 
     <script type="text/javascript">
         jQuery(document).ready(function(){
-            jQuery('#hideshowname').on('click', function(event) {
-                 jQuery('#namestuff').toggle(500);
-                 jQuery('#passstuff').hide(500);
-                 jQuery('#emailstuff').hide(500);
-                 jQuery('#tzstuff').hide(500);
-            });
-            jQuery('#hideshowpass').on('click', function(event) {
-                 jQuery('#passstuff').toggle(500);
-                 jQuery('#namestuff').hide(500);
-                 jQuery('#emailstuff').hide(500);
-                 jQuery('#tzstuff').hide(500);
-            });
-            jQuery('#hideshowemail').on('click', function(event) {
-                 jQuery('#emailstuff').toggle(500);
-                 jQuery('#namestuff').hide(500);
-                 jQuery('#passstuff').hide(500);
-                 jQuery('#tzstuff').hide(500);
-            });
             jQuery('#hideshowcurremail').on('click', function(event) {
                  jQuery('#currentemail').toggle(500);
-            });
-            jQuery('#hideshowtz').on('click', function(event) {
-                 jQuery('#tzstuff').toggle(500);
-                 jQuery('#namestuff').hide(500);
-                 jQuery('#passstuff').hide(500);
-                 jQuery('#emailstuff').hide(500);
             });
             jQuery('#hideshowcurrtz').on('click', function(event) {
                  jQuery('#currenttz').toggle(500);
@@ -575,7 +554,6 @@
                     tz: selected_zone,
                 },
                 success: function(){
-                    jQuery('#tzstuff').hide(500);
                     jQuery('#currenttz').hide(500);
                     jQuery('#tzDropdown').hide(500);
                     $li.removeClass('selected');
@@ -596,5 +574,5 @@
             $(this).addClass('selected');
         });
 
-    </script>
+    </script>-->
 </html>

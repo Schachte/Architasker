@@ -17,6 +17,32 @@ h1 {
     vertical-align: top;
 }
 
+.scrollable-menu {
+  height: auto;
+  max-height: 200px;
+  overflow-x: hidden;
+}
+
+#namesuccess{
+  color: #008000; 
+  display:none;
+}
+
+#passsuccess{
+  color: #008000; 
+  display:none;
+}
+
+#emailsuccess{
+  color: #008000; 
+  display:none;
+}
+
+#tzsuccess{
+  color: #008000; 
+  display:none;
+}
+
 /* css for the shiny buttons */
 
 .btn {
@@ -116,6 +142,32 @@ h1 {
 .buttons {
   padding-top: 30px;
   text-align: center;
+}
+
+.dropdown-content {
+    background-color: #f9f9f9;
+    min-width: 180px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    padding: 10px;
+    max-height:190px;
+    overflow-y:auto;
+    overflow-x:hidden;
+    display: inline-block;
+}
+
+.dropdown-content li {
+    color: black;
+    text-decoration: none;
+    display: block;
+}
+
+.dropdown-content li:hover {
+  cursor: pointer;
+  background-color: #f1f1f1;
+}
+
+.dropdown-content li.selected {
+  background-color: #006600;
 }
 
 .tabs-left > .nav-tabs > li,
