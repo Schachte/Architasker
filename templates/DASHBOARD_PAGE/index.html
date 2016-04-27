@@ -65,9 +65,6 @@
 	  <link rel="stylesheet" type="text/css" href="http://jonthornton.github.io/jquery-timepicker/lib/site.css" />
 
 
-      <link rel="stylesheet" type="text/css" href="{% static 'review_slider/css/simple-slider.css' %}" />
-
-      <link rel="stylesheet" type="text/css" href="{% static 'review_slider/css/simple-slider-volume.css' %}" />
 
 	<link type="text/css" rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500">
 
@@ -1492,13 +1489,122 @@ $(function () {
 			}
 
 
+#input-wrapper {
+  width: 200px;
+  margin: 0 auto;
+  position: relative;
+  padding-top: 64px;
+  padding-bottom: 10px;
+  overflow-x: hidden;
+  margin-top: -80px;
+}
 
-            input.slide_width  {
-                width: 50% !important;
-                margin: auto;
-            }
+#rangeslider {
+  display: block;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  outline: none;
+  height: 5px;
+  width: 100%;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+#rangeslider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  cursor: pointer;
+  height: 5px;
+  width: 54px;
+  position: relative;
+}
+
+#rangeslider::-webkit-slider-thumb:after {
+  content: '< >';
+  word-spacing: 20px;
+  text-align: center;
+  background: hsl(140, 50%, 70%);
+  font: bold 17px/25px 'roboto';
+  color: white;
+  width: 54px;
+  height: 25px;
+  position: absolute;
+  top: -10px;
+  left: 0;
+  color: transparent;
+  -webkit-transition: color 0.25s;
+  transition: color 0.25s;
+}
+
+#rangeslider::-webkit-slider-thumb:before {
+  content: '';
+  height: 5px;
+  width: 400px;
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: hsl(140, 50%, 70%);
+  pointer-events: none;
+}
+
+#reel {
+  width: 54px;
+  height: 54px;
+  overflow: hidden;
+  position: absolute;
+  top: 0; 
+  opacity: 0;
+  -webkit-transition: opacity 0.25s;
+  transition: opacity 0.25s;
+}
+
+#rn {
+  background: -webkit-linear-gradient(hsl(0, 80%, 70%), hsl(120, 80%, 70%));
+  background: linear-gradient(hsl(0, 80%, 70%), hsl(120, 80%, 70%));
+  -webkit-transition: all 0.25s;
+  transition: all 0.25s; 
+}
+
+#rn span {
+  font: 30px/54px 'roboto';
+  color: white;
+  display: block;
+  text-align: center;
+}
+
+#static-output {
+  font: bold 17px/25px 'roboto';
+  color: white;
+  position: absolute;
+  bottom: 0;
+  height: 25px;
+  width: 54px;
+  text-align: center;
+  pointer-events: none;
+  -webkit-transition: color 0.25s;
+  transition: color 0.25s;
+  float: right;
+}
+
+.active #reel { opacity: 1; }
+
+.active #static-output { color: transparent; }
+
+.active #rangeslider::-webkit-slider-thumb:after {
+  color: white;
+}
+
+
+    .reviewdates {
+
+        font-size: 30px;
+        margin-left: 10px;
+    }
+
 
 		</style>
+
+
 
 
 
@@ -1801,7 +1907,10 @@ $(function () {
 				<center>
         <div>
 
+
+
         	{% include "DASHBOARD_PAGE/charts.html" %}
+
 
 
         </div><br><br>
@@ -2941,7 +3050,6 @@ $("#custom").spectrum({
             }
             return curr_month + " " + current_day + ", " + curr_year;
 
-
         }
 
 		function check_for_review_AJAX() {
@@ -2971,7 +3079,7 @@ $("#custom").spectrum({
                             var slider_insertion = document.getElementById('productivity_slider');
 		        			console.log(my_json);
                             english_date = convert_date_to_english(date_key);
-		        			insert_date.innerHTML += '<h3 class="reviewdates" style="margin-right: 20px; margin-bottom: 20px;">' + english_date + '</h3>';
+		        			insert_date.innerHTML += '<h2 class="reviewdates" style="margin-right: 20px; font-size: 35px margin-bottom: 20px;">' + english_date + '</h2><hr>';
 
 		        			for (var tasks in my_json[date_key]) {
 		        				console.log("FOR THE DATE OF ... " + date_key);
@@ -2985,12 +3093,14 @@ $("#custom").spectrum({
                                     <h5>Scheduled Hours: '+ hour_fix +' </h5>\
 									</li>';
 
+
                                 insert_review.innerHTML += '\
-                                <li class="review">\
-                                    <input type="range" class="slide_width" id="slider'+custom_id+'" />\
-                                    <div id="uno">&nbsp;</div>\
-                                    \
-                                </li>\
+                        <div id="input-wrapper" class="force">\
+                          <input type="range" id="slider_id_'+custom_id+'" min="0" max="'+hour_fix+'" value="0" step="'+hour_fix/10+'" oninput="updateOutput(value, true, update_slider_'+custom_id+')" onchange="deactivate()" onmouseup="deactivate()">\
+                          <div id="reel" style="left: 193.76px;">\
+                            <div id="rn" style="transform: translateY(-3024px) translateZ(0px);"></div>\
+                        </div>\
+                        <div id="update_slider_'+custom_id+'"  style="left: 193.76px;">0</div>\
                                 ';
 
 
@@ -3017,5 +3127,66 @@ $("#custom").spectrum({
 		}
 
 </script>
+
+
+
+<script>
+
+//lets populate reel numbers
+var min = $("#rangeslider").attr("min");
+var max = $("#rangeslider").attr("max");
+
+var rn = "";
+for(var i = min; i <= max; i++)
+    rn += "<span>"+i+"</span>";
+$("#rn").html(rn);
+
+//triggering updateOutput manually
+updateOutput($("#rangeslider").val(), false);
+
+var rfigure, h, v;
+//lets display the static output now
+function updateOutput(figure, activate, class_name) {
+    //if activate then add .active to #input-wrapper to help animate the #reel
+    if(activate)
+        $("#input-wrapper").addClass("active");
+    
+    //because of the step param the slider will return values in multiple of 0.05 so we have to round it up
+    rfigure = figure;
+    //displaying the static output
+    $("#static-output").html(rfigure);
+    // $("#"+class_name).html(rfigure);
+    // console.log(class_name.id);
+    var class_id = class_name.id
+    console.log(class_id);
+    $("#" + class_id).text(rfigure);
+    console.log("before");
+    // tester.text
+    console.log("after");
+
+
+    
+    //positioning #static-output and #reel
+    //horizontal positioning first
+    h = figure/max*($("#input-wrapper").width()-$("#reel").width()) + 'px';
+    //vertical positioning of #rn
+    v = rfigure*$("#reel").height()*-1 + 'px';
+    
+    //applying the positions
+    $("#static-output, #reel").css({left: h});
+    //#rn will be moved using transform+transitions for better animation performance. The false translateZ triggers GPU acceleration for better performance.
+    $("#rn").css({transform: 'translateY('+v+') translateZ(0)'});
+}
+function deactivate() {
+    //remove .active from #input-wrapper
+    $("#input-wrapper").removeClass("active");
+}
+
+
+
+</script>
+
+
+
 
 </html>
