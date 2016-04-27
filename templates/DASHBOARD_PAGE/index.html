@@ -1602,6 +1602,18 @@ $(function () {
     }
 
 
+input[type=search]::-webkit-search-cancel-button,
+input[type=search]::-webkit-search-decoration,
+input[type=search]::-webkit-search-results-button,
+input[type=search]::-webkit-search-results-decoration {
+  -webkit-appearance:none;
+}
+input[type=search] {
+  -webkit-appearance:textfield;
+  -webkit-box-sizing:content-box;
+}
+
+
 		</style>
 
 
@@ -1734,14 +1746,24 @@ $(function () {
                 {% if google_auth_complete == True %}
 
 
+
                 <!-- DIV onclick may not be good practice tbqh -->
-                <div onclick="syncGoogleCalendar();" class='button -border center' id = "syncGoogle" style="float: right;">Sync Google Calendar</div>
+                <div onclick="syncGoogleCalendar();" class='button -border center' id = "syncGoogle" style="float: right;">Sync Google Calendar
+                </div>
 
 
+                <div style="float: right">Search Events &amp; Tasks Here: 
+                <form action="{% url 'task_event_user_search' %}" method="POST">
+                {% csrf_token %}
+                 <input type="search" name="search_data" placeholder="Search Tasks and Events here"><button type="submit" value="Search">Search</button>
+                 </form>
+                 </div>
 
                 {% else %}
                 <p align="right" id="margin-paragraph-from-right"><a href="/oauth" style="text-align: right">Want To Sync With Google Calendar? Click Here</a></p>
                 {% endif %}
+
+
 
 				<div class="morph-button morph-button-modal morph-button-modal-1 morph-button-fixed" style="float: left;">
 						<button type="button">Add Task</button>

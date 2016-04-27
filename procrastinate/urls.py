@@ -70,6 +70,7 @@ urlpatterns = [
     url(r'^event_conflict', event_conflict_analysis, name='event_conflict_analysis'),
     url(r'^checkreviews', reviewal_check, name='reviewal_check'),
     url(r'^submit_reviewal', submit_reviewal, name='submit_reviewal'),
+    url(r'^search', task_event_user_search, name='task_event_user_search'),
 
 
 

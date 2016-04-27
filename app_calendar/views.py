@@ -52,6 +52,11 @@ from app_review.views import *
 
 from operator import itemgetter
 
+import operator
+
+
+#Import the parent user tasks
+from app_tasks.models import UserTask as PUT
 
 from random import choice
 from string import ascii_uppercase
@@ -1162,4 +1167,46 @@ def get_current_week_range(request):
     time_range = [now, then]
 
     return time_range
+
+
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+Develop a flexible search engine for users to search tasks
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+def task_event_user_search(request):
+
+    if request.method == "POST":
+        print("Search accessed via post!")
+
+        search_text = request.POST.get('search_data')
+        print(search_text)
+
+        #Split the initial input string based on the spaces
+        search_list_data = search_text.split(" ")
+
+        #Do a django filter search on the input list form above on all the relevant search terms
+        user_events = reduce(operator.or_, (SNE.objects.filter(task_name__icontains=item) for item in search_list_data))
+
+        if len(user_events) == 0:
+            print("nothing to display")
+            user_events = "Empty"
+
+        #Do the same thing as above for the parent tasks
+        user_tasks = reduce(operator.or_, (PUT.objects.filter(task_name__icontains=item) for item in search_list_data))
+
+        if len(user_tasks) == 0:
+            print("nothing to display tasks")
+            user_tasks = "Empty"
+
+
+
+        context = {
+
+
+            'relevant_search_events' : user_events,
+            'relevant_search_tasks' : user_tasks,
+
+        }
+
+    return render(request, 'SEARCH_PAGE/index.html', context)
 
