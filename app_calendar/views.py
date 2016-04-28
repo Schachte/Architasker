@@ -1178,6 +1178,8 @@ def task_event_user_search(request):
     if request.method == "POST":
         print("Search accessed via post!")
 
+        initial_search_query = request.POST.get('search_data')
+
         search_text = request.POST.get('search_data')
         print(search_text)
 
@@ -1205,6 +1207,7 @@ def task_event_user_search(request):
 
             'relevant_search_events' : user_events,
             'relevant_search_tasks' : user_tasks,
+            'search_query' : initial_search_query
 
         }
 

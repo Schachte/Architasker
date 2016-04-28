@@ -1586,6 +1586,17 @@ $(function () {
   float: right;
 }
 
+
+#search_data {
+
+    color: black;
+    list-style-type: none;
+}
+
+#hidesearch {
+    list-style-type: none;
+}
+
 .active #reel { opacity: 1; }
 
 .active #static-output { color: transparent; }
@@ -1646,6 +1657,27 @@ input[type=search] {
                 </a>
             </div>
 
+
+
+
+            <div id = "hide_search">
+                <li>
+
+                <center>
+                 
+                <form action="{% url 'task_event_user_search' %}" method="POST">
+                {% csrf_token %}
+                 <input type="search" id="search_data" name="search_data" placeholder="Search Tasks and Events here"><button type="submit" value="Search">Search</button>
+                 </form>
+
+                </center>
+
+
+                </li>
+
+            </div>
+
+
             <ul class="nav">
                 <li class="active">
                     <a href="/dashboard">
@@ -1653,6 +1685,11 @@ input[type=search] {
                         <p>Dashboard</p>
                     </a>
                 </li>
+
+
+
+
+
 
                 <li data-toggle="modal" data-target="#addEventModal">
                     <a href="#">
@@ -1691,6 +1728,10 @@ input[type=search] {
                         <p>Help &amp; Information</p>
                     </a>
                 </li>
+
+
+
+
 
 
             </ul>
@@ -1751,13 +1792,6 @@ input[type=search] {
                 <div onclick="syncGoogleCalendar();" class='button -border center' id = "syncGoogle" style="float: right;">Sync Google Calendar
                 </div>
 
-
-                <div style="float: right">Search Events &amp; Tasks Here: 
-                <form action="{% url 'task_event_user_search' %}" method="POST">
-                {% csrf_token %}
-                 <input type="search" name="search_data" placeholder="Search Tasks and Events here"><button type="submit" value="Search">Search</button>
-                 </form>
-                 </div>
 
                 {% else %}
                 <p align="right" id="margin-paragraph-from-right"><a href="/oauth" style="text-align: right">Want To Sync With Google Calendar? Click Here</a></p>
