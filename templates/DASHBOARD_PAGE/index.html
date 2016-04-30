@@ -1,12 +1,15 @@
+
 {% load static %}
 {% load staticfiles %}
+
 
 <!doctype html>
 <html lang="en">
 <head>
 	<meta charset="utf-8" />
-	{% include 'css.html' %}
-	{% include 'javascript.html' %}
+    {% include 'css.html' %}
+    {% include 'javascript.html' %}
+
 	<link rel="icon" type="image/png" href="assets/img/favicon.ico">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
 
@@ -64,6 +67,10 @@
 
 
 	<link type="text/css" rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500">
+
+
+
+
     <style>
       #locationField, #controls {
         position: relative;
@@ -797,6 +804,77 @@
 			});
 
 			
+
+$(function () {
+    $('#container').highcharts({
+        chart: {
+            type: 'areaspline'
+        },
+        title: {
+            text: 'Average fruit consumption during one week'
+        },
+        legend: {
+            layout: 'vertical',
+            align: 'left',
+            verticalAlign: 'top',
+            x: 150,
+            y: 100,
+            floating: true,
+            borderWidth: 1,
+            backgroundColor: (Highcharts.theme && Highcharts.theme.legendBackgroundColor) || '#FFFFFF'
+        },
+        xAxis: {
+            categories: [
+                'Monday',
+                'Tuesday',
+                'Wednesday',
+                'Thursday',
+                'Friday',
+                'Saturday',
+                'Sunday'
+            ],
+            plotBands: [{ // visualize the weekend
+                from: 4.5,
+                to: 6.5,
+                color: 'rgba(68, 170, 213, .2)'
+            }]
+        },
+        yAxis: {
+            title: {
+                text: 'Fruit units'
+            }
+        },
+        tooltip: {
+            shared: true,
+            valueSuffix: ' units'
+        },
+        credits: {
+            enabled: false
+        },
+        plotOptions: {
+            areaspline: {
+                fillOpacity: 0.5
+            }
+        },
+        series: [{
+            name: 'Tasks',
+            data: [3, 4, 3, 5, 4, 10, 12]
+        }, {
+            name: 'Events',
+            data: [1, 3, 4, 3, 3, 5, 4]
+        },
+		{	
+            name: 'Combined',
+            data: [2, 4, 3, 5, 4, 10, 12]
+        },]
+    });
+});
+
+
+
+
+
+
 		</script>
 
 
@@ -1102,13 +1180,23 @@
 		</style>
         <style>
 
+        	.review_scroll {
+
+				/*position:absolute;*/
+				margin: auto;
+				overflow:scroll;
+				height: 600px;
+				width: 500px;
+
+        	}
+
             .footer{
-                position: absolute;
-                left: 0;
+                position: fixed;
+                /*left: 0;*/
                 bottom: 0;
                 height: 60px;
                 width: 100%;
-                overflow:hidden;
+                /*overflow:hidden;*/
             }
 
             /* Paste this css to your style sheet file or under head tag */
@@ -1322,7 +1410,226 @@
 				margin-top: -5px;
 			}
 
+
+			input[type="checkbox"] {
+			    display:none
+			}
+			ul li.review {
+			    list-style:none;
+			    margin:10px auto;
+			    font-family:'Lato';
+			    position:relative;
+
+			}
+			 
+			ul li.review:after {
+			    content:'';
+			    position:absolute;
+			    width:35px;
+			    height:35px;
+			    border:4px solid #fff;
+			    border-radius:6px;
+			    left:-12px;
+			    z-index:-1
+			}
+
+
+			label.review {
+			    cursor:pointer;
+			    color:#c0392b;
+			    margin:5px 0;
+			    padding-left:40px;
+			    position:relative;
+			    font-size:30px;
+			    -webkit-transition:.2s linear;
+			    -moz-transition:.2s linear;
+			    -o-transition:.2s linear;
+			    transition:.2s linear
+			}
+
+
+			label.review:before,label.review:after {
+			    content:'';
+			    left:11px;
+			    width:3px;
+			    bottom:0;
+			    background:#2E4E71;
+			    position:absolute;
+			    top:0
+			}
+
+
+			label.review:before {
+			    transform:rotate(45deg);
+			    transform-origin:0 14px;
+			    height:0;
+			    -webkit-transition:.2s linear;
+			    -moz-transition:.2s linear;
+			    -o-transition:.2s linear;
+			    transition:.2s linear
+			}
+			 
+			label.review:after {
+			    transform:rotate(-45deg);
+			    transform-origin:0 20px;
+			    height:0;
+			    -webkit-transition:.2s linear .2s;
+			    -moz-transition:.2s linear .2s;
+			    -o-transition:.2s linear .2s;
+			    transition:.2s linear .2s
+			}
+
+			input[type="checkbox"].review:checked + label.review:after,input[type="checkbox"].review:checked + label.review:before {
+			    height:100%
+			}
+			 
+			input[type="checkbox"].review:checked + label.review {
+			    color:#000;
+			    text-decoration: line-through;
+			}
+
+
+#input-wrapper {
+  width: 200px;
+  margin: 0 auto;
+  position: relative;
+  padding-top: 64px;
+  padding-bottom: 10px;
+  overflow-x: hidden;
+  margin-top: -80px;
+}
+
+#rangeslider {
+  display: block;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  outline: none;
+  height: 5px;
+  width: 100%;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+#rangeslider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  cursor: pointer;
+  height: 5px;
+  width: 54px;
+  position: relative;
+}
+
+#rangeslider::-webkit-slider-thumb:after {
+  content: '< >';
+  word-spacing: 20px;
+  text-align: center;
+  background: hsl(140, 50%, 70%);
+  font: bold 17px/25px 'roboto';
+  color: white;
+  width: 54px;
+  height: 25px;
+  position: absolute;
+  top: -10px;
+  left: 0;
+  color: transparent;
+  -webkit-transition: color 0.25s;
+  transition: color 0.25s;
+}
+
+#rangeslider::-webkit-slider-thumb:before {
+  content: '';
+  height: 5px;
+  width: 400px;
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: hsl(140, 50%, 70%);
+  pointer-events: none;
+}
+
+#reel {
+  width: 54px;
+  height: 54px;
+  overflow: hidden;
+  position: absolute;
+  top: 0; 
+  opacity: 0;
+  -webkit-transition: opacity 0.25s;
+  transition: opacity 0.25s;
+}
+
+#rn {
+  background: -webkit-linear-gradient(hsl(0, 80%, 70%), hsl(120, 80%, 70%));
+  background: linear-gradient(hsl(0, 80%, 70%), hsl(120, 80%, 70%));
+  -webkit-transition: all 0.25s;
+  transition: all 0.25s; 
+}
+
+#rn span {
+  font: 30px/54px 'roboto';
+  color: white;
+  display: block;
+  text-align: center;
+}
+
+#static-output {
+  font: bold 17px/25px 'roboto';
+  color: white;
+  position: absolute;
+  bottom: 0;
+  height: 25px;
+  width: 54px;
+  text-align: center;
+  pointer-events: none;
+  -webkit-transition: color 0.25s;
+  transition: color 0.25s;
+  float: right;
+}
+
+
+#search_data {
+
+    color: black;
+    list-style-type: none;
+}
+
+#hidesearch {
+    list-style-type: none;
+}
+
+.active #reel { opacity: 1; }
+
+.active #static-output { color: transparent; }
+
+.active #rangeslider::-webkit-slider-thumb:after {
+  color: white;
+}
+
+
+    .reviewdates {
+
+        font-size: 30px;
+        margin-left: 10px;
+    }
+
+
+input[type=search]::-webkit-search-cancel-button,
+input[type=search]::-webkit-search-decoration,
+input[type=search]::-webkit-search-results-button,
+input[type=search]::-webkit-search-results-decoration {
+  -webkit-appearance:none;
+}
+input[type=search] {
+  -webkit-appearance:textfield;
+  -webkit-box-sizing:content-box;
+}
+
+
 		</style>
+
+
+
+
 
             <link href='https://fonts.googleapis.com/css?family=Comfortaa:700' rel='stylesheet' type='text/css'>
         <script>
@@ -1336,7 +1643,7 @@
 
         </script>
 </head>
-<body onload="init();">
+<body onload="init(); check_for_review_AJAX();">
 
 <div class="wrapper">
     <div class="sidebar" data-color="azure" data-image="{% static 'img/DASHBOARD_IMAGES/sidebar-4.jpg' %}">
@@ -1350,6 +1657,27 @@
                 </a>
             </div>
 
+
+
+
+            <div id = "hide_search">
+                <li>
+
+                <center>
+                 
+                <form action="{% url 'task_event_user_search' %}" method="POST">
+                {% csrf_token %}
+                 <input type="search" id="search_data" name="search_data" placeholder="Search Tasks and Events here"><button type="submit" value="Search">Search</button>
+                 </form>
+
+                </center>
+
+
+                </li>
+
+            </div>
+
+
             <ul class="nav">
                 <li class="active">
                     <a href="/dashboard">
@@ -1357,6 +1685,11 @@
                         <p>Dashboard</p>
                     </a>
                 </li>
+
+
+
+
+
 
                 <li data-toggle="modal" data-target="#addEventModal">
                     <a href="#">
@@ -1397,10 +1730,13 @@
                 </li>
 
 
+
+
+
+
             </ul>
     	</div>
     </div>
-
 
 
 
@@ -1451,14 +1787,17 @@
                 {% if google_auth_complete == True %}
 
 
-                <!-- DIV onclick may not be good practice tbqh -->
-                <div onclick="syncGoogleCalendar();" class='button -border center' id = "syncGoogle" style="float: right;">Sync Google Calendar</div>
 
+                <!-- DIV onclick may not be good practice tbqh -->
+                <div onclick="syncGoogleCalendar();" class='button -border center' id = "syncGoogle" style="float: right;">Sync Google Calendar
+                </div>
 
 
                 {% else %}
                 <p align="right" id="margin-paragraph-from-right"><a href="/oauth" style="text-align: right">Want To Sync With Google Calendar? Click Here</a></p>
                 {% endif %}
+
+
 
 				<div class="morph-button morph-button-modal morph-button-modal-1 morph-button-fixed" style="float: left;">
 						<button type="button">Add Task</button>
@@ -1621,7 +1960,22 @@
 				{% endif %}
 
 
-        <footer id="footerID" class="footer">
+				<center>
+        <div>
+
+
+
+        	{% include "DASHBOARD_PAGE/charts.html" %}
+
+
+
+        </div><br><br>
+    </center>
+
+    <!-- <a data-remodal-target="modal_test">Call the modal with data-remodal-id="modal"</a> -->
+
+
+<!--         <footer id="footerID" class="footer">
             <div class="container-fluid">
                 <nav class="pull-left">
                     <ul>
@@ -1641,7 +1995,7 @@
                     &copy; 2015 <a href="http://www.creative-tim.com">Architasker</a>, made with love for a better scheduler
                 </p>
             </div>
-        </footer>
+        </footer> -->
         <input type="hidden" id="hidden_transit"></input>
 
     </div>
@@ -1663,6 +2017,26 @@
     </div><!-- /.modal-content -->
   </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
+
+
+
+<div class="remodal" data-remodal-id="modal_test">
+  <button data-remodal-action="close" class="remodal-close"></button>
+  <h2 class="reviewtitle">Your Life In Review.</h2><hr>
+        <ul id="item_date">
+            
+
+        </ul>
+
+
+
+  <br>
+  <button data-remodal-action="confirm" onclick="submit_reviewal();" class="remodal-confirm">Submit Review</button>
+</div>
+
+
+
+
 
 
 <script>
@@ -2163,6 +2537,8 @@ function fill_transit(trans_type) {
 
 
 
+
+
 <!-- Modal -->
 <div id="addEventModal" class="modal fade" role="dialog">
   <div class="modal-dialog">
@@ -2238,7 +2614,7 @@ function fill_transit(trans_type) {
 		  </div>
 		</div>
 
-<<<<<<< HEAD
+
 
       </div>
       <div class="modal-footer">
@@ -2259,6 +2635,8 @@ function fill_transit(trans_type) {
         <h4 class="modal-title" id="myModalLabel">Hold on! There are event and task conflicts!</h4>
       </div>
       <div class="modal-body">
+
+
         The event <b><span id="event_name_list_1"></p></b> conflicts with the following tasks:<br>
         <ul id = "event_name_list">
 
@@ -2290,6 +2668,7 @@ function fill_transit(trans_type) {
         Decrease Your Task Hours By: <b><span id="conf_decrease_by"></span><br></b>
 
       </div>
+
       <div class="modal-footer">
         <button onclick="refresher()" type="button" class="btn btn-default" data-dismiss="modal">Close</button>
         <!-- <button type="button" class="btn btn-primary">Save changes</button> -->
@@ -2468,7 +2847,46 @@ $("#custom").spectrum({
 		    });
 		};
 
+		function submit_reviewal() {
 
+			var task_reviewal_json = [];
+			var array_of_inputs = $('input[task_hours]')
+
+			$("input[task_hours]").each(function(){
+				console.log($(this).attr('task_hours'));
+				console.log($(this).attr('task_name'));
+				console.log($(this).attr('task_date'));
+				console.log($(this).val());
+				console.log("------\n");
+				 // do your stuff
+
+				 task_reviewal_json.push({task_name : $(this).attr('task_name'), task_date:$(this).attr('task_date'), task_hours_complete: $(this).val(), task_hours: $(this).attr('task_hours')});
+			});
+
+			console.log(task_reviewal_json);
+
+			$.ajax({
+		        url : "submit_reviewal/", // the endpoint
+		        type : "POST", // http method
+				data: {
+					csrfmiddlewaretoken: '{{ csrf_token }}',
+					contentType: 'application/json; charset=utf-8',
+					task_reviewal: JSON.stringify(task_reviewal_json),
+
+				},
+		        success : function() {
+
+		            console.log("success"); // another sanity check
+		            
+		        },
+
+		        // handle a non-successful response
+		        error : function(xhr,errmsg,err) {
+		        	console.log("didn't work allocate test");
+		        }
+		    });
+
+		};
 
 
 		//This is an ajax call that will help display event and mini task conflict analysis in modal
@@ -2521,6 +2939,7 @@ $("#custom").spectrum({
 						}
 						//Show all the conflicts within the modal window
 		            	$('#conflictmodal').modal('show');
+
 		          
 		            	
 		        	}
@@ -2636,6 +3055,194 @@ $("#custom").spectrum({
 		// sp-replacer sp-light
 
 
+
+
+        function convert_date_to_english(date_string) {
+
+
+
+            $(".modal-body").append('<p><input type="text" data-slider="true" data-slider-theme="volume" />');
+
+            curr_year = date_string.substr(0, 4);
+            curr_month = date_string.substr(5, 7);
+            curr_month = curr_month.substr(0,2)
+            current_day = date_string.substr(8, 10);
+
+            if (curr_month == "01"){
+                curr_month = "January";
+            }
+            else if (curr_month == "02"){
+                curr_month = "February";
+            }
+            else if (curr_month == "03"){
+                curr_month = "March";
+            }
+            else if (curr_month == "04"){
+                curr_month = "April";
+            }
+            else if (curr_month == "05"){
+                curr_month = "May";
+            }
+            else if (curr_month == "06"){
+                curr_month = "June";
+            }
+            else if (curr_month == "07"){
+                curr_month = "July";
+            }
+            else if (curr_month == "08"){
+                curr_month = "August";
+            }
+            else if (curr_month == "09"){
+                curr_month = "September";
+            }
+            else if (curr_month == "10"){
+                curr_month = "October";
+            }
+            else if (curr_month == "11"){
+                curr_month = "November";
+            }
+            else if (curr_month == "12"){
+                curr_month = "December";
+            }
+            return curr_month + " " + current_day + ", " + curr_year;
+
+        }
+
+		function check_for_review_AJAX() {
+
+			//Ajax call into the backend
+			$('.ajaxProgress').show();
+			$.ajax({
+				type: "POST",
+				url: "checkreviews/",
+				dataType: "json",
+				data: {
+					csrfmiddlewaretoken: '{{ csrf_token }}',
+				},
+		        success : function(my_json) {
+
+		        	var count = Object.keys(my_json).length;
+		        	var custom_id = 0;
+
+		        	if (count > 0) {
+		        		console.log("There are tasks to be reviewed!!!");
+
+
+		        		for (var date_key in my_json){
+
+		        			var insert_review = document.getElementById("item_date");
+		        			var insert_date = document.getElementById("item_date");
+                            var slider_insertion = document.getElementById('productivity_slider');
+		        			console.log(my_json);
+                            english_date = convert_date_to_english(date_key);
+		        			insert_date.innerHTML += '<h2 class="reviewdates" style="margin-right: 20px; font-size: 35px margin-bottom: 20px;">' + english_date + '</h2><hr>';
+
+		        			for (var tasks in my_json[date_key]) {
+		        				console.log("FOR THE DATE OF ... " + date_key);
+		        				console.log(my_json[date_key][tasks]);
+		        				var hour_fix = my_json[date_key][tasks][1];
+		        				hour_fix = hour_fix.toFixed(2);
+		        				insert_review.innerHTML += '\
+		        				\
+									<li class="review">	\
+									<h5>Task: ' + my_json[date_key][tasks][0] + '</h5>\
+                                    <h5>Scheduled Hours: '+ hour_fix +' </h5>\
+									</li>';
+
+
+                                insert_review.innerHTML += '\
+                        <div id="input-wrapper" class="force">\
+                          <input type="range" id="slider_id_'+custom_id+'" min="0" max="'+hour_fix+'" value="0" step="'+hour_fix/10+'" oninput="updateOutput(value, true, update_slider_'+custom_id+')" onchange="deactivate()" onmouseup="deactivate()">\
+                          <div id="reel" style="left: 193.76px;">\
+                            <div id="rn" style="transform: translateY(-3024px) translateZ(0px);"></div>\
+                        </div>\
+                        <div id="update_slider_'+custom_id+'"  style="left: 193.76px;">0</div>\
+                                ';
+
+
+									// insert_review.innerHTML += '<input type="text" style="width: 100%" task_date="'+ date_key +'" task_name= "'+ my_json[date_key][tasks][0] +'" task_hours="'+ hour_fix+'" task_hours_completed=0 placeholder="Hours completed out of '+ hour_fix +'"></input>'
+
+								custom_id +=1;
+		        			}
+		        		}
+                        var inst = $('[data-remodal-id=modal_test]').remodal();
+                        inst.open();
+		        	}
+		        	else {
+		        		console.log("There is nothing that needs to be reviewed");
+		        	}
+
+		        },
+
+		        // handle a non-successful response
+		        error : function(xhr,errmsg,err) {
+		        	console.log("didn't work2");
+		        },
+
+			});
+		}
+
 </script>
+
+
+
+<script>
+
+//lets populate reel numbers
+var min = $("#rangeslider").attr("min");
+var max = $("#rangeslider").attr("max");
+
+var rn = "";
+for(var i = min; i <= max; i++)
+    rn += "<span>"+i+"</span>";
+$("#rn").html(rn);
+
+//triggering updateOutput manually
+updateOutput($("#rangeslider").val(), false);
+
+var rfigure, h, v;
+//lets display the static output now
+function updateOutput(figure, activate, class_name) {
+    //if activate then add .active to #input-wrapper to help animate the #reel
+    if(activate)
+        $("#input-wrapper").addClass("active");
+    
+    //because of the step param the slider will return values in multiple of 0.05 so we have to round it up
+    rfigure = figure;
+    //displaying the static output
+    $("#static-output").html(rfigure);
+    // $("#"+class_name).html(rfigure);
+    // console.log(class_name.id);
+    var class_id = class_name.id
+    console.log(class_id);
+    $("#" + class_id).text(rfigure);
+    console.log("before");
+    // tester.text
+    console.log("after");
+
+
+    
+    //positioning #static-output and #reel
+    //horizontal positioning first
+    h = figure/max*($("#input-wrapper").width()-$("#reel").width()) + 'px';
+    //vertical positioning of #rn
+    v = rfigure*$("#reel").height()*-1 + 'px';
+    
+    //applying the positions
+    $("#static-output, #reel").css({left: h});
+    //#rn will be moved using transform+transitions for better animation performance. The false translateZ triggers GPU acceleration for better performance.
+    $("#rn").css({transform: 'translateY('+v+') translateZ(0)'});
+}
+function deactivate() {
+    //remove .active from #input-wrapper
+    $("#input-wrapper").removeClass("active");
+}
+
+
+
+</script>
+
+
+
 
 </html>

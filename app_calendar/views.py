@@ -48,8 +48,15 @@ from .models import CredentialsModel
 from procrastinate import settings
 from app_account_management.models import UserExtended
 
+from app_review.views import *
+
 from operator import itemgetter
 
+import operator
+
+
+#Import the parent user tasks
+from app_tasks.models import UserTask as PUT
 
 from random import choice
 from string import ascii_uppercase
@@ -1080,6 +1087,8 @@ def get_calendar_data(request):
 
     user_breakdown_mini_tasks = BUT.objects.filter(parent_task__authenticated_user = request.user)
 
+    data_for_charts(request)
+
     context = {
 
         'user_is_authenticated' : user_is_authenticated,
@@ -1112,6 +1121,8 @@ def get_calendar_data(request):
         context['user_day_of_week'] = user_day_of_week
 
     return render(request, 'DASHBOARD_PAGE/index.html', context)
+
+    
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 Remove authorization manually (Oauth token removal)
@@ -1156,4 +1167,49 @@ def get_current_week_range(request):
     time_range = [now, then]
 
     return time_range
+
+
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+Develop a flexible search engine for users to search tasks
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+def task_event_user_search(request):
+
+    if request.method == "POST":
+        print("Search accessed via post!")
+
+        initial_search_query = request.POST.get('search_data')
+
+        search_text = request.POST.get('search_data')
+        print(search_text)
+
+        #Split the initial input string based on the spaces
+        search_list_data = search_text.split(" ")
+
+        #Do a django filter search on the input list form above on all the relevant search terms
+        user_events = reduce(operator.or_, (SNE.objects.filter(task_name__icontains=item) for item in search_list_data))
+
+        if len(user_events) == 0:
+            print("nothing to display")
+            user_events = "Empty"
+
+        #Do the same thing as above for the parent tasks
+        user_tasks = reduce(operator.or_, (PUT.objects.filter(task_name__icontains=item) for item in search_list_data))
+
+        if len(user_tasks) == 0:
+            print("nothing to display tasks")
+            user_tasks = "Empty"
+
+
+
+        context = {
+
+
+            'relevant_search_events' : user_events,
+            'relevant_search_tasks' : user_tasks,
+            'search_query' : initial_search_query
+
+        }
+
+    return render(request, 'SEARCH_PAGE/index.html', context)
 

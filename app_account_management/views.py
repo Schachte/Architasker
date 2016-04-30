@@ -16,6 +16,8 @@ from app_calendar.models import UserEvent
 from django.template.loader import render_to_string
 import json
 
+from app_review.models import ReviewModel as Review
+
 
 def login_view(request):
     if not request.user.username:

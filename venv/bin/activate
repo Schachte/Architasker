@@ -39,7 +39,7 @@ deactivate () {
 # unset irrelevant variables
 deactivate nondestructive
 
-VIRTUAL_ENV="/Users/Schachte/Desktop/procrastinate/venv"
+VIRTUAL_ENV="/Users/schachte/Documents/Architasker/venv"
 export VIRTUAL_ENV
 
 _OLD_VIRTUAL_PATH="$PATH"
