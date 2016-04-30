@@ -1,10 +1,11 @@
-#!/Users/schachte/Documents/Architasker/venv/bin/python
-# EASY-INSTALL-ENTRY-SCRIPT: 'bdist-mpkg==0.5.0','console_scripts','bdist_mpkg'
-__requires__ = 'bdist-mpkg==0.5.0'
+#!/Users/schachte/Desktop/Architasker/venv/bin/python2.7
+
+# -*- coding: utf-8 -*-
+import re
 import sys
-from pkg_resources import load_entry_point
+
+from bdist_mpkg.script_bdist_mpkg import main
 
 if __name__ == '__main__':
-    sys.exit(
-        load_entry_point('bdist-mpkg==0.5.0', 'console_scripts', 'bdist_mpkg')()
-    )
+    sys.argv[0] = re.sub(r'(-script\.pyw|\.exe)?$', '', sys.argv[0])
+    sys.exit(main())

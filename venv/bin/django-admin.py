@@ -1,4 +1,4 @@
-#!/Users/schachte/Documents/Architasker/venv/bin/python
+#!/Users/schachte/Desktop/Architasker/venv/bin/python2.7
 from django.core import management
 
 if __name__ == "__main__":
