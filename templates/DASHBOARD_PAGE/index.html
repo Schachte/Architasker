@@ -1667,7 +1667,7 @@ input[type=search] {
                  
                 <form action="{% url 'task_event_user_search' %}" method="POST">
                 {% csrf_token %}
-                 <input type="search" id="search_data" name="search_data" placeholder="Search Tasks and Events here"><button type="submit" value="Search">Search</button>
+                 <input type="search" data-step="1" data-intro="You can search through your tasks and events through the click of a button at any time." id="search_data" name="search_data" placeholder="Search Tasks and Events here"><button type="submit" value="Search">Search</button>
                  </form>
 
                 </center>
@@ -1701,7 +1701,7 @@ input[type=search] {
                 <li>
                     <a href="/dashboard">
                         <i class="pe-7s-plus"></i>
-                        <p>Add Task</p>
+                        <p id="tester_tour">Add Task</p>
                     </a>
                 </li>
 
@@ -1937,7 +1937,7 @@ input[type=search] {
 					<div class="alert alert-success" visible=false>Success! <span id="updateType"></span></div>
 
 			
-				<div id="scheduler_here" class="dhx_cal_container card col-md-12" style='width:100%; height:70%'>
+				<div id="scheduler_here" data-intro='This calendar is where Google Sync data allocates, where events can be added and where the autonmous task allocation will take place. ' class="dhx_cal_container card col-md-12" style='width:100%; height:70%'>
 
 					 <div class="dhx_cal_navline">
 							<div class="dhx_cal_prev_button">&nbsp;</div>
